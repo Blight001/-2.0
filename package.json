@@ -1,0 +1,138 @@
+{
+  "name": "ai-account-register-electron",
+  "version": "2.9.0",
+  "description": "AI账号注册器 2.0 - Electron版本",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "start:hybrid": "electron . --web-ui",
+    "start:web": "electron . --web-ui --headless-web",
+    "start:control-server": "python python/control_server.py",
+    "start:frp-client": "run-frp-client.bat",
+    "start:frp-server": "run-frps.bat",
+    "start:mqtt-experiment": "node scripts/mqtt-experiment-server.js",
+    "start:mqtt-experiment:py": "python python/run_mqtt_experiment.py",
+    "dev": "electron . --dev",
+    "build": "node scripts/build-package.js app",
+    "dist": "npm run build",
+    "dist:app": "npm run build",
+    "dist:web": "node scripts/build-package.js web",
+    "build:app": "npm run build",
+    "build:web": "npm run dist:web",
+    "test": "node test.js",
+    "check-env": "node check-environment.js",
+    "test-features": "node test-features.js",
+    "check-build": "node check-build.js"
+  },
+  "keywords": [
+    "electron",
+    "automation",
+    "account-registration"
+  ],
+  "author": "AI账号注册器团队",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^25.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "aedes": "^0.51.3",
+    "child_process": "^1.0.2",
+    "events": "^3.3.0",
+    "express": "^4.18.2",
+    "fs-extra": "^11.1.1",
+    "imap-simple": "^5.1.0",
+    "js-yaml": "^4.1.1",
+    "mqtt": "^5.15.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.7",
+    "path": "^0.12.7",
+    "playwright": "^1.40.0",
+    "playwright-core": "^1.59.1",
+    "universalify": "^2.0.1"
+  },
+  "build": {
+    "appId": "com.ai.account.register",
+    "productName": "AI账号注册器",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!build/**",
+      "!*.md",
+      "!screenshots/**",
+      "!test/**",
+      "!*.log"
+    ],
+    "extraResources": [
+      {
+        "from": "resource",
+        "to": "resource",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "src/core/browser/electron-helper",
+        "to": "electron-helper",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "extensions",
+        "to": "extensions",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "node_modules/playwright",
+        "to": "node_modules/playwright",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "node_modules/playwright-core",
+        "to": "node_modules/playwright-core",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/fs-extra/**",
+      "**/node_modules/universalify/**",
+      "**/extensions/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "sign": false,
+      "icon": "src/ui/assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "src/ui/assets/icon.ico",
+      "uninstallerIcon": "src/ui/assets/icon.ico",
+      "installerHeaderIcon": "src/ui/assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AI账号注册器 2.0",
+      "language": "2052",
+      "artifactName": "${productName} Setup ${version}.${ext}",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "menuCategory": true
+    },
+    "nsisWeb": {
+      "appPackageUrl": "https://example.com",
+      "artifactName": "${productName} Web Setup ${version}.${ext}"
+    }
+  }
+}

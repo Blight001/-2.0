@@ -1,0 +1,59 @@
+{
+    "browserSettings": {
+        "browser_type": "edge",
+        "browser_source": "local-browser",
+        "browser_display_mode": "window",
+        "headless": false,
+        "block_images_videos": false,
+        "captcha_compatibility_mode": true,
+        "remove_watermark_plugin": false,
+        "sync_execution": true,
+        "max_proxy_recovery_attempts": 3,
+        "registration_auto_upload": true,
+        "save_local_cookie": true,
+        "concurrent_count": 1,
+        "run_mode": 0,
+        "timed_registration_count": 1,
+        "timed_registration_cycle_count": 1,
+        "timed_registration_start_mode": "immediate",
+        "timed_registration_delay_seconds": 0,
+        "debug_mode": true,
+        "debugMode": true,
+        "debug_inspector_auto_open": false
+    },
+    "apiServerSettings": {
+        "enabled": true,
+        "host": "127.0.0.1",
+        "port": 65412,
+        "api_key": "sk-local-469a2f21bbba9a941e322102025cde6ac3abf772a5982246",
+        "model_params": {
+            "text": {
+                "model": "",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": ""
+                    }
+                ],
+                "temperature": 1,
+                "stream": false
+            },
+            "image": {
+                "model": "",
+                "prompt": "",
+                "size": "",
+                "n": 1,
+                "quality": "",
+                "response_format": ""
+            },
+            "video": {
+                "model": "",
+                "prompt": "",
+                "size": "",
+                "n": 1,
+                "quality": "",
+                "response_format": ""
+            }
+        }
+    }
+}

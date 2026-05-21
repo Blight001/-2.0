@@ -1,0 +1,33 @@
+{
+  "name": "runway 注册卡片（seedance2.0）",
+  "website": "https://app.runwayml.com/",
+  "description": "runway 账号中注册卡片",
+  "email": "",
+  "password": "",
+  "points": 0,
+  "random": {
+    "email": {
+      "length": 8,
+      "type": "lowercase"
+    },
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "steps": [],
+  "popups": [],
+  "upload_server_url": "",
+  "upload_card_key": "",
+  "min_cookie_size_bytes": 8192,
+  "upload_target_score_scope": "all",
+  "upload_target_score_types": [],
+  "upload_target_score_type": "",
+  "upload": {
+    "server_url": "",
+    "card_key": "",
+    "target_score_scope": "all",
+    "target_score_types": [],
+    "target_score_type": ""
+  }
+}

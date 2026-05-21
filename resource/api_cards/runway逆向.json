@@ -1,0 +1,28 @@
+{
+  "name": "runway逆向",
+  "website": "https://app.runwayml.com/",
+  "description": "runway的api对接方案",
+  "password": "",
+  "points": 0,
+  "steps": [
+    {
+      "name": "访问runway",
+      "type": "navigate",
+      "by": "auto",
+      "url": "https://app.runwayml.com/",
+      "wait": 0,
+      "page_sync_timeout_ms": 8000,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "点击生成",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "button[aria-label=\"Custom\"]",
+      "timeout": 5000,
+      "wait": 0,
+      "ui_fields_mode": "collapsed"
+    }
+  ],
+  "popups": []
+}

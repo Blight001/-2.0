@@ -1,0 +1,179 @@
+{
+  "name": "国际版即梦注册卡片",
+  "website": "https://dreamina.capcut.com/ai-tool/home?type=video",
+  "description": "即梦 AI工具自动注册，使用标准步骤流程",
+  "email": "",
+  "password": "",
+  "points": 0,
+  "random": {
+    "email": {
+      "length": 8,
+      "type": "lowercase"
+    },
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "steps": [
+    {
+      "name": "访问CapCut Dreamina页面",
+      "timeout": 60000,
+      "type": "navigate",
+      "url": "https://dreamina.capcut.com/ai-tool/home?type=video"
+    },
+    {
+      "by": "css_selector",
+      "name": "点击Create按钮",
+      "selector": "div:has-text('Create')",
+      "timeout": 20000,
+      "type": "click"
+    },
+    {
+      "by": "css_selector",
+      "name": "选择Continue with email",
+      "selector": "span:has-text('Continue with email')",
+      "timeout": 10000,
+      "type": "click"
+    },
+    {
+      "by": "css_selector",
+      "name": "点击Sign up",
+      "selector": "span.new-forget-pwd-btn",
+      "timeout": 10000,
+      "type": "click"
+    },
+    {
+      "by": "css_selector",
+      "name": "填写邮箱",
+      "selector": "input[placeholder*='email']",
+      "text": "{account}",
+      "timeout": 20000,
+      "type": "type"
+    },
+    {
+      "by": "css_selector",
+      "name": "填写密码",
+      "selector": "input[type='password']",
+      "text": "{password}",
+      "timeout": 20000,
+      "type": "type"
+    },
+    {
+      "by": "css_selector",
+      "name": "点击Continue按钮",
+      "selector": "span:has-text('Continue')",
+      "timeout": 10000,
+      "type": "click"
+    },
+    {
+      "name": "开始等待邮箱验证码",
+      "timeout": 300,
+      "type": "wait_verification_code"
+    },
+    {
+      "by": "css_selector",
+      "name": "填写验证码",
+      "selector": "input[maxlength='6']",
+      "text": "{code}",
+      "timeout": 60000,
+      "type": "type"
+    },
+    {
+      "by": "css_selector",
+      "name": "填写出生年份",
+      "selector": "input[placeholder='Year']",
+      "text": "2000",
+      "timeout": 10000,
+      "type": "type"
+    },
+    {
+      "by": "css_selector",
+      "name": "选择出生月份",
+      "nth": 0,
+      "selector": "svg.lv-icon.lv-icon-down",
+      "timeout": 10000,
+      "type": "click"
+    },
+    {
+      "name": "等待月份下拉菜单展开",
+      "seconds": 0.5,
+      "type": "wait"
+    },
+    {
+      "by": "css_selector",
+      "name": "选择January",
+      "nth": 0,
+      "selector": "li.lv-select-option",
+      "timeout": 10000,
+      "type": "click"
+    },
+    {
+      "by": "css_selector",
+      "name": "选择出生日期",
+      "nth": 1,
+      "selector": "svg.lv-icon.lv-icon-down",
+      "timeout": 10000,
+      "type": "click"
+    },
+    {
+      "name": "等待日期下拉菜单展开",
+      "seconds": 0.5,
+      "type": "wait"
+    },
+    {
+      "by": "css_selector",
+      "name": "选择日期1",
+      "nth": 0,
+      "selector": "li.lv-select-option",
+      "timeout": 10000,
+      "type": "click"
+    },
+    {
+      "by": "css_selector",
+      "name": "点击Next完成注册",
+      "selector": "span:has-text('Next')",
+      "timeout": 10000,
+      "type": "click"
+    },
+    {
+      "by": "css_selector",
+      "name": "等待下一步按钮消失",
+      "type": "wait",
+      "wait_for_element_hidden": "span:has-text('Next')",
+      "wait_for_element_hidden_interval_ms": 300,
+      "wait_for_element_hidden_timeout_ms": 13000
+    },
+    {
+      "by": "css_selector",
+      "default": "0",
+      "fallback_selectors": [
+        "div[class*='credit-amount-text']",
+        "div[class*='column-mode']",
+        "[class*='credit-amount']"
+      ],
+      "max_attempts": 20,
+      "name": "获取积分数",
+      "selector": "[class*='credit-amount-text']",
+      "timeout": 30000,
+      "type": "get_credits",
+      "wait_for_credit_increase": true,
+      "wait_for_credit_increase_interval_ms": 500,
+      "wait_for_credit_increase_timeout_ms": 5000
+    }
+  ],
+  "popups": [],
+  "upload_server_url": "http://146.196.80.203:58158",
+  "upload_card_key": "0FY7-W95J-IAWB-GOCX-HZPW",
+  "min_cookie_size_bytes": 4096,
+  "upload_target_score_scope": "all",
+  "upload_target_score_types": [],
+  "upload_target_score_type": "",
+  "upload": {
+    "server_url": "http://146.196.80.203:58158",
+    "card_key": "0FY7-W95J-IAWB-GOCX-HZPW",
+    "target_score_scope": "all",
+    "target_score_types": [],
+    "target_score_type": ""
+  }
+}

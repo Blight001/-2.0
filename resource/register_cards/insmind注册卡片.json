@@ -1,0 +1,120 @@
+{
+  "name": "insmind注册卡片",
+  "website": "https://www.insmind.com/zh-cn/creation",
+  "description": "海螺可灵工具自动注册，使用标准步骤流程",
+  "password": "",
+  "points": 0,
+  "steps": [
+    {
+      "name": "访问insmind页面",
+      "type": "navigate",
+      "by": "auto",
+      "url": "https://www.insmind.com/zh-cn/creation",
+      "wait_for_element": "button:has-text(\"登录/注册\")",
+      "timeout": 60000,
+      "wait": 8,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "登录/注册",
+      "type": "click",
+      "by": "auto",
+      "selector": "button:has-text(\"登录/注册\")",
+      "timeout": 15000,
+      "wait": 2,
+      "fallback_selectors": [
+        "text=登录/注册",
+        "button.gda-btn-primary:has-text(\"登录/注册\")",
+        "button:has-text(\"立即登录\")",
+        "text=立即登录"
+      ],
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "使用邮箱继续",
+      "type": "click",
+      "by": "auto",
+      "selector": "button:has-text(\"使用邮箱继续\")",
+      "timeout": 5000,
+      "wait": 0,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "同意协议",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "<label for=\"footerCheckbox\"></label>",
+      "timeout": 15000,
+      "wait": 1,
+      "fallback_selectors": [
+        "span.gd-login-footer-wrap-left-label",
+        "label[for=\"footerCheckbox\"]",
+        "#footerCheckbox",
+        "input#footerCheckbox[type=\"checkbox\"]"
+      ],
+      "checkbox_like": true,
+      "ui_fields_mode": "all"
+    },
+    {
+      "name": "点击邮箱注册",
+      "type": "click",
+      "by": "css_selector",
+      "timeout": 5000,
+      "wait": 0,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "输入邮箱地址",
+      "type": "type",
+      "by": "auto",
+      "selector": "input[placeholder=\"输入邮箱地址\"]",
+      "text": "{email}",
+      "timeout": 5000,
+      "wait": 0,
+      "clear_first": true,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "输入6-30位密码",
+      "type": "type",
+      "by": "auto",
+      "selector": "input[placeholder=\"输入6-30位密码\"]",
+      "text": "{password}",
+      "timeout": 5000,
+      "wait": 0,
+      "clear_first": true,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "登录",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "button:has-text(\"登录\")",
+      "timeout": 5000,
+      "wait": 0,
+      "ui_fields_mode": "collapsed"
+    }
+  ],
+  "popups": [],
+  "upload_server_url": "",
+  "upload_card_key": "",
+  "registration_auto_upload": true,
+  "min_cookie_size_bytes": 4096,
+  "upload_target_score_scope": "all",
+  "upload_target_score_types": [],
+  "upload_target_score_type": "",
+  "random": {
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "upload": {
+    "server_url": "",
+    "card_key": "",
+    "registration_auto_upload": true,
+    "target_score_scope": "all",
+    "target_score_types": [],
+    "target_score_type": ""
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "国际版即梦账号积分测试卡片",
+  "website": "https://dreamina.capcut.com/ai-tool/home?type=video",
+  "description": "即梦AI普通账号自动测试，重新检查积分",
+  "email": "",
+  "password": "",
+  "points": 0,
+  "random": {
+    "email": {
+      "length": 8,
+      "type": "lowercase"
+    },
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "steps": [
+    {
+      "type": "navigate",
+      "name": "访问CapCut Dreamina页面",
+      "url": "https://dreamina.capcut.com/ai-tool/home?type=video",
+      "timeout": 60000
+    },
+    {
+      "type": "get_credits",
+      "name": "获取积分数",
+      "selector": "[class*='credit-amount-text']",
+      "by": "css_selector",
+      "default": "0",
+      "timeout": 30000,
+      "max_attempts": 20,
+      "fallback_selectors": [
+        "div[class*='credit-amount-text']",
+        "div[class*='column-mode']",
+        "[class*='credit-amount']"
+      ]
+    }
+  ],
+  "popups": []
+}

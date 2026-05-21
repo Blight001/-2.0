@@ -1,0 +1,58 @@
+{
+  "name": "早版即梦特殊账号测试卡片（已废弃）",
+  "website": "https://dreamina.capcut.com/ai-tool/home?type=video",
+  "description": "即梦AI特殊账号自动测试，检查是否是可用的0积分账号",
+  "email": "",
+  "password": "",
+  "points": 0,
+  "random": {
+    "email": {
+      "length": 8,
+      "type": "lowercase"
+    },
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "steps": [
+    {
+      "type": "navigate",
+      "name": "访问CapCut Dreamina页面",
+      "url": "https://dreamina.capcut.com/ai-tool/home?type=video",
+      "timeout": 60000,
+      "on_timeout": "race_fastest_node"
+    },
+    {
+      "type": "click",
+      "name": "点击积分按钮",
+      "by": "css_selector",
+      "selector": "[class*='credit-amount-text']",
+      "timeout": 60000
+    },
+    {
+      "type": "wait",
+      "name": "跳过此账号",
+      "wait_for_element": "div:has-text('Basic')",
+      "end_scores": "0",
+      "stability_timeout": 2000
+    },
+    {
+      "type": "wait",
+      "name": "等待注册完成",
+      "wait_for_element": "div:has-text('Select a plan that meets your needs or')",
+      "end_scores": "1000",
+      "stability_timeout": 2000
+    }
+  ],
+  "popups": [
+    {
+      "name": "关闭广告弹窗",
+      "selector": "svg path[d^='M19.579 6.119']",
+      "fallback_selectors": [
+        "svg:has(path[d^='M19.579 6.119'])",
+        "button:has(svg path[d^='M19.579 6.119'])"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "runway 账号测试卡片（seedance2.0）",
+  "website": "https://app.runwayml.com/",
+  "description": "runway测试卡片",
+  "email": "",
+  "password": "",
+  "points": 0,
+  "random": {
+    "email": {
+      "length": 8,
+      "type": "lowercase"
+    },
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "steps": [
+    {
+      "name": "访问runway页面",
+      "type": "navigate",
+      "url": "https://app.runwayml.com/",
+      "wait": 3,
+      "timeout": 60000
+    }
+  ],
+  "popups": []
+}

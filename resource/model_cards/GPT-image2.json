@@ -1,0 +1,65 @@
+{
+  "name": "GPT-image2",
+  "website": "",
+  "description": "标准模型",
+  "password": "",
+  "points": 0,
+  "steps": [
+    {
+      "name": "点击图片生成",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "label.radioItem-v7VRzD:has-text(\"Image\")",
+      "timeout": 5000,
+      "wait": 0,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "点击选择模型",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "button[aria-label=\"Image models\"]",
+      "timeout": 5000,
+      "wait": 0,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "点击GPT模型",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "span[slot=\"label\"]:has-text(\"GPT Image 2\")",
+      "timeout": 5000,
+      "wait": 0,
+      "ui_fields_mode": "collapsed"
+    }
+  ],
+  "popups": [],
+  "api_card_name": "runway逆向",
+  "apiCardName": "runway逆向",
+  "api_service": {
+    "type": "image",
+    "endpoint": "/v1/images/generations",
+    "request_params": {
+      "model": "",
+      "prompt": "",
+      "size": "",
+      "n": 1,
+      "quality": "",
+      "response_format": ""
+    }
+  },
+  "apiService": {
+    "type": "image",
+    "endpoint": "/v1/images/generations",
+    "requestParams": {
+      "model": "",
+      "prompt": "",
+      "size": "",
+      "n": 1,
+      "quality": "",
+      "response_format": ""
+    }
+  },
+  "api_service_type": "image",
+  "api_service_endpoint": "/v1/images/generations"
+}

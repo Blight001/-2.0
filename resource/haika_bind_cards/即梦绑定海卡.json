@@ -1,0 +1,475 @@
+{
+  "name": "即梦绑定海卡",
+  "website": "https://dreamina.capcut.com/ai-tool/home?type=video",
+  "description": "即梦海卡绑定完整流程",
+  "email": "",
+  "password": "",
+  "points": 0,
+  "random": {
+    "email": {
+      "length": 8,
+      "type": "lowercase"
+    },
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "steps": [
+    {
+      "name": "访问即梦首页",
+      "type": "navigate",
+      "url": "https://dreamina.capcut.com/ai-tool/home?type=video",
+      "wait": 0,
+      "timeout": 60000
+    },
+    {
+      "name": "等待即梦首页加载",
+      "type": "wait",
+      "wait_for_page_contains": [
+        "https://dreamina.capcut.com/ai-tool/home"
+      ],
+      "wait_timeout_ms": 15000,
+      "wait_poll_interval_ms": 200
+    },
+    {
+      "name": "点击登录",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "button:has-text('Sign in')",
+      "fallback_selectors": [
+        "span:has-text('Sign in')",
+        "text=Sign in"
+      ],
+      "timeout": 30000,
+      "force_click": true,
+      "wait": 0,
+      "click_attempt_timeout_ms": 5000,
+      "skip_page_sync": true
+    },
+    {
+      "name": "选择邮箱登录",
+      "type": "click",
+      "preferred_page_contains": [
+        "dreamina.capcut.com/ai-tool/home"
+      ],
+      "by": "css_selector",
+      "selector": "button:has-text('Continue with email')",
+      "fallback_selectors": [
+        "span:has-text('Continue with email')",
+        "text=Continue with email"
+      ],
+      "timeout": 30000,
+      "force_click": true,
+      "wait": 0,
+      "click_attempt_timeout_ms": 5000,
+      "skip_page_sync": true
+    },
+    {
+      "name": "输入邮箱",
+      "type": "type",
+      "preferred_page_contains": [
+        "dreamina.capcut.com/ai-tool/home"
+      ],
+      "by": "css_selector",
+      "selector": "input[placeholder='Enter email']",
+      "wait_for_element": "input[placeholder='Enter email']",
+      "wait_for_element_timeout_ms": 15000,
+      "wait_for_element_interval_ms": 100,
+      "fallback_selectors": [
+        "input[placeholder*='email']",
+        "input[aria-label*='email']",
+        "input[type='email']"
+      ],
+      "text": "{email}",
+      "timeout": 30000,
+      "wait": 0
+    },
+    {
+      "name": "输入密码",
+      "type": "type",
+      "preferred_page_contains": [
+        "dreamina.capcut.com/ai-tool/home"
+      ],
+      "by": "css_selector",
+      "selector": "input[placeholder='Enter password']",
+      "wait_for_element": "input[placeholder='Enter password']",
+      "wait_for_element_timeout_ms": 15000,
+      "wait_for_element_interval_ms": 100,
+      "fallback_selectors": [
+        "input[type='password']",
+        "input[aria-label*='password']"
+      ],
+      "text": "{password}",
+      "timeout": 30000,
+      "wait": 0
+    },
+    {
+      "name": "提交登录",
+      "type": "click",
+      "preferred_page_contains": [
+        "dreamina.capcut.com/ai-tool/home"
+      ],
+      "by": "css_selector",
+      "selector": "button:has-text('Continue')",
+      "fallback_selectors": [
+        "span:has-text('Continue')",
+        "text=Continue"
+      ],
+      "timeout": 30000,
+      "force_click": true,
+      "wait": 0,
+      "click_attempt_timeout_ms": 5000,
+      "skip_page_sync": true
+    },
+    {
+      "name": "进入试用入口",
+      "type": "click",
+      "preferred_page_contains": [
+        "dreamina.capcut.com/ai-tool/home"
+      ],
+      "by": "css_selector",
+      "selector": "button:has-text('See results')",
+      "fallback_selectors": [
+        "span:has-text('See results')",
+        "button:has-text('Try it now')",
+        "span:has-text('Try it now')",
+        "text=See results",
+        "text=Try it now"
+      ],
+      "timeout": 30000,
+      "force_click": true,
+      "wait": 0,
+      "click_attempt_timeout_ms": 5000,
+      "skip_page_sync": true
+    },
+    {
+      "name": "选择信用卡或借记卡",
+      "type": "click",
+      "preferred_page_contains": [
+        "cashier-my.pipopay.com",
+        "agreement-cashier.html",
+        "cashier-my4a.pipopay.com"
+      ],
+      "by": "css_selector",
+      "selector": "text=Credit / debit card",
+      "fallback_selectors": [
+        "text=Credit card",
+        "text=Debit card",
+        "text=Credit / debit card",
+        "div.pipo-list-item-selection-meta-headline:has-text('Credit / debit card')",
+        "label.pipo-radio",
+        "input[type='radio']"
+      ],
+      "timeout": 30000,
+      "wait": 1,
+      "force_click": true,
+      "wait_for_enabled": false,
+      "pre_click_delay_ms": 0
+    },
+    {
+      "name": "输入卡号",
+      "type": "type",
+      "preferred_page_contains": [
+        "cashier-my.pipopay.com",
+        "agreement-cashier.html",
+        "cashier-my4a.pipopay.com"
+      ],
+      "by": "css_selector",
+      "selector": "input[name='card_number']",
+      "wait_for_element": "input[name='card_number']",
+      "wait_for_element_timeout_ms": 15000,
+      "wait_for_element_interval_ms": 100,
+      "fallback_selectors": [
+        "input[autocomplete='cc-number']",
+        "input[name='cardNumber']",
+        "input[name='cardNo']",
+        "input[name='card_no']",
+        "input[placeholder*='Card number']",
+        "input[placeholder*='Card Number']",
+        "input[aria-label*='Card number']",
+        "input[aria-label*='Card Number']"
+      ],
+      "text": "{card_number}",
+      "timeout": 30000,
+      "wait": 0
+    },
+    {
+      "name": "输入CVV",
+      "type": "type",
+      "preferred_page_contains": [
+        "cashier-my.pipopay.com",
+        "agreement-cashier.html",
+        "cashier-my4a.pipopay.com"
+      ],
+      "by": "css_selector",
+      "selector": "input[name='cvv']",
+      "wait_for_element": "input[name='cvv']",
+      "wait_for_element_timeout_ms": 15000,
+      "wait_for_element_interval_ms": 100,
+      "fallback_selectors": [
+        "input[autocomplete='cc-csc']",
+        "input[placeholder*='CVV']",
+        "input[placeholder*='CVC']",
+        "input[aria-label*='CVV']"
+      ],
+      "text": "{cvv}",
+      "timeout": 30000,
+      "wait": 0
+    },
+    {
+      "name": "输入到期日",
+      "type": "type",
+      "preferred_page_contains": [
+        "cashier-my.pipopay.com",
+        "agreement-cashier.html",
+        "cashier-my4a.pipopay.com"
+      ],
+      "by": "css_selector",
+      "selector": "input[name='expiration_date']",
+      "wait_for_element": "input[name='expiration_date']",
+      "wait_for_element_timeout_ms": 15000,
+      "wait_for_element_interval_ms": 100,
+      "fallback_selectors": [
+        "input[autocomplete='cc-exp']",
+        "input[placeholder*='MM/YY']",
+        "input[placeholder*='到期']",
+        "input[aria-label*='到期']"
+      ],
+      "text": "{expiry_date}",
+      "type_chunk_size": 2,
+      "type_chunk_delay_ms": 300,
+      "timeout": 30000,
+      "wait": 0
+    },
+    {
+      "name": "输入持卡人姓名",
+      "type": "type",
+      "preferred_page_contains": [
+        "cashier-my.pipopay.com",
+        "agreement-cashier.html",
+        "cashier-my4a.pipopay.com"
+      ],
+      "by": "css_selector",
+      "selector": "input[name='holder_name']",
+      "wait_for_element": "input[name='holder_name']",
+      "wait_for_element_timeout_ms": 15000,
+      "wait_for_element_interval_ms": 100,
+      "fallback_selectors": [
+        "input[autocomplete='cc-name']",
+        "input[placeholder*='Full name']",
+        "input[placeholder*='Name']",
+        "input[placeholder*='姓名']",
+        "input[aria-label*='持卡人姓名']"
+      ],
+      "text": "{name}",
+      "timeout": 30000,
+      "wait": 0
+    },
+    {
+      "name": "提交免费试用",
+      "type": "click",
+      "preferred_page_contains": [
+        "cashier-my.pipopay.com",
+        "agreement-cashier.html",
+        "cashier-my4a.pipopay.com",
+        "centinelapi.cardinalcommerce.com/V2/Cruise/StepUp",
+        "acs.stripeauthentications.com/cld/challengeRequestBrowser",
+        "challengeRequestBrowser"
+      ],
+      "by": "css_selector",
+      "selector": "button:has-text('Continue')",
+      "fallback_selectors": [
+        "[role='button']:has-text('Continue')",
+        "button:has-text('Start free trial')",
+        "button:has-text('Start trial')",
+        "button:has-text('Pay')",
+        "text=Continue"
+      ],
+      "timeout": 30000,
+      "wait": 0,
+      "force_click": true,
+      "wait_for_page_switch": true,
+      "page_sync_timeout_ms": 3000,
+      "post_click_required_page_contains": [
+        "centinelapi.cardinalcommerce.com/V2/Cruise/StepUp",
+        "acs.stripeauthentications.com/cld/challengeRequestBrowser",
+        "challengeRequestBrowser"
+      ],
+      "post_click_required_page_timeout_ms": 4000,
+      "post_click_required_page_interval_ms": 100
+    },
+    {
+      "name": "等待海卡验证码",
+      "type": "wait_verification_code",
+      "verification_source": "haika_sms",
+      "preferred_page_contains": [
+        "cashier-my.pipopay.com",
+        "agreement-cashier.html",
+        "cashier-my4a.pipopay.com",
+        "centinelapi.cardinalcommerce.com/V2/Cruise/StepUp",
+        "acs.stripeauthentications.com/cld/challengeRequestBrowser",
+        "challengeRequestBrowser"
+      ],
+      "timeout": 300
+    },
+    {
+      "name": "等待StepUp页面打开",
+      "type": "wait",
+      "preferred_page_contains": [
+        "centinelapi.cardinalcommerce.com/V2/Cruise/StepUp",
+        "acs.stripeauthentications.com/cld/challengeRequestBrowser",
+        "challengeRequestBrowser"
+      ],
+      "wait_timeout_ms": 30000,
+      "wait_poll_interval_ms": 200
+    },
+    {
+      "name": "输入海卡验证码",
+      "type": "type",
+      "allow_cross_page_focus": false,
+      "preferred_page_contains": [
+        "cashier-my.pipopay.com",
+        "agreement-cashier.html",
+        "cashier-my4a.pipopay.com",
+        "centinelapi.cardinalcommerce.com/V2/Cruise/StepUp",
+        "acs.stripeauthentications.com/cld/challengeRequestBrowser",
+        "challengeRequestBrowser"
+      ],
+      "by": "css_selector",
+      "selector": "#inputID",
+      "wait_for_element": "#inputID",
+      "wait_for_element_timeout_ms": 15000,
+      "wait_for_element_interval_ms": 100,
+      "fallback_selectors": [
+        "input[name='text']",
+        "input[placeholder='Enter code']",
+        "input[type='text']",
+        "input[autocomplete='one-time-code']",
+        "input[maxlength='6']",
+        "input[maxlength='4']",
+        "input[id*='code']",
+        "input[name*='code']",
+        "input[placeholder*='Enter code']",
+        "input[placeholder*='code']",
+        "input[placeholder*='Code']",
+        "input[type='password'][maxlength='6']",
+        "input[type='password'][maxlength='06']",
+        "input[type='tel']"
+      ],
+      "text": "{code}",
+      "timeout": 30000,
+      "max_retries": 12,
+      "retry_delay": 0.25,
+      "type_operation_timeout_ms": 10000,
+      "wait": 0,
+      "type_char_delay_ms": 0,
+      "type_chunk_size": 0
+    },
+    {
+      "name": "连续点击Pay按钮直到页面关闭",
+      "type": "click",
+      "preferred_page_contains": [
+        "cashier-my.pipopay.com",
+        "agreement-cashier.html",
+        "cashier-my4a.pipopay.com",
+        "centinelapi.cardinalcommerce.com/V2/Cruise/StepUp",
+        "acs.stripeauthentications.com/cld/challengeRequestBrowser",
+        "challengeRequestBrowser"
+      ],
+      "by": "css_selector",
+      "selector": "button:has-text('Pay')",
+      "fallback_selectors": [
+        "#sendOtp",
+        "button#sendOtp",
+        "button:has-text('Pay')"
+      ],
+      "timeout": 30000,
+      "wait": 0,
+      "wait_for_enabled": false,
+      "wait_for_enabled_interval_ms": 100,
+      "click_until_disappear": true,
+      "click_until_disappear_timeout_ms": 80000,
+      "click_until_disappear_interval_ms": 100,
+      "max_successful_clicks_before_jump": 20,
+      "jump_to_step_on_max_clicks": "等待海卡验证码",
+      "max_jump_retries": 3,
+      "recover_when_text_visible": [
+        "余额或信用额度不足"
+      ],
+      "recover_with_next_haika": true,
+      "recovery_retry_button_selectors": [
+        "button:has-text('重试')",
+        "[role='button']:has-text('重试')",
+        "text=重试",
+        "button:has-text('Retry')",
+        "text=Retry"
+      ],
+      "recovery_retry_button_timeout_ms": 5000,
+      "recovery_jump_to_step": "选择信用卡或借记卡",
+      "recovery_max_retries": 1,
+      "wait_for_page_close": true,
+      "page_closed_preferred_page_contains": [
+        "www.pippit.ai/home",
+        "www.pippit.ai",
+        "dreamina.capcut.com/ai-tool/home"
+      ],
+      "click_attempt_timeout_ms": 200,
+      "force_click": true,
+      "skip_page_sync": true,
+      "pre_click_delay_ms": 0,
+      "post_click_required_page_timeout_ms": 3000,
+      "post_click_required_page_interval_ms": 100
+    },
+    {
+      "name": "等待首页打开",
+      "type": "wait",
+      "skip_page_sync": true,
+      "preferred_page_contains": [
+        "dreamina.capcut.com/ai-tool/home",
+        "www.pippit.ai/home",
+        "www.pippit.ai"
+      ],
+      "wait_timeout_ms": 15000,
+      "wait_poll_interval_ms": 200
+    },
+    {
+      "name": "等待首页提示消失",
+      "type": "wait",
+      "skip_page_sync": true,
+      "wait_for_text_hidden": "你的付款当前正在其他页面处理。如果已关闭支付页面，可",
+      "wait_for_text_hidden_timeout_ms": 15000,
+      "wait_for_text_hidden_interval_ms": 300,
+      "seconds": 0
+    },
+    {
+      "type": "get_credits",
+      "name": "获取积分数",
+      "selector": "span[class*='credits-label']",
+      "by": "css_selector",
+      "default": "0",
+      "skip_page_sync": true,
+      "search_open_pages": true,
+      "preferred_page_contains": [
+        "dreamina.capcut.com/ai-tool/home",
+        "www.pippit.ai/home",
+        "www.pippit.ai",
+        "credits"
+      ],
+      "timeout": 30000,
+      "max_attempts": 20,
+      "fallback_selectors": [
+        "span[class*='credits-label']",
+        "[class*='credits'] span",
+        "span:has-text('积分')",
+        "span:has-text('credits')",
+        ".credit-amount-text",
+        "[class*='credit-amount']",
+        "[class*='credit'] div",
+        "div:has-text('积分')",
+        "div:has-text('credits')"
+      ]
+    }
+  ],
+  "popups": []
+}

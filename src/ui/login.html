@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡密验证 - AI账号注册器 2.0</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+            background: linear-gradient(180deg, #101826 0%, #0b1220 100%);
+            color: #e9eefb;
+            overflow: hidden;
+        }
+
+        .wrap {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 370px;
+            padding: 20px 20px 18px;
+            border-radius: 18px;
+            background: rgba(17, 25, 38, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+        }
+
+        .error-message {
+            display: none;
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255, 96, 96, 0.12);
+            color: #ffc9c9;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .field {
+            margin-bottom: 12px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #dfe7f6;
+        }
+
+        .input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .input:focus {
+            border-color: rgba(122, 162, 255, 0.55);
+        }
+
+        .device-id {
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-family: Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            word-break: break-all;
+            color: #dbe5f7;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 10px 0 12px;
+            font-size: 13px;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #dfe7f6;
+        }
+
+        .remember input {
+            accent-color: #7aa2ff;
+        }
+
+        .link-btn {
+            border: 0;
+            background: transparent;
+            color: #9eb7ff;
+            cursor: pointer;
+            padding: 0;
+            font-size: 13px;
+        }
+
+        .btn {
+            width: 100%;
+            height: 44px;
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #7aa2ff 0%, #63e6be 100%);
+            color: #09111d;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .validation-info {
+            display: none;
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #dfe7f6;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .validation-info.show {
+            display: block;
+        }
+
+        .validation-info__title {
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .validation-info__grid {
+            display: grid;
+            gap: 6px;
+        }
+
+        .validation-info__row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .validation-info__label {
+            color: #9fb0d1;
+            flex: 0 0 auto;
+        }
+
+        .validation-info__value {
+            text-align: right;
+            word-break: break-all;
+            flex: 1 1 auto;
+        }
+
+        .validation-info details {
+            margin-top: 10px;
+        }
+
+        .validation-info summary {
+            cursor: pointer;
+            color: #9eb7ff;
+        }
+
+        .validation-info pre {
+            margin: 8px 0 0;
+            padding: 10px;
+            max-height: 170px;
+            overflow: auto;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            color: #dfe7f6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(9, 17, 29, 0.28);
+            border-top-color: #09111d;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <div id="error-message" class="error-message"></div>
+
+            <div class="field">
+                <label for="card-key">卡密</label>
+                <input id="card-key" class="input" type="text" placeholder="请输入卡密" autocomplete="off" spellcheck="false">
+            </div>
+
+            <div class="field">
+                <div id="device-id" class="device-id">获取中...</div>
+            </div>
+
+            <div class="row">
+                <label class="remember">
+                    <input type="checkbox" id="remember-key" checked>
+                    记住卡密
+                </label>
+                <button id="clear-saved-btn" class="link-btn" type="button">清除记录</button>
+            </div>
+
+            <button id="validate-btn" class="btn">验证并进入</button>
+
+            <div id="validation-info" class="validation-info" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        const elements = {
+            cardKey: document.getElementById('card-key'),
+            deviceId: document.getElementById('device-id'),
+            errorMessage: document.getElementById('error-message'),
+            validateBtn: document.getElementById('validate-btn'),
+            rememberKey: document.getElementById('remember-key'),
+            clearSavedBtn: document.getElementById('clear-saved-btn'),
+            validationInfo: document.getElementById('validation-info'),
+        };
+
+        let deviceId = '';
+        let isSubmitting = false;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await init();
+
+            elements.cardKey.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    validateKey();
+                }
+            });
+
+            elements.cardKey.addEventListener('input', () => {
+                hideError();
+                hideValidationInfo();
+            });
+
+            elements.validateBtn.addEventListener('click', validateKey);
+            elements.clearSavedBtn.addEventListener('click', clearSavedKey);
+        });
+
+        async function init() {
+            try {
+                const [deviceResult, savedResult] = await Promise.all([
+                    ipcRenderer.invoke('get-device-id'),
+                    ipcRenderer.invoke('get-saved-card-key')
+                ]);
+
+                deviceId = deviceResult || '';
+                elements.deviceId.textContent = deviceId || '获取失败';
+
+                if (savedResult && savedResult.success && savedResult.cardKey) {
+                    elements.cardKey.value = savedResult.cardKey;
+                    elements.rememberKey.checked = true;
+                    setTimeout(() => validateKey(), 0);
+                }
+            } catch (error) {
+                elements.deviceId.textContent = '获取失败';
+                showError('初始化失败: ' + error.message);
+            }
+        }
+
+        async function validateKey() {
+            if (isSubmitting) return;
+
+            const cardKey = elements.cardKey.value.trim();
+            if (!cardKey) {
+                showError('请输入卡密');
+                return;
+            }
+
+            isSubmitting = true;
+            setLoading(true);
+            hideError();
+
+            try {
+                const result = await ipcRenderer.invoke('validate-card-key', {
+                    key: cardKey,
+                    deviceId
+                });
+
+                if (result.success) {
+                    await saveCardKey(cardKey, result.usageInfo || null);
+                    elements.validateBtn.textContent = '验证成功';
+                    renderValidationInfo(result);
+                    elements.validateBtn.disabled = true;
+                    ipcRenderer.send('validation-success');
+                } else {
+                    showError(result.error || '验证失败，请检查卡密');
+                    setLoading(false);
+                }
+            } catch (error) {
+                showError('验证请求失败: ' + error.message);
+                setLoading(false);
+            } finally {
+                isSubmitting = false;
+            }
+        }
+
+        async function saveCardKey(cardKey, usageInfo = null) {
+            try {
+                const shouldForcePersist = usageInfo && usageInfo.unlimited !== true;
+                if (shouldForcePersist || elements.rememberKey.checked) {
+                    await ipcRenderer.invoke('save-saved-card-key', cardKey);
+                } else {
+                    await ipcRenderer.invoke('clear-saved-card-key');
+                }
+            } catch (error) {
+            }
+        }
+
+        async function clearSavedKey() {
+            try {
+                await ipcRenderer.invoke('clear-saved-card-key');
+                elements.cardKey.value = '';
+                elements.rememberKey.checked = false;
+                hideError();
+                hideValidationInfo();
+            } catch (error) {
+                showError('清除记录失败: ' + error.message);
+            }
+        }
+
+        function setLoading(loading) {
+            elements.validateBtn.disabled = loading;
+            if (loading) {
+                elements.validateBtn.innerHTML = '<span class="loading-spinner"></span>验证中...';
+            } else {
+                elements.validateBtn.textContent = '验证并进入';
+            }
+        }
+
+        function showError(text) {
+            elements.errorMessage.textContent = text;
+            elements.errorMessage.classList.add('show');
+        }
+
+        function hideError() {
+            elements.errorMessage.textContent = '';
+            elements.errorMessage.classList.remove('show');
+        }
+
+        function normalizeUsageText(value) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+            return String(value).trim();
+        }
+
+        function hasExplicitNullUsageTotal(result) {
+            const candidates = [
+                result?.max_usage_times,
+                result?.maxUsageTimes,
+                result?.total_times,
+                result?.totalTimes,
+                result?.limit_times,
+                result?.limitTimes,
+                result?.times,
+                result?.count,
+                result?.content?.max_usage_times,
+                result?.content?.maxUsageTimes,
+                result?.content?.total_times,
+                result?.content?.totalTimes,
+                result?.content?.limit_times,
+                result?.content?.limitTimes,
+                result?.content?.times,
+                result?.content?.count,
+                result?.data?.max_usage_times,
+                result?.data?.maxUsageTimes,
+                result?.data?.total_times,
+                result?.data?.totalTimes,
+                result?.data?.limit_times,
+                result?.data?.limitTimes,
+                result?.data?.times,
+                result?.data?.count,
+                result?.result?.max_usage_times,
+                result?.result?.maxUsageTimes,
+                result?.result?.total_times,
+                result?.result?.totalTimes,
+                result?.result?.limit_times,
+                result?.result?.limitTimes,
+                result?.result?.times,
+                result?.result?.count,
+                result?.validationResult?.max_usage_times,
+                result?.validationResult?.maxUsageTimes,
+                result?.validationResult?.total_times,
+                result?.validationResult?.totalTimes,
+                result?.validationResult?.limit_times,
+                result?.validationResult?.limitTimes,
+                result?.validationResult?.times,
+                result?.validationResult?.count
+            ];
+
+            return candidates.some((value) => value === null);
+        }
+
+        function extractLicenseExpiryText(result) {
+            const candidates = [
+                result?.expire_at,
+                result?.expireAt,
+                result?.valid_at,
+                result?.valid_date,
+                result?.validDate,
+                result?.expiry_date,
+                result?.expire_date,
+                result?.expires_at,
+                result?.content?.expire_at,
+                result?.content?.valid_date,
+                result?.content?.validDate,
+                result?.content?.expiry_date,
+                result?.content?.expire_date,
+                result?.content?.expires_at,
+                result?.content?.expireAt,
+                result?.data?.expire_at,
+                result?.data?.valid_date,
+                result?.data?.validDate,
+                result?.data?.expiry_date,
+                result?.data?.expire_date,
+                result?.data?.expires_at,
+                result?.data?.expireAt
+            ];
+
+            return candidates.find((value) => typeof value === 'string' && value.trim())?.trim() || '';
+        }
+
+        function extractLicenseUsageText(result) {
+            const usageInfoText = normalizeUsageText(result?.usageInfo?.summaryText);
+            if (usageInfoText) {
+                return usageInfoText;
+            }
+            if (result?.usageInfo?.unlimited === true) {
+                return '无限次数';
+            }
+            if (hasExplicitNullUsageTotal(result)) {
+                return '无限次数';
+            }
+
+            const unlimitedCandidates = [
+                result?.is_unlimited,
+                result?.isUnlimited,
+                result?.unlimited,
+                result?.no_limit,
+                result?.noLimit,
+                result?.remaining_usage_times,
+                result?.remainingUsageTimes,
+                result?.remaining_times,
+                result?.remainingTimes,
+                result?.remaining_count,
+                result?.remainingCount,
+                result?.surplus_times,
+                result?.surplusTimes,
+                result?.usage_times,
+                result?.usageTimes,
+                result?.used_times,
+                result?.usedTimes,
+                result?.used_count,
+                result?.usedCount,
+                result?.max_usage_times,
+                result?.maxUsageTimes,
+                result?.total_times,
+                result?.totalTimes,
+                result?.limit_times,
+                result?.limitTimes,
+                result?.times,
+                result?.count,
+                result?.content?.is_unlimited,
+                result?.content?.isUnlimited,
+                result?.content?.unlimited,
+                result?.content?.no_limit,
+                result?.content?.noLimit,
+                result?.content?.remaining_usage_times,
+                result?.content?.remainingUsageTimes,
+                result?.content?.remaining_times,
+                result?.content?.remainingTimes,
+                result?.content?.remaining_count,
+                result?.content?.remainingCount,
+                result?.content?.surplus_times,
+                result?.content?.surplusTimes,
+                result?.content?.usage_times,
+                result?.content?.usageTimes,
+                result?.content?.used_times,
+                result?.content?.usedTimes,
+                result?.content?.used_count,
+                result?.content?.usedCount,
+                result?.content?.max_usage_times,
+                result?.content?.maxUsageTimes,
+                result?.content?.total_times,
+                result?.content?.totalTimes,
+                result?.content?.limit_times,
+                result?.content?.limitTimes,
+                result?.content?.times,
+                result?.content?.count,
+                result?.data?.is_unlimited,
+                result?.data?.isUnlimited,
+                result?.data?.unlimited,
+                result?.data?.no_limit,
+                result?.data?.noLimit,
+                result?.data?.remaining_usage_times,
+                result?.data?.remainingUsageTimes,
+                result?.data?.remaining_times,
+                result?.data?.remainingTimes,
+                result?.data?.remaining_count,
+                result?.data?.remainingCount,
+                result?.data?.surplus_times,
+                result?.data?.surplusTimes,
+                result?.data?.usage_times,
+                result?.data?.usageTimes,
+                result?.data?.used_times,
+                result?.data?.usedTimes,
+                result?.data?.used_count,
+                result?.data?.usedCount,
+                result?.data?.max_usage_times,
+                result?.data?.maxUsageTimes,
+                result?.data?.total_times,
+                result?.data?.totalTimes,
+                result?.data?.limit_times,
+                result?.data?.limitTimes,
+                result?.data?.times,
+                result?.data?.count
+            ];
+
+            const unlimitedText = unlimitedCandidates.find((value) => {
+                const text = normalizeUsageText(value);
+                return text === 'true' || /无限|不限|终身|永久|unlimited|no\s*limit/i.test(text);
+            });
+            if (unlimitedText !== undefined) {
+                return '无限次数';
+            }
+
+            const remainingCandidates = [
+                result?.remaining_usage_times,
+                result?.remainingUsageTimes,
+                result?.remaining_times,
+                result?.remainingTimes,
+                result?.remaining_count,
+                result?.remainingCount,
+                result?.surplus_times,
+                result?.surplusTimes,
+                result?.content?.remaining_usage_times,
+                result?.content?.remainingUsageTimes,
+                result?.content?.remaining_times,
+                result?.content?.remainingTimes,
+                result?.content?.remaining_count,
+                result?.content?.remainingCount,
+                result?.content?.surplus_times,
+                result?.content?.surplusTimes,
+                result?.data?.remaining_usage_times,
+                result?.data?.remainingUsageTimes,
+                result?.data?.remaining_times,
+                result?.data?.remainingTimes,
+                result?.data?.remaining_count,
+                result?.data?.remainingCount,
+                result?.data?.surplus_times,
+                result?.data?.surplusTimes
+            ];
+            const usedCandidates = [
+                result?.usage_times,
+                result?.usageTimes,
+                result?.used_times,
+                result?.usedTimes,
+                result?.used_count,
+                result?.usedCount,
+                result?.content?.usage_times,
+                result?.content?.usageTimes,
+                result?.content?.used_times,
+                result?.content?.usedTimes,
+                result?.content?.used_count,
+                result?.content?.usedCount,
+                result?.data?.usage_times,
+                result?.data?.usageTimes,
+                result?.data?.used_times,
+                result?.data?.usedTimes,
+                result?.data?.used_count,
+                result?.data?.usedCount
+            ];
+            const totalCandidates = [
+                result?.max_usage_times,
+                result?.maxUsageTimes,
+                result?.total_times,
+                result?.totalTimes,
+                result?.limit_times,
+                result?.limitTimes,
+                result?.times,
+                result?.count,
+                result?.content?.max_usage_times,
+                result?.content?.maxUsageTimes,
+                result?.content?.total_times,
+                result?.content?.totalTimes,
+                result?.content?.limit_times,
+                result?.content?.limitTimes,
+                result?.content?.times,
+                result?.content?.count,
+                result?.data?.max_usage_times,
+                result?.data?.maxUsageTimes,
+                result?.data?.total_times,
+                result?.data?.totalTimes,
+                result?.data?.limit_times,
+                result?.data?.limitTimes,
+                result?.data?.times,
+                result?.data?.count
+            ];
+
+            const remainingText = remainingCandidates.map(normalizeUsageText).find(Boolean);
+            const usedText = usedCandidates.map(normalizeUsageText).find(Boolean);
+            const totalText = totalCandidates.map(normalizeUsageText).find(Boolean);
+
+            if (remainingText && totalText) {
+                return `剩余 ${remainingText} / ${totalText}`;
+            }
+            if (remainingText) {
+                return `剩余 ${remainingText}`;
+            }
+            if (usedText && totalText) {
+                return `已用 ${usedText} / ${totalText}`;
+            }
+            if (usedText) {
+                return `已用 ${usedText}`;
+            }
+            if (totalText) {
+                return `总次数 ${totalText}`;
+            }
+            return '未识别到次数字段';
+        }
+
+        function renderValidationInfo(result) {
+            if (!elements.validationInfo) {
+                return;
+            }
+
+            const escapeHtml = (value) => String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+            const summaryRows = [
+                ['有效期', extractLicenseExpiryText(result) || '未提供'],
+                ['次数信息', extractLicenseUsageText(result)],
+                ['验证状态', '成功']
+            ];
+            const rawResult = JSON.stringify(result, null, 2);
+
+            elements.validationInfo.innerHTML = `
+                <div class="validation-info__title">验证卡密信息</div>
+                <div class="validation-info__grid">
+                    ${summaryRows.map(([label, value]) => `
+                        <div class="validation-info__row">
+                            <div class="validation-info__label">${escapeHtml(label)}</div>
+                            <div class="validation-info__value">${escapeHtml(value)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <details open>
+                    <summary>查看原始响应</summary>
+                    <pre>${escapeHtml(rawResult)}</pre>
+                </details>
+            `;
+            elements.validationInfo.classList.add('show');
+        }
+
+        function hideValidationInfo() {
+            if (!elements.validationInfo) {
+                return;
+            }
+            elements.validationInfo.classList.remove('show');
+            elements.validationInfo.innerHTML = '';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+{
+"update_url": "https://clients2.google.com/service/update2/crx",
+
+  "manifest_version": 3,
+  "name": "__MSG_name__",
+  "version": "1.1.20",
+  "description": "__MSG_description__",
+  "default_locale": "zh_CN",
+  "icons": {
+    "32": "assets/icons/48.png",
+    "96": "assets/icons/48.png",
+    "128": "assets/icons/48.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "assets/icons/48.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*/*",
+        "http://*/*",
+        "file://*/*"
+      ],
+      "js": [
+        "./content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://*.feishu.cn/*",
+        "https://*.feishu.net/*",
+        "https://*.larksuite.com/*",
+        "https://*.feishu-pre.net/*",
+        "https://*.larkoffice.com/*"
+      ],
+      "js": [
+        "lack/lark.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "externally_connectable": {
+    "matches": [
+      "https://supercopy.app/*",
+      "https://enablecopy.com/*"
+    ]
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/*",
+        "EDzMc92pfi.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*",
+    "file://*/*"
+  ],
+  "permissions": [
+    "tabs",
+    "scripting",
+    "storage"
+  ],
+  "minimum_chrome_version": "88.0"
+}

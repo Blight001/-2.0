@@ -1,0 +1,7 @@
+{
+    "email_host": "heysure.top",
+    "email_port": 8888,
+    "email_suffix": "heysure.top",
+    "email_random_length": 8,
+    "email_random_type": "lowercase"
+}

@@ -1,0 +1,4 @@
+{
+    "tcp_server_url": "127.0.0.1:58113",
+    "tcp_auto_reconnect_enabled": true
+}

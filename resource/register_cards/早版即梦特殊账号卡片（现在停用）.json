@@ -1,0 +1,203 @@
+{
+  "name": "早版即梦特殊账号卡片（现在停用）",
+  "website": "https://dreamina.capcut.com/ai-tool/home?type=video",
+  "description": "即梦特殊账号自动注册，使用标准步骤流程",
+  "email": "",
+  "password": "",
+  "points": 0,
+  "random": {
+    "email": {
+      "length": 8,
+      "type": "lowercase"
+    },
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "steps": [
+    {
+      "type": "navigate",
+      "name": "访问CapCut Dreamina页面",
+      "url": "https://dreamina.capcut.com/ai-tool/home?type=video",
+      "timeout": 60000
+    },
+    {
+      "type": "click",
+      "name": "点击Create按钮",
+      "by": "css_selector",
+      "selector": "div:has-text('Create')",
+      "timeout": 20000
+    },
+    {
+      "type": "click",
+      "name": "选择Continue with email",
+      "by": "css_selector",
+      "selector": "span:has-text('Continue with email')",
+      "timeout": 10000
+    },
+    {
+      "type": "click",
+      "name": "点击Sign up",
+      "by": "css_selector",
+      "selector": "span.new-forget-pwd-btn",
+      "timeout": 10000
+    },
+    {
+      "type": "type",
+      "name": "填写邮箱",
+      "by": "css_selector",
+      "selector": "input[placeholder*='email']",
+      "text": "{account}",
+      "timeout": 20000
+    },
+    {
+      "type": "type",
+      "name": "填写密码",
+      "by": "css_selector",
+      "selector": "input[type='password']",
+      "text": "{password}",
+      "timeout": 20000
+    },
+    {
+      "type": "loop_click",
+      "name": "循环点击Continue直至验证码输入框出现",
+      "by": "css_selector",
+      "selector": "span:has-text('Continue')",
+      "stop_by": "css_selector",
+      "stop_selector": "input[maxlength='6']",
+      "interval": 5000,
+      "max_loop_attempts": 5
+    },
+    {
+      "type": "wait_verification_code",
+      "name": "开始等待邮箱验证码",
+      "timeout": 30
+    },
+    {
+      "type": "clash-system-proxy",
+      "name": "关闭Clash系统代理",
+      "action": "off"
+    },
+    {
+      "type": "type",
+      "name": "填写验证码",
+      "by": "css_selector",
+      "selector": "input[maxlength='6']",
+      "text": "{code}",
+      "timeout": 60000
+    },
+    {
+      "type": "wait",
+      "name": "等待加载",
+      "seconds": 5
+    },
+    {
+      "type": "clash-system-proxy",
+      "name": "开启Clash系统代理",
+      "action": "on"
+    },
+    {
+      "type": "type",
+      "name": "填写出生年份",
+      "by": "css_selector",
+      "selector": "input[placeholder='Year']",
+      "text": "2000",
+      "timeout": 30000
+    },
+    {
+      "type": "click",
+      "name": "选择出生月份",
+      "by": "css_selector",
+      "selector": "svg.lv-icon.lv-icon-down",
+      "nth": 0,
+      "timeout": 10000
+    },
+    {
+      "type": "click",
+      "name": "选择January",
+      "by": "css_selector",
+      "selector": "li.lv-select-option",
+      "nth": 0,
+      "timeout": 10000
+    },
+    {
+      "type": "click",
+      "name": "选择出生日期",
+      "by": "css_selector",
+      "selector": "svg.lv-icon.lv-icon-down",
+      "nth": 1,
+      "timeout": 10000
+    },
+    {
+      "type": "click",
+      "name": "选择日期1",
+      "by": "css_selector",
+      "selector": "li.lv-select-option",
+      "nth": 0,
+      "timeout": 10000
+    },
+    {
+      "type": "clash-system-proxy",
+      "name": "关闭Clash系统代理",
+      "action": "off"
+    },
+    {
+      "type": "click",
+      "name": "点击Next完成注册",
+      "by": "css_selector",
+      "selector": "span:has-text('Next')",
+      "timeout": 10000
+    },
+    {
+      "type": "wait",
+      "name": "等待注册完成",
+      "wait_for_element": "div:has-text('Coming up soon...')",
+      "stability_timeout": 10000
+    },
+    {
+      "type": "clash-system-proxy",
+      "name": "开启Clash系统代理",
+      "action": "on"
+    },
+    {
+      "type": "wait",
+      "name": "等待兼容",
+      "seconds": 5
+    },
+    {
+      "type": "navigate",
+      "name": "访问CapCut Dreamina页面",
+      "url": "https://dreamina.capcut.com/ai-tool/home?type=video",
+      "timeout": 60000
+    },
+    {
+      "type": "get_credits",
+      "name": "获取积分数",
+      "selector": "[class*='credit-amount-text']",
+      "by": "css_selector",
+      "default": "0",
+      "timeout": 30000,
+      "max_attempts": 20,
+      "fallback_selectors": [
+        "div[class*='credit-amount-text']",
+        "div[class*='column-mode']",
+        "[class*='credit-amount']"
+      ]
+    }
+  ],
+  "popups": [],
+  "upload_server_url": "",
+  "upload_card_key": "",
+  "min_cookie_size_bytes": 4096,
+  "upload_target_score_scope": "all",
+  "upload_target_score_types": [],
+  "upload_target_score_type": "",
+  "upload": {
+    "server_url": "",
+    "card_key": "",
+    "target_score_scope": "all",
+    "target_score_types": [],
+    "target_score_type": ""
+  }
+}

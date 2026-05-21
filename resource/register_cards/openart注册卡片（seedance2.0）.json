@@ -1,0 +1,124 @@
+{
+  "name": "openart注册卡片（seedance2.0）",
+  "website": "https://openart.ai/signup",
+  "description": "skywork标准注册步骤",
+  "password": "",
+  "points": 0,
+  "steps": [
+    {
+      "name": "访问网站",
+      "type": "navigate",
+      "by": "auto",
+      "url": "https://openart.ai/signup",
+      "timeout": 0,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "输入邮箱",
+      "type": "type",
+      "by": "css_selector",
+      "selector": "input[placeholder=\"Email Address *\"]",
+      "text": "{account}",
+      "timeout": 5000,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "输入密码",
+      "type": "type",
+      "by": "auto",
+      "selector": "input[placeholder=\"Password *\"]",
+      "text": "{password}",
+      "timeout": 5000,
+      "wait": 0,
+      "clear_first": true,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "确定密码",
+      "type": "type",
+      "by": "auto",
+      "selector": "input[placeholder=\"Confirm password *\"]",
+      "text": "{password}",
+      "timeout": 5000,
+      "wait": 0,
+      "clear_first": true,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "点击发送邮箱",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "button:has-text(\"Sign Up\")",
+      "timeout": 5000,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "等待验证码",
+      "type": "wait_verification_code",
+      "by": "css_selector",
+      "timeout": 15000,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "输入验证码",
+      "type": "type",
+      "by": "css_selector",
+      "selector": "input.otp-input[type=\"text\"]",
+      "text": "{code}",
+      "timeout": 15000,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "存在升级按钮",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "div.main-title.-mt-\\[50px\\]:has-text(\"全配拉满，Claw🦞的最佳之选！\")",
+      "timeout": 15000,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "获取Cookie",
+      "type": "save_cookies",
+      "by": "css_selector",
+      "timeout": 15000,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "清理当前页缓存",
+      "type": "clear_current_page_cache",
+      "by": "css_selector",
+      "timeout": 15000,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "刷新页面",
+      "type": "navigate",
+      "by": "css_selector",
+      "url": "https://baidu.com",
+      "timeout": 15000,
+      "ui_fields_mode": "collapsed"
+    }
+  ],
+  "popups": [],
+  "upload_server_url": "",
+  "upload_card_key": "",
+  "registration_auto_upload": true,
+  "min_cookie_size_bytes": 8192,
+  "upload_target_score_scope": "all",
+  "upload_target_score_types": [],
+  "upload_target_score_type": "",
+  "random": {
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "upload": {
+    "server_url": "",
+    "card_key": "",
+    "registration_auto_upload": true,
+    "target_score_scope": "all",
+    "target_score_types": [],
+    "target_score_type": ""
+  }
+}

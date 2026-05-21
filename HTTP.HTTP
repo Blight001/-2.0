@@ -1,0 +1,72 @@
+
+@project_api_key=sk-local-469a2f21bbba9a941e322102025cde6ac3abf772a5982246
+
+# 项目对外视频接口地址
+@project_generations_url=http://127.0.0.1:65412
+
+# 统一切换区：取消注释你要测试的模型即可
+# @active_model=doubao-seedance-2-0-260128
+# @active_model=doubao-seedance-2-0-fast-260128
+@active_model=doubao-seedance-1-5-pro-251215
+# @active_model=doubao-seedance-1-0-pro-250428
+# @active_model=doubao-seedance-1-0-pro-fast-250528
+
+@prompt_text=女孩抱着狐狸，女孩睁开眼，温柔地看向镜头，狐狸友善地抱着，镜头缓缓拉出，女孩的头发被风吹动，可以听到风声
+@image_url=https://ark-project.tos-cn-beijing.volces.com/doc_image/i2v_foxrgirl.png
+@active_image_model=GPT-image2
+@image_prompt_text=一只白色小猫坐在窗边，柔和自然光，写实摄影风格
+
+
+# 调试任务 ID
+# @task_id = cgt-20260514100926-dq6rp
+# @task_id = task_6ppNwLpqVTlwI5GPWiEcJoE2PxSf0Twe
+# @task_id = task_2pkfLxXmMHvcl2bn6gQplGHeylI1jkRb
+@task_id = task_MJEQLIIIHkunbD2W00btcDhHnAFrJxX9
+
+
+
+GET http://127.0.0.1:65412/health
+
+
+##################################################################################
+##################################################################################
+### 项目视频生成 /v1/video/generations
+POST {{project_generations_url}}
+Authorization: Bearer {{project_api_key}}
+Content-Type: application/json
+
+{
+  "model": "{{active_model}}",
+  "prompt": "{{prompt_text}}",
+  "image": "{{image_url}}",
+  "duration": 5.0
+}
+
+### 项目任务查询 /v1/video/generations/{task_id}
+GET {{project_generations_url}}/{{task_id}}
+Authorization: Bearer {{project_api_key}}
+Accept: application/json
+
+### 项目任务查询 /v1/videos/{task_id}
+GET {{project_generations_url}}/{{task_id}}
+Authorization: Bearer {{project_api_key}}
+Accept: application/json
+
+### 项目视频预览 /v1/videos/{task_id}/content
+https://wuxianai.cc/v1/videos/task_MJEQLIIIHkunbD2W00btcDhHnAFrJxX9/content
+
+##################################################################################
+##################################################################################
+### 项目图片生成 /v1/images/generations
+POST {{project_generations_url}}/v1/images/generations
+Authorization: Bearer {{project_api_key}}
+Content-Type: application/json
+
+{
+  "model": "{{active_image_model}}",
+  "prompt": "{{image_prompt_text}}",
+  "size": "1024x1024",
+  "n": 1,
+  "quality": "standard",
+  "response_format": "url"
+}

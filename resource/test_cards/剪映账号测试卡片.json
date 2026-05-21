@@ -1,0 +1,28 @@
+{
+  "name": "剪映账号测试卡片",
+  "website": "https://www.capcut.com/ai-creator/agent",
+  "description": "剪映AI普通账号自动测试",
+  "email": "",
+  "password": "",
+  "points": 0,
+  "random": {
+    "email": {
+      "length": 8,
+      "type": "lowercase"
+    },
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "steps": [
+    {
+      "name": "访问剪映页面",
+      "type": "navigate",
+      "url": "https://www.capcut.com/ai-creator/agent",
+      "wait": 3,
+      "timeout": 60000
+    }
+  ],
+  "popups": []
+}

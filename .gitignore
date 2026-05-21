@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+
+# Build Output
+dist/
+build/
+out/
+release/
+
+# Runtime Data & User Data
+cookies/
+backup/
+logs/
+*.log
+screenshots/
+temp/
+tmp/
+cache/
+
+# Configuration with Secrets
+cookie_user_config.json
+resource/cookie_user_config.json
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# IDEs & Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.sublime-project
+*.sublime-workspace
+
+# Electron Specific
+*.asar

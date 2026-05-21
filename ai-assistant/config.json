@@ -1,0 +1,9 @@
+{
+  "baseURL": "https://api.deepseek.com",
+  "model": "deepseek-chat",
+  "apiKey": "sk-78869d78833d4ec79402dd9700904417",
+  "activeProfileId": "browser-mcp",
+  "activeProfileIds": [
+    "browser-mcp"
+  ]
+}

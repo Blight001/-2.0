@@ -1,0 +1,47 @@
+{
+  "name": "小云雀账号积分测试卡片",
+  "website": "https://www.pippit.ai/zh-cn",
+  "description": "香蕉AI普通账号自动测试，重新检查积分",
+  "email": "",
+  "password": "",
+  "points": 0,
+  "random": {
+    "email": {
+      "length": 10,
+      "type": "mixed"
+    },
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "steps": [
+    {
+      "type": "navigate",
+      "name": "访问小云雀页面",
+      "url": "https://www.pippit.ai/zh-cn",
+      "timeout": 60000
+    },
+    {
+      "type": "get_credits",
+      "name": "获取积分数",
+      "selector": "span[class*='credits-label']",
+      "by": "css_selector",
+      "default": "0",
+      "timeout": 30000,
+      "max_attempts": 20,
+      "fallback_selectors": [
+        "span[class*='credits-label']",
+        "[class*='credits'] span",
+        "span:has-text('积分')",
+        "span:has-text('credits')",
+        ".credit-amount-text",
+        "[class*='credit-amount']",
+        "[class*='credit'] div",
+        "div:has-text('积分')",
+        "div:has-text('credits')"
+      ]
+    }
+  ],
+  "popups": []
+}

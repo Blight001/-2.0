@@ -1,0 +1,232 @@
+{
+  "name": "小云雀注册卡片",
+  "website": "https://www.pippit.ai/zh-cn",
+  "description": "香蕉AI工具自动注册，使用标准步骤流程",
+  "password": "",
+  "points": 0,
+  "steps": [
+    {
+      "name": "访问小云雀页面",
+      "type": "navigate",
+      "url": "https://www.pippit.ai/i/0vh59llzuH9V",
+      "timeout": 60000,
+      "wait": 3,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "点击免费开始按钮",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "a:has-text(\"Start for free\")",
+      "force_click": true,
+      "ui_fields_mode": "filled"
+    },
+    {
+      "name": "用电子邮箱登录",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "span:has-text('Continue with email')",
+      "wait": 2,
+      "force_click": true,
+      "ui_fields_mode": "filled"
+    },
+    {
+      "name": "注册",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "span:has-text(Sign up')",
+      "timeout": 30000,
+      "wait": 2,
+      "text_match": "注册",
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "输入邮箱",
+      "type": "type",
+      "by": "css_selector",
+      "selector": "input[placeholder='Enter email']",
+      "text": "{account}",
+      "timeout": 20000,
+      "wait": 1,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "输入密码",
+      "type": "type",
+      "by": "css_selector",
+      "selector": "input[placeholder='Enter password']",
+      "text": "{password}",
+      "timeout": 20000,
+      "wait": 1,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "点击继续按钮",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "span:has-text('Continue')",
+      "wait": 3,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "开始等待邮箱验证码",
+      "type": "wait_verification_code",
+      "timeout": 300,
+      "email": "{email}",
+      "retry_count": 0,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "填写验证码",
+      "type": "type",
+      "by": "css_selector",
+      "selector": "input[maxlength='6']",
+      "text": "{code}",
+      "timeout": 60000,
+      "wait": 2,
+      "fallback_selectors": [
+        "div.verification_code_input-number.verification_code_input-number-focus",
+        "input[placeholder*='验证码']",
+        "input[placeholder*='code']"
+      ],
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "填写出生年份",
+      "type": "type",
+      "by": "css_selector",
+      "selector": "input[placeholder='year']",
+      "text": "2000",
+      "wait": 1,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "选择出生月份",
+      "type": "click",
+      "by": "css_selector",
+      "selector": ".lv-select-view-value:has-text('月')",
+      "timeout": 30000,
+      "force_click": true,
+      "fallback_selectors": [
+        "span.lv-select-view-value-mirror:has-text('月')",
+        "span[class*='select']:has-text('月')",
+        "[placeholder*='月']"
+      ],
+      "text_match": "月",
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "选择1月",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "li.lv-select-option:first-child",
+      "timeout": 30000,
+      "fallback_selectors": [
+        "li[role='option'][aria-selected='false']:has-text('1 月')",
+        ".lv-select-option:has-text('1 月')",
+        "li:has-text('1 月'):nth-of-type(1)"
+      ],
+      "text_match": "1 月",
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "选择出生日期",
+      "type": "click",
+      "by": "css_selector",
+      "selector": ".lv-select-view-value:has-text('日')",
+      "timeout": 30000,
+      "force_click": true,
+      "fallback_selectors": [
+        "span.lv-select-view-value-mirror:has-text('日')",
+        "span[class*='select']:has-text('日')",
+        "[placeholder*='日']"
+      ],
+      "text_match": "日",
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "等待加载",
+      "type": "wait",
+      "seconds": 0.5,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "选择1日",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "li.lv-select-option:first-child",
+      "timeout": 30000,
+      "force_click": true,
+      "fallback_selectors": [
+        "li[role='option'][aria-selected='false']:has-text('1')",
+        ".lv-select-option:has-text('1')",
+        "li:has-text('1'):nth-of-type(1)"
+      ],
+      "text_match": 1,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "等待下一步按钮消失",
+      "type": "wait",
+      "by": "css_selector",
+      "wait_for_element_hidden": ".lv_new_sign_in_panel_wide-birthday-next",
+      "wait_for_element_hidden_timeout_ms": 50000,
+      "wait_for_element_hidden_interval_ms": 300,
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "点击重试按钮",
+      "type": "click",
+      "by": "css_selector",
+      "selector": "button:has-text('重试')",
+      "timeout": 1000,
+      "optional": true,
+      "force_click": true,
+      "fallback_selectors": [
+        "[role='button']:has-text('重试')",
+        "span:has-text('重试')",
+        "text=重试"
+      ],
+      "text_match": "重试",
+      "ui_fields_mode": "collapsed"
+    },
+    {
+      "name": "获取积分数",
+      "type": "get_credits",
+      "by": "css_selector",
+      "selector": "span[class*='credits-label']",
+      "timeout": 30000,
+      "wait_for_credit_increase": true,
+      "default": 0,
+      "wait_for_credit_increase_timeout_ms": 5000,
+      "wait_for_credit_increase_interval_ms": 500,
+      "fallback_selectors": [
+        "span[class*='credits-label']",
+        "[class*='credits'] span"
+      ],
+      "ui_fields_mode": "collapsed"
+    }
+  ],
+  "popups": [],
+  "upload_server_url": "http://146.196.81.140:58158",
+  "upload_card_key": "E1C0-8HAP-GC08-Q3PW-EV11",
+  "registration_auto_upload": true,
+  "min_cookie_size_bytes": 8192,
+  "upload_target_score_scope": "all",
+  "upload_target_score_types": [],
+  "upload_target_score_type": "",
+  "random": {
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "upload": {
+    "server_url": "http://146.196.81.140:58158",
+    "card_key": "E1C0-8HAP-GC08-Q3PW-EV11",
+    "registration_auto_upload": true,
+    "target_score_scope": "all",
+    "target_score_types": [],
+    "target_score_type": ""
+  }
+}

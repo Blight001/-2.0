@@ -1,0 +1,49 @@
+{
+    "selected_mode": "temp",
+    "selected_provider": "tempmail-ing",
+    "api_config": {
+        "name": "GPTMail API",
+        "baseUrl": "https://mail.chatgpt.org.uk",
+        "apiKey": "sk-jeo0lhe4ZFDo",
+        "authHeaderName": "X-API-Key",
+        "authQueryName": "",
+        "endpoints": {
+            "generateEmail": "/api/generate-email",
+            "emails": "/api/emails?email={email}",
+            "emailDetail": "/api/email/{id}",
+            "deleteEmail": "/api/email/{id}",
+            "clearEmails": "/api/emails/clear?email={email}",
+            "stats": "/api/stats",
+            "statistics24h": "/api/statistics/24h",
+            "topSubjects": "/api/statistics/top-subjects",
+            "topDomains": "/api/statistics/top-domains",
+            "topSenders": "/api/statistics/top-senders"
+        },
+        "notes": "默认自动填入 API Key，生成邮箱后即可查询收件箱、查看详情、删除邮件和清空收件箱。"
+    },
+    "providers": [
+        {
+            "id": "chatgpt",
+            "name": "chatgpt",
+            "url": "https://mail.chatgpt.org.uk/zh/",
+            "closePopupSelectors": [
+                "button:has-text(\"我知道了\")",
+                "button:has-text(\"关闭\")"
+            ],
+            "emailElement": "div.email-address",
+            "refreshButton": "button[title=\"Generate Random\"]",
+            "codeClickElement": "div.email-header-row",
+            "codeElement": "iframe#emailFrame"
+        },
+        {
+            "id": "tempmail-ing",
+            "name": "tempmail.ing",
+            "url": "https://cleantempmail.com/zh",
+            "closePopupSelectors": [],
+            "emailElement": "div.email-address",
+            "refreshButton": "button.action-btn[title=\"Generate Random\"]",
+            "codeClickElement": "div.unread-dot",
+            "codeElement": "iframe[id^=\"emailFrame\"], iframe#emailFrame"
+        }
+    ]
+}

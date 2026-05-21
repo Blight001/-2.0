@@ -1,0 +1,68 @@
+{
+  "name": {
+    "message": "SuperCopy Pro - 超级复制"
+  },
+  "description": {
+    "message": "一键破解禁止右键、破解禁止选择、破解禁止复制、破解禁止粘贴，启用复制，启用右键，启用选择。免费。简单。"
+  },
+  "copy_enabled": {
+    "message": "已启用"
+  },
+  "copy_disabled": {
+    "message": "未启用"
+  },
+  "copy_clickToEnable": {
+    "message": "点击破解禁止复制"
+  },
+  "copy_clickToDisable": {
+    "message": "点击取消破解"
+  },
+  "copy_noNeedToEnable": {
+    "message": "无需破解"
+  },
+  "crackTips": {
+    "message": "破解禁止复制"
+  },
+  "enableTips": {
+    "message": "点击破解禁止复制"
+  },
+  "disableTips": {
+    "message": "点击取消破解"
+  },
+  "cannotTips": {
+    "message": "无需破解"
+  },
+  "domainLists": {
+    "message": "域名列表"
+  },
+  "rate": {
+    "message": "五星好评"
+  },
+  "delete": {
+    "message": "删除域名"
+  },
+  "tips": {
+    "message": "提示"
+  },
+  "qqgroup": {
+    "message": "QQ群"
+  },
+  "domainListsTips": {
+    "message": " 在此域名列表中的页面将自动启动SuperCopy。"
+  },
+  "copy": {
+    "message": "复制"
+  },
+  "copySuccess": {
+    "message": "复制成功"
+  },
+  "copyFail": {
+    "message": "复制失败"
+  },
+  "copy_docx_as_markdown": {
+    "message": "复制为 Markdown"
+  },
+  "download_docx_as_markdown": {
+    "message": "导出为 Markdown"
+  }
+}

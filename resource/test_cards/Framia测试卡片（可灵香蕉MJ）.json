@@ -1,0 +1,20 @@
+{
+  "name": "Framia测试卡片（可灵香蕉MJ）",
+  "website": "https://framia.pro",
+  "description": "Framia测试卡片",
+  "email": "",
+  "password": "",
+  "points": 0,
+  "random": {
+    "email": {
+      "length": 8,
+      "type": "lowercase"
+    },
+    "password": {
+      "length": 12,
+      "type": "mixed"
+    }
+  },
+  "steps": [],
+  "popups": []
+}
