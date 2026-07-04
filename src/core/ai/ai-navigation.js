@@ -99,7 +99,5 @@ function extractOpenUrlRequest(text = '') {
 
 module.exports = {
     BROWSER_OPEN_URL_CHANNEL,
-    COMMON_OPEN_URLS,
-    extractOpenUrlRequest,
-    normalizeUrlCandidate
+    extractOpenUrlRequest
 };

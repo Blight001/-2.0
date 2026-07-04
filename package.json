@@ -7,22 +7,14 @@
     "start": "electron .",
     "start:hybrid": "electron . --web-ui",
     "start:web": "electron . --web-ui --headless-web",
-    "start:control-server": "python python/control_server.py",
-    "start:frp-client": "run-frp-client.bat",
-    "start:frp-server": "run-frps.bat",
     "start:mqtt-experiment": "node scripts/mqtt-experiment-server.js",
-    "start:mqtt-experiment:py": "python python/run_mqtt_experiment.py",
     "dev": "electron . --dev",
     "build": "node scripts/build-package.js app",
     "dist": "npm run build",
     "dist:app": "npm run build",
     "dist:web": "node scripts/build-package.js web",
     "build:app": "npm run build",
-    "build:web": "npm run dist:web",
-    "test": "node test.js",
-    "check-env": "node check-environment.js",
-    "test-features": "node test-features.js",
-    "check-build": "node check-build.js"
+    "build:web": "npm run dist:web"
   },
   "keywords": [
     "electron",

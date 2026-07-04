@@ -8,7 +8,7 @@ const { URLSearchParams } = require('url');
 class LicenseManager {
     constructor() {
         this.validateServerConfig = {
-            hostname: '146.196.80.152',
+            hostname: '49.234.181.190',
             port: 58111,
             protocol: 'http:',
             path: '/api/validate_key'

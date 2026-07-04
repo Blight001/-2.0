@@ -16,7 +16,7 @@ class ClashManager {
         this.configPath = this.getVergeConfigPath();
         this.apiConfig = {
             hostname: '127.0.0.1',
-            port: 9097, // Default port from clash_api.js
+            port: 9097, // Default Clash API external-controller port
             secret: '',
             timeout: 5000
         };
@@ -155,7 +155,7 @@ class ClashManager {
                     command = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f`;
                 }
 
-                exec(command, async (error, stdout, stderr) => {
+                exec(command, async (error, _stdout, stderr) => {
                     if (error) {
                         this.logger.error(`❌ Failed to set system proxy: ${error.message}`);
                         resolve(false);

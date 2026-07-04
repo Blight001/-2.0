@@ -152,7 +152,6 @@ function stripEmailConfigCompatFields(config = {}) {
 }
 
 module.exports = {
-    DEFAULT_TCP_SERVER_URL,
     normalizeBooleanValue,
     normalizeTcpServerUrl,
     stripObjectKeys,

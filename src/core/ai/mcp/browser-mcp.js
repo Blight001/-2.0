@@ -1,12 +1,5 @@
 const { BrowserMcp } = require('../../browser/browser-mcp');
 
-const BROWSER_MCP_CAPABILITY_SUMMARY = '浏览器页面快照、元素定位、点击、输入、选择、滚动、按键、在内置浏览器打开网址、切换标签、网页搜索、页面文本提取';
-const BROWSER_MCP_PROMPT_HINTS = Object.freeze([
-    '优先使用 mcpId 定位元素；如果能直接点击、输入、选择、滚动、打开网址、切换标签或搜索网页，就不要只给抽象建议。',
-    '当用户给出网址、搜索结果或明确页面链接时，优先主动用 browser.open_url 在内置浏览器打开；需要最新资料时，优先用 browser.search_web 或 browser.open_url 打开搜索结果，再基于页面证据回答。',
-    '如果证据不足，明确说明还缺哪类页面信息，而不是直接写“无法实现”。'
-]);
-
 const BROWSER_MCP_TOOL_DEFINITIONS = Object.freeze([
     {
         name: 'browser.capture_page_snapshot',
@@ -417,23 +410,8 @@ function getBrowserMcpTool(app, options = {}) {
     return tool;
 }
 
-function formatBrowserPageSnapshotForPrompt(snapshot = {}, options = {}, logger = console) {
-    return new BrowserMcpTool({ logger }).formatPageSnapshotForPrompt(snapshot, options);
-}
-
-function getBrowserMcpCapabilitySummary() {
-    return BROWSER_MCP_CAPABILITY_SUMMARY;
-}
-
-function getBrowserMcpPromptHints() {
-    return [...BROWSER_MCP_PROMPT_HINTS];
-}
-
 module.exports = {
     BrowserMcpTool,
     BROWSER_MCP_TOOL_DEFINITIONS,
-    getBrowserMcpTool,
-    formatBrowserPageSnapshotForPrompt,
-    getBrowserMcpCapabilitySummary,
-    getBrowserMcpPromptHints
+    getBrowserMcpTool
 };

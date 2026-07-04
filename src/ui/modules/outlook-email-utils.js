@@ -1,4 +1,3 @@
-const OUTLOOK_ACCOUNTS_STORAGE_KEY = 'temp-email-outlook-accounts';
 const OUTLOOK_SELECTED_ACCOUNT_KEY = 'temp-email-outlook-selected-account-id';
 
 const OUTLOOK_EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
@@ -133,10 +132,7 @@ function mergeOutlookAccounts(existingAccounts = [], importedAccounts = []) {
 }
 
 module.exports = {
-    OUTLOOK_ACCOUNTS_STORAGE_KEY,
     OUTLOOK_SELECTED_ACCOUNT_KEY,
-    sanitizeOutlookAccount,
-    parseOutlookAccountLine,
     parseOutlookAccountsFromText,
     mergeOutlookAccounts
 };

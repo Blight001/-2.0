@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
+const { app, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs-extra');
 const os = require('os');
@@ -28,7 +28,6 @@ const RpcHandlerRegistry = require('./core/infra/rpc-handler-registry');
 const UiChannelManager = require('./core/infra/ui-channel-manager');
 const WebControlServer = require('./core/web/web-control-server');
 const {
-    normalizeBooleanValue,
     stripBrowserSettingsCompatFields,
     stripRuntimeConfigCompatFields,
     stripEmailConfigCompatFields

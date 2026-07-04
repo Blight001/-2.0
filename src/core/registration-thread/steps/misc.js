@@ -3,7 +3,7 @@ const {
     extractNativeElementSelectorCandidates
 } = require('../../selector-utils');
 
-const { extractVerificationCode, fetchHaikaSmsCodeFromUrl, pageUrlMatchesNeedle } = require('./shared');
+const { fetchHaikaSmsCodeFromUrl, pageUrlMatchesNeedle } = require('./shared');
 
 const sleep = async (thread, ms, context = '') => {
     if (thread && typeof thread._sleepInterruptibly === 'function') {

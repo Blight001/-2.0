@@ -1,14 +1,12 @@
 ﻿const {
     IPC_CHANNELS,
     mergeApiConfig,
-    setResultCard,
-    setStatusCard
+    setResultCard
 } = require('./renderer-temp-email-shared');
 const createRendererTempEmailOutlook = require('./renderer-temp-email-outlook');
 const createRendererTempEmailApi = require('./renderer-temp-email-api');
 const createRendererTempEmailPanel = require('./renderer-temp-email-panel');
 const {
-    OUTLOOK_ACCOUNTS_STORAGE_KEY,
     OUTLOOK_SELECTED_ACCOUNT_KEY,
     parseOutlookAccountsFromText,
     mergeOutlookAccounts

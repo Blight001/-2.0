@@ -6,7 +6,7 @@
         "headless": false,
         "block_images_videos": false,
         "captcha_compatibility_mode": true,
-        "remove_watermark_plugin": false,
+        "remove_watermark_plugin": true,
         "sync_execution": true,
         "max_proxy_recovery_attempts": 3,
         "registration_auto_upload": true,
