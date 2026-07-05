@@ -44,7 +44,7 @@ function normalizeRegistrationMode(value, fallback = 'standalone') {
     return fallback === 'embedded' ? 'embedded' : 'standalone';
 }
 
-function buildRegistrationRouteUrl(baseUrl, context = {}, routePath = '/') {
+function buildExecutionRouteUrl(baseUrl, context = {}, routePath = '/') {
     const url = new URL(baseUrl);
     url.pathname = routePath.startsWith('/') ? routePath : `/${routePath}`;
     url.search = '';
@@ -119,7 +119,7 @@ class WebControlServer {
             const runtimeContext = this._resolveRequestRuntimeContext(request);
 
             if (this._shouldBypassLogin()) {
-                response.redirect(302, buildRegistrationRouteUrl(this.getUrl(), runtimeContext, '/'));
+                response.redirect(302, buildExecutionRouteUrl(this.getUrl(), runtimeContext, '/'));
                 return;
             }
 
@@ -338,8 +338,8 @@ class WebControlServer {
                     : 'local-browser';
             })(),
             webUiUrl: this.getUrl(),
-            registrationHomeUrl: buildRegistrationRouteUrl(this.getUrl(), context, '/'),
-            registrationLoginUrl: buildRegistrationRouteUrl(this.getUrl(), context, '/login'),
+            executionHomeUrl: buildExecutionRouteUrl(this.getUrl(), context, '/'),
+            executionLoginUrl: buildExecutionRouteUrl(this.getUrl(), context, '/login'),
             source: String(context.source || '').trim() || 'standalone'
         };
         const json = escapeInlineJson(runtime);
@@ -351,8 +351,8 @@ class WebControlServer {
   window.__REGISTRATION_EMBEDDED__ = runtime.embedded === true;
   window.__REGISTRATION_HOST_APP__ = runtime.hostApp || '';
   window.__REGISTRATION_BROWSER_SOURCE__ = runtime.browserSource || 'local-browser';
-  window.__REGISTRATION_HOME_URL__ = runtime.registrationHomeUrl || runtime.webUiUrl || '/';
-  window.__REGISTRATION_LOGIN_URL__ = runtime.registrationLoginUrl || '/login';
+  window.__REGISTRATION_HOME_URL__ = runtime.executionHomeUrl || runtime.webUiUrl || '/';
+  window.__REGISTRATION_LOGIN_URL__ = runtime.executionLoginUrl || '/login';
   try {
     document.documentElement.dataset.registrationMode = runtime.registrationMode || 'standalone';
     document.documentElement.dataset.registrationEmbedded = runtime.embedded ? 'true' : 'false';
@@ -1160,3 +1160,4 @@ class WebControlServer {
 }
 
 module.exports = WebControlServer;
+

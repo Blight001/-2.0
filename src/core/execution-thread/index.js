@@ -1,4 +1,4 @@
-﻿const EventEmitter = require('events');
+const EventEmitter = require('events');
 const randomHelpers = require('./random');
 const runnerHelpers = require('./runner');
 const stepHelpers = require('./steps');
@@ -128,7 +128,7 @@ class RegistrationThread extends EventEmitter {
     _cleanupBrowserLifecycle() { return stepHelpers._cleanupBrowserLifecycle.call(this); }
     async start() { return runnerHelpers.start.call(this); }
     async _run() { return runnerHelpers._run.call(this); }
-    async _executeRegistrationSteps() { return runnerHelpers._executeRegistrationSteps.call(this); }
+    async _executeExecutionSteps() { return runnerHelpers._executeExecutionSteps.call(this); }
 
     async _executeStep(browser, step, browserId = null, nextStep = null) { return stepHelpers._executeStep.call(this, browser, step, browserId, nextStep); }
     async _executeLoopClickStep(browser, step) { return stepHelpers._executeLoopClickStep.call(this, browser, step); }
@@ -378,3 +378,4 @@ class RegistrationThread extends EventEmitter {
 }
 
 module.exports = RegistrationThread;
+

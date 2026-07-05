@@ -148,7 +148,7 @@ module.exports = function registerAppHandlers({ app, ipcMain }) {
 
     ipcMain.handle('get-registration-ui-state', async (_event, options = {}) => {
         try {
-            if (typeof app.getRegistrationUiState !== 'function') {
+            if (typeof app.getExecutionUiState !== 'function') {
                 return {
                     success: true,
                     enabled: false,
@@ -167,7 +167,7 @@ module.exports = function registerAppHandlers({ app, ipcMain }) {
                 };
             }
 
-            const state = await app.getRegistrationUiState(options);
+            const state = await app.getExecutionUiState(options);
             return {
                 success: true,
                 ...state
@@ -306,3 +306,4 @@ module.exports = function registerAppHandlers({ app, ipcMain }) {
         }
     });
 };
+

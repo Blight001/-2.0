@@ -226,7 +226,7 @@ module.exports = function createRendererExecution(deps) {
             headless: elements.headlessMode ? elements.headlessMode.checked === true : true,
             block_images_videos: elements.browserBlockImagesVideos ? elements.browserBlockImagesVideos.checked === true : false,
             sync_execution: elements.syncExecution ? elements.syncExecution.checked === true : true,
-            max_proxy_recovery_attempts: getRegistrationRecoveryAttempts(),
+            max_proxy_recovery_attempts: getExecutionRecoveryAttempts(),
             registration_auto_upload: elements.registrationAutoUpload ? elements.registrationAutoUpload.checked === true : true,
             save_local_cookie: elements.registrationSaveLocalCookie ? elements.registrationSaveLocalCookie.checked === true : false,
             concurrent_count: elements.concurrentCount ? Math.max(1, Math.min(10, parseInt(elements.concurrentCount.value, 10) || 1)) : 1,
@@ -240,7 +240,7 @@ module.exports = function createRendererExecution(deps) {
         return browserSettings;
     }
 
-    function buildRegistrationStartConfig(savedConfig = {}) {
+    function buildExecutionStartConfig(savedConfig = {}) {
         const savedBrowserSettings = getSavedBrowserSettings(savedConfig);
         const savedSaveLocalCookie = getConfigValue(
             savedBrowserSettings,
@@ -383,7 +383,7 @@ module.exports = function createRendererExecution(deps) {
             return normalizedMode;
         }
 
-        function getRegistrationRecoveryAttempts() {
+        function getExecutionRecoveryAttempts() {
             const rawValue = elements.proxyRecoveryAttempts ? elements.proxyRecoveryAttempts.value : '';
             const parsed = parseInt(rawValue, 10);
             if (Number.isFinite(parsed)) {
@@ -635,7 +635,7 @@ module.exports = function createRendererExecution(deps) {
         async function saveRegistrationControls() {
             applyLimitedLicenseBrowserConstraints();
             if (elements.proxyRecoveryAttempts) {
-                const normalizedRecoveryAttempts = getRegistrationRecoveryAttempts();
+                const normalizedRecoveryAttempts = getExecutionRecoveryAttempts();
                 elements.proxyRecoveryAttempts.value = String(normalizedRecoveryAttempts);
                 localStorage.setItem('registration-max-proxy-recovery-attempts', String(normalizedRecoveryAttempts));
             }
@@ -716,7 +716,7 @@ module.exports = function createRendererExecution(deps) {
                 registration_timed_delay_seconds: getTimedRegistrationDelaySeconds(),
                 concurrent_count: elements.concurrentCount ? Math.max(1, Math.min(10, parseInt(elements.concurrentCount.value, 10) || 1)) : 1,
                 sync_execution: elements.syncExecution ? elements.syncExecution.checked === true : true,
-                max_proxy_recovery_attempts: getRegistrationRecoveryAttempts(),
+                max_proxy_recovery_attempts: getExecutionRecoveryAttempts(),
                 registration_auto_upload: elements.registrationAutoUpload ? elements.registrationAutoUpload.checked === true : true,
                 registration_save_local_cookie: elements.registrationSaveLocalCookie ? elements.registrationSaveLocalCookie.checked === true : false,
                 save_local_cookie: elements.registrationSaveLocalCookie ? elements.registrationSaveLocalCookie.checked === true : false,
@@ -764,7 +764,7 @@ module.exports = function createRendererExecution(deps) {
                 registration_timed_delay_seconds: getTimedRegistrationDelaySeconds(),
                 concurrent_count: elements.concurrentCount ? Math.max(1, Math.min(10, parseInt(elements.concurrentCount.value, 10) || 1)) : 1,
                 sync_execution: elements.syncExecution ? elements.syncExecution.checked === true : true,
-                max_proxy_recovery_attempts: getRegistrationRecoveryAttempts(),
+                max_proxy_recovery_attempts: getExecutionRecoveryAttempts(),
                 registration_auto_upload: elements.registrationAutoUpload ? elements.registrationAutoUpload.checked === true : true,
                 registration_save_local_cookie: elements.registrationSaveLocalCookie ? elements.registrationSaveLocalCookie.checked === true : false,
                 save_local_cookie: elements.registrationSaveLocalCookie ? elements.registrationSaveLocalCookie.checked === true : false
@@ -864,7 +864,7 @@ module.exports = function createRendererExecution(deps) {
             };
         }
 
-        async function getRegistrationUploadDeviceId() {
+        async function getExecutionUploadDeviceId() {
             if (state.cachedUploadDeviceId) {
                 return state.cachedUploadDeviceId;
             }
@@ -879,7 +879,7 @@ module.exports = function createRendererExecution(deps) {
             }
         }
 
-        async function getRegistrationUploadConfig(cardName = '') {
+        async function getExecutionUploadConfig(cardName = '') {
             const resolvedCardName = (cardName || cardManager.getCurrentCard() || '').trim();
             if (!resolvedCardName) {
                 logger.warning('自动上传已跳过：未选择自动化卡片');
@@ -1008,14 +1008,14 @@ module.exports = function createRendererExecution(deps) {
             }
 
             const uploadConfig = getInlineRegistrationUploadConfig(result)
-                || await getRegistrationUploadConfig(result.cardName || '');
+                || await getExecutionUploadConfig(result.cardName || '');
             if (!uploadConfig) {
                 updateRegistrationUploadStatus('未找到可用的上传配置，已跳过上传', 'warning');
                 return false;
             }
             const { serverUrl, cardKey, cardName, targetScoreScope, targetScoreTypes } = uploadConfig;
 
-            const deviceId = await getRegistrationUploadDeviceId();
+            const deviceId = await getExecutionUploadDeviceId();
             if (!deviceId) {
                 updateRegistrationUploadStatus('获取设备ID失败，已跳过上传', 'error');
                 logger.warning('自动上传已跳过：获取设备ID失败');
@@ -1102,7 +1102,7 @@ module.exports = function createRendererExecution(deps) {
             }
 
             const latestConfig = await readSavedRegistrationConfig();
-            const runtimeConfig = buildRegistrationStartConfig(latestConfig);
+            const runtimeConfig = buildExecutionStartConfig(latestConfig);
             const timedRegistrationCount = runtimeConfig.timedRegistrationCount;
             const timedRegistrationCycleCount = runtimeConfig.timedRegistrationCycleCount;
             const timedRegistrationDelaySeconds = Math.max(0, Math.floor(runtimeConfig.timedRegistrationDelayMs / 1000));
@@ -1244,7 +1244,7 @@ module.exports = function createRendererExecution(deps) {
             DEFAULT_MIN_COOKIE_SIZE_BYTES,
             getSelectedRunMode,
             setRunMode,
-            getRegistrationRecoveryAttempts,
+            getExecutionRecoveryAttempts,
             getTimedRegistrationCount,
             getTimedRegistrationCycleCount,
             getTimedRegistrationStartMode,
@@ -1260,8 +1260,8 @@ module.exports = function createRendererExecution(deps) {
             resolveCookieUploadMinSizeBytes,
             calculateCookieUploadPayloadBytes,
             validateCookieUploadSize,
-            getRegistrationUploadDeviceId,
-            getRegistrationUploadConfig,
+            getExecutionUploadDeviceId,
+            getExecutionUploadConfig,
             uploadRegisteredCookie,
             startRegistration,
             stopRegistration,
@@ -1269,3 +1269,4 @@ module.exports = function createRendererExecution(deps) {
             updateCustomTestAccountButtons
         };
 };
+

@@ -170,7 +170,7 @@ module.exports = {
         }
 
         try {
-            await this.startRegistrationTcpConnectionMonitor({ immediate: true });
+            await this.startExecutionTcpConnectionMonitor({ immediate: true });
         } catch (tcpError) {
             this.logger.warning(`启动TCP连接监控失败: ${tcpError.message}`);
         }
@@ -481,7 +481,7 @@ module.exports = {
         return paths;
     },
 
-    async readRegistrationRuntimeConfigFromDisk() {
+    async readExecutionRuntimeConfigFromDisk() {
         try {
             const paths = await this.ensureRuntimeConfigPathReady();
             const preferredPath = paths.installed || paths.dev;
@@ -900,7 +900,7 @@ module.exports = {
             await this.logDeviceIdOnStartup?.();
 
             try {
-                await this.startRegistrationTcpConnectionMonitor({ immediate: true });
+                await this.startExecutionTcpConnectionMonitor({ immediate: true });
             } catch (tcpError) {
                 this.logger.warning(`启动TCP连接监控失败: ${tcpError.message}`);
             }
@@ -1310,3 +1310,4 @@ module.exports = {
     },
 
 };
+

@@ -35,12 +35,12 @@ const {
 const { resolveWebControlConfig } = require('./core/web/web-control-config');
 const {
     getAutomationTcpRuntimeInfo,
-    refreshRegistrationTcpConnection,
-    startRegistrationTcpConnectionMonitor,
-    stopRegistrationTcpConnectionMonitor,
-    notifyRegistrationTcpSuccess,
-    applyRegistrationTcpUserConfig,
-    normalizeRegistrationTcpEndpoint: normalizeRegistrationTcpEndpointValue
+    refreshExecutionTcpConnection,
+    startExecutionTcpConnectionMonitor,
+    stopExecutionTcpConnectionMonitor,
+    notifyExecutionTcpSuccess,
+    applyExecutionTcpUserConfig,
+    normalizeExecutionTcpEndpoint: normalizeExecutionTcpEndpointValue
 } = require('./core/execution/tcp-control');
 const { buildAutomationUiState } = require('./core/execution/execution-ui-state');
 const mainRuntime = require('./core/runtime/main-runtime');
@@ -450,10 +450,10 @@ class AutomationApp {
             registration_runtime_config: runtimeConfig,
             registrationRuntimeBrowserSettings: runtimeBrowserSettings,
             registration_runtime_browser_settings: runtimeBrowserSettings,
-            ...(await getRegistrationTcpRuntimeInfo(this))
+            ...(await getExecutionTcpRuntimeInfo(this))
         };
     }
-    getRegistrationTcpEndpoint() {
+    getExecutionTcpEndpoint() {
         const sourceConfig = this.automationTcpConfigSource && typeof this.automationTcpConfigSource === 'object'
             ? this.automationTcpConfigSource
             : null;
@@ -463,13 +463,13 @@ class AutomationApp {
         }
 
         return this.automationTcpEndpoint
-            || normalizeRegistrationTcpEndpointValue(sourceConfig || {});
+            || normalizeExecutionTcpEndpointValue(sourceConfig || {});
     }
-    hasRegistrationTcpConfig(config = {}) {
-        return hasRegistrationTcpConfig(config);
+    hasExecutionTcpConfig(config = {}) {
+        return hasExecutionTcpConfig(config);
     }
     async applyUserConfig(config = {}, options = {}) {
-        return await applyRegistrationTcpUserConfig(this, config, options);
+        return await applyExecutionTcpUserConfig(this, config, options);
     }
     async saveBrowserSettingsToConfig(browserSettings = {}, options = {}) {
         try {
@@ -536,17 +536,17 @@ class AutomationApp {
             return { success: false, error: error.message };
         }
     }
-    normalizeRegistrationTcpEndpoint(input = {}) {
-        return normalizeRegistrationTcpEndpointValue(input);
+    normalizeExecutionTcpEndpoint(input = {}) {
+        return normalizeExecutionTcpEndpointValue(input);
     }
-    async refreshRegistrationTcpConnection(options = {}) {
-        return await refreshRegistrationTcpConnection(this, options);
+    async refreshExecutionTcpConnection(options = {}) {
+        return await refreshExecutionTcpConnection(this, options);
     }
-    async startRegistrationTcpConnectionMonitor(options = {}) {
-        return await startRegistrationTcpConnectionMonitor(this, options);
+    async startExecutionTcpConnectionMonitor(options = {}) {
+        return await startExecutionTcpConnectionMonitor(this, options);
     }
-    stopRegistrationTcpConnectionMonitor() {
-        return stopRegistrationTcpConnectionMonitor(this);
+    stopExecutionTcpConnectionMonitor() {
+        return stopExecutionTcpConnectionMonitor(this);
     }
     async persistRegistrationTcpEndpoint() {
         return false;
@@ -554,7 +554,7 @@ class AutomationApp {
     applyConnectionConfig(config = {}, options = {}) {
         return {
             validateServerConfig: { ...(this.licenseManager?.validateServerConfig || {}) },
-            registrationTcpEndpoint: this.getRegistrationTcpEndpoint()
+            registrationTcpEndpoint: this.getExecutionTcpEndpoint()
         };
     }
     async loadAndApplyUserConfig() {
@@ -573,7 +573,7 @@ class AutomationApp {
             restartTcpBridge: false
         });
         try {
-            const tcpConfig = await this.readRegistrationTcpConfigFromDisk();
+            const tcpConfig = await this.readExecutionTcpConfigFromDisk();
             if (tcpConfig && Object.keys(tcpConfig).length > 0) {
                 await this.applyUserConfig(tcpConfig, {
                     source: 'startup-tcp-config',
@@ -609,14 +609,14 @@ class AutomationApp {
         this.startupUserConfigApplied = true;
         this.logger.info(`已从配置加载邮箱服务器: ${this.emailClient.serverHost}:${this.emailClient.serverPort}`);
         this.logger.info(`已从配置加载邮箱后缀: ${this.emailAddressSuffix}`);
-        const registrationTcpEndpoint = this.getRegistrationTcpEndpoint?.();
+        const registrationTcpEndpoint = this.getExecutionTcpEndpoint?.();
         if (registrationTcpEndpoint?.url) {
             this.logger.info(`已从配置加载TCP服务地址: ${registrationTcpEndpoint.url}`);
         }
         return config;
     }
 
-    getRegistrationTcpConfigPath() {
+    getExecutionTcpConfigPath() {
         const isDev = !(app && typeof app.isPackaged === 'boolean' ? app.isPackaged : false);
         const resourceTcpConfigPath = path.join('resource', 'tcp_config.json');
         const legacyTcpConfigPath = path.join('resource', 'config.json');
@@ -640,7 +640,7 @@ class AutomationApp {
         };
     }
     async ensureRegistrationTcpConfigPathReady() {
-        const paths = this.getRegistrationTcpConfigPath();
+        const paths = this.getExecutionTcpConfigPath();
         const targetPath = paths.dev || paths.installed;
         const legacyPath = paths.legacyDev || paths.legacyInstalled;
         const bundledPath = paths.bundled;
@@ -661,7 +661,7 @@ class AutomationApp {
             }
         }
 
-        const targetHasTcpConfig = hasRegistrationTcpConfig(targetConfig);
+        const targetHasTcpConfig = hasExecutionTcpConfig(targetConfig);
         if (!targetHasTcpConfig && legacyPath && await fs.pathExists(legacyPath)) {
             try {
                 const legacyConfig = await fs.readJson(legacyPath);
@@ -695,7 +695,7 @@ class AutomationApp {
 
         return paths;
     }
-    async readRegistrationTcpConfigFromDisk() {
+    async readExecutionTcpConfigFromDisk() {
         try {
             const paths = await this.ensureRegistrationTcpConfigPathReady();
             const targetPath = paths.installed || paths.dev;
@@ -710,7 +710,7 @@ class AutomationApp {
                 }
             }
 
-            if (!hasRegistrationTcpConfig(config) && legacyPath && await fs.pathExists(legacyPath)) {
+            if (!hasExecutionTcpConfig(config) && legacyPath && await fs.pathExists(legacyPath)) {
                 try {
                     const legacyConfig = await fs.readJson(legacyPath);
                     const snapshot = buildTcpConfigSnapshot(legacyConfig);
@@ -726,7 +726,7 @@ class AutomationApp {
                 } catch (_) {}
             }
 
-            const normalized = hasRegistrationTcpConfig(config) ? buildTcpConfigSnapshot(config) : {};
+            const normalized = hasExecutionTcpConfig(config) ? buildTcpConfigSnapshot(config) : {};
             this.automationTcpConfigSource = Object.keys(normalized).length > 0 ? { ...normalized } : null;
             return normalized;
         } catch (error) {
@@ -864,7 +864,7 @@ class AutomationApp {
 
     async startRegistrationTcpBridge() {
         try {
-            await this.startRegistrationTcpConnectionMonitor({ immediate: true });
+            await this.startExecutionTcpConnectionMonitor({ immediate: true });
             return { success: true };
         } catch (error) {
             return { success: false, error: error.message };
@@ -876,12 +876,12 @@ class AutomationApp {
     }
 
     async stopRegistrationTcpBridge() {
-        this.stopRegistrationTcpConnectionMonitor();
+        this.stopExecutionTcpConnectionMonitor();
         return { success: true };
     }
 
-    async notifyRegistrationTcpSuccess(payload = {}) {
-        return await notifyRegistrationTcpSuccess(this, payload);
+    async notifyExecutionTcpSuccess(payload = {}) {
+        return await notifyExecutionTcpSuccess(this, payload);
     }
 
     async automationControlSnapshot() {
@@ -892,7 +892,7 @@ class AutomationApp {
         return { ok: false, error: '控制桥接已移除' };
     }
 
-    async getRegistrationUiState(options = {}) {
+    async getExecutionUiState(options = {}) {
         return await buildAutomationUiState(this, options);
     }
 
@@ -931,10 +931,10 @@ class AutomationApp {
     async loadCards() { return mainRuntime.loadCards.call(this); }
     async startRegistration(config) { return mainRuntime.startRegistration.call(this, config); }
     async startSingleRegistrationTask(...args) { return mainRuntime.startSingleRegistrationTask.call(this, ...args); }
-    _getRegistrationModeLabel(...args) { return mainRuntime._getRegistrationModeLabel.call(this, ...args); }
+    _getExecutionModeLabel(...args) { return mainRuntime._getExecutionModeLabel.call(this, ...args); }
     _clearTimedRegistrationTimers(...args) { return mainRuntime._clearTimedRegistrationTimers.call(this, ...args); }
     _isTimedRegistrationSessionActive(...args) { return mainRuntime._isTimedRegistrationSessionActive.call(this, ...args); }
-    _emitRegistrationCycleStatus(...args) { return mainRuntime._emitRegistrationCycleStatus.call(this, ...args); }
+    _emitExecutionCycleStatus(...args) { return mainRuntime._emitExecutionCycleStatus.call(this, ...args); }
     _createTimedRegistrationState(...args) { return mainRuntime._createTimedRegistrationState.call(this, ...args); }
     _finalizeTimedRegistrationSession(...args) { return mainRuntime._finalizeTimedRegistrationSession.call(this, ...args); }
     _launchTimedRegistrationTask(...args) { return mainRuntime._launchTimedRegistrationTask.call(this, ...args); }
@@ -967,3 +967,5 @@ class AutomationApp {
 
 // 创建应用程序实例
 const appInstance = new AutomationApp();
+
+

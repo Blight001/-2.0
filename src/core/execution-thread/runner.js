@@ -221,7 +221,7 @@ module.exports = {
                 await tempEmailWarmupPromise;
             }
 
-            const result = await this._executeRegistrationSteps();
+            const result = await this._executeExecutionSteps();
             if (this.cookiesSavedByCaptureStep === true) {
                 result.cookiesSaved = true;
             }
@@ -265,7 +265,7 @@ module.exports = {
         }
     },
 
-    async _executeRegistrationSteps() {
+    async _executeExecutionSteps() {
         const result = {
             success: false,
             email: '',
@@ -717,3 +717,4 @@ module.exports = {
         return result;
     }
 };
+

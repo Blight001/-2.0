@@ -12,8 +12,8 @@ module.exports = function registerExecutionHandlers({ app, ipcMain }) {
 
         let latestRuntimeConfig = {};
         try {
-            latestRuntimeConfig = typeof app.readRegistrationRuntimeConfigFromDisk === 'function'
-                ? await app.readRegistrationRuntimeConfigFromDisk()
+            latestRuntimeConfig = typeof app.readExecutionRuntimeConfigFromDisk === 'function'
+                ? await app.readExecutionRuntimeConfigFromDisk()
                 : {};
         } catch (error) {
             app.logger.warning(`读取注册运行配置失败，继续使用当前参数: ${error.message}`);
@@ -124,3 +124,4 @@ module.exports = function registerExecutionHandlers({ app, ipcMain }) {
         }
     });
 };
+

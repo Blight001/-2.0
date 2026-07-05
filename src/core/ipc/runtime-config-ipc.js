@@ -43,8 +43,8 @@ module.exports = function registerRuntimeConfigHandlers({ app, ipcMain }) {
             const cookieConfig = typeof app.readCookieUserConfigFromDisk === 'function'
                 ? await app.readCookieUserConfigFromDisk()
                 : {};
-            const runtimeConfig = typeof app.readRegistrationRuntimeConfigFromDisk === 'function'
-                ? await app.readRegistrationRuntimeConfigFromDisk()
+            const runtimeConfig = typeof app.readExecutionRuntimeConfigFromDisk === 'function'
+                ? await app.readExecutionRuntimeConfigFromDisk()
                 : {};
 
             return {
@@ -106,3 +106,4 @@ module.exports = function registerRuntimeConfigHandlers({ app, ipcMain }) {
         }
     });
 };
+

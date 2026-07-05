@@ -16,8 +16,8 @@ module.exports = function createRendererCookie(deps) {
         updateTaskProgress,
         finishTaskProgress,
         updateTaskCount,
-        getRegistrationUploadDeviceId,
-        getRegistrationUploadConfig,
+        getExecutionUploadDeviceId,
+        getExecutionUploadConfig,
         validateCookieUploadSize,
         DEFAULT_MIN_COOKIE_SIZE_BYTES,
         startHaikaBinding,
@@ -90,13 +90,13 @@ module.exports = function createRendererCookie(deps) {
                 }
 
                 if (action === 'upload') {
-                    const deviceId = await getRegistrationUploadDeviceId();
+                    const deviceId = await getExecutionUploadDeviceId();
                     if (!deviceId) {
                         utils.showMessage('获取设备ID失败，无法上传', 'warning', elements);
                         return false;
                     }
 
-                    const uploadConfig = await getRegistrationUploadConfig(cookie.card_name || '');
+                    const uploadConfig = await getExecutionUploadConfig(cookie.card_name || '');
                     if (!uploadConfig) {
                         utils.showMessage('当前账号未配置上传信息', 'warning', elements);
                         return false;
@@ -575,7 +575,7 @@ module.exports = function createRendererCookie(deps) {
             };
 
             const configCache = new Map();
-            const deviceId = await getRegistrationUploadDeviceId();
+            const deviceId = await getExecutionUploadDeviceId();
             if (!deviceId) {
                 updateTaskProgress(taskId, 0, '获取设备ID失败，批量上传终止');
                 logger.warning('批量上传已终止：获取设备ID失败');
@@ -600,7 +600,7 @@ module.exports = function createRendererCookie(deps) {
                     try {
                         let uploadConfig = configCache.get(cardName);
                         if (uploadConfig === undefined) {
-                            uploadConfig = await getRegistrationUploadConfig(cardName);
+                            uploadConfig = await getExecutionUploadConfig(cardName);
                             configCache.set(cardName, uploadConfig || null);
                         }
 
@@ -689,3 +689,4 @@ module.exports = function createRendererCookie(deps) {
             runSelectedCookieBatchUpload
         };
 };
+

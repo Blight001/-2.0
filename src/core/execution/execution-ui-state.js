@@ -1,4 +1,4 @@
-const { getRegistrationTcpRuntimeInfo } = require('./tcp-control');
+const { getExecutionTcpRuntimeInfo } = require('./tcp-control');
 
 const ALLOWED_AUTOMATION_CARD_NAMES = new Set([
     '国际版即梦自动化卡片'
@@ -83,12 +83,12 @@ async function buildAutomationUiState(app, options = {}) {
     const currentCardName = cardMode === 'automation' && !unlimitedCardAccess && !isAllowedAutomationCardName(getCurrentCardNameForMode(app, cardMode))
         ? String(cards[0]?.name || '').trim()
         : getCurrentCardNameForMode(app, cardMode);
-    const tcpInfo = await getRegistrationTcpRuntimeInfo(app);
+    const tcpInfo = await getExecutionTcpRuntimeInfo(app);
     const browserSettings = app?.browserSettings && typeof app.browserSettings === 'object'
         ? { ...app.browserSettings }
         : {};
-    const runtimeConfig = typeof app?.readRegistrationRuntimeConfigFromDisk === 'function'
-        ? await app.readRegistrationRuntimeConfigFromDisk()
+    const runtimeConfig = typeof app?.readExecutionRuntimeConfigFromDisk === 'function'
+        ? await app.readExecutionRuntimeConfigFromDisk()
         : {};
     const runtimeBrowserSettings = runtimeConfig && typeof runtimeConfig === 'object'
         ? (runtimeConfig.browserSettings && typeof runtimeConfig.browserSettings === 'object'
@@ -155,3 +155,4 @@ module.exports = {
     loadAutomationCardsForMode,
     buildAutomationUiState
 };
+

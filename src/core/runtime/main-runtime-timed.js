@@ -207,7 +207,7 @@ module.exports = {
             return null;
         }
 
-        this._emitRegistrationCycleStatus(payload.message, payload);
+        this._emitExecutionCycleStatus(payload.message, payload);
         return payload;
     },
 
@@ -289,7 +289,7 @@ module.exports = {
             }
 
             this.logger.info(payload.message);
-            this._emitRegistrationCycleStatus(payload.message, payload);
+            this._emitExecutionCycleStatus(payload.message, payload);
         }, 1000);
     },
 
@@ -314,7 +314,7 @@ module.exports = {
         return !!(state && state.active && !state.stopRequested);
     },
 
-    _emitRegistrationCycleStatus(text, extra = {}) {
+    _emitExecutionCycleStatus(text, extra = {}) {
         if (this.mainWindow && text) {
             this.mainWindow.webContents.send('registration-cycle-status', {
                 text,
@@ -387,9 +387,9 @@ module.exports = {
         this.isTimedRunning = false;
 
         if (finalPayload) {
-            this._emitRegistrationCycleStatus(finalPayload.message, finalPayload);
+            this._emitExecutionCycleStatus(finalPayload.message, finalPayload);
         } else {
-            this._emitRegistrationCycleStatus(reason, {
+            this._emitExecutionCycleStatus(reason, {
                 mode: 'timed',
                 completed: true
             });
@@ -650,7 +650,7 @@ module.exports = {
 
         if (schedulePayload) {
             this.logger.info(schedulePayload.message);
-            this._emitRegistrationCycleStatus(schedulePayload.message, schedulePayload);
+            this._emitExecutionCycleStatus(schedulePayload.message, schedulePayload);
         }
 
         return this._scheduleTimedRegistrationCycleStart(state, nextCycleIndex, delayMs, {
@@ -717,3 +717,4 @@ module.exports = {
         return true;
     }
 };
+

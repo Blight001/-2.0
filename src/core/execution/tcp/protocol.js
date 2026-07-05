@@ -17,9 +17,9 @@ const MSG_TYPE_REGISTRATION_HEARTBEAT_REQ = 0x0207;
 const MSG_TYPE_REGISTRATION_HEARTBEAT_RESP = 0x0208;
 const MSG_TYPE_REGISTRATION_SUCCESS_REQ = 0x0209;
 const MSG_TYPE_REGISTRATION_SUCCESS_RESP = 0x020A;
-const REGISTRATION_CLIENT_ROLE = 'registration';
-const REGISTRATION_APP_NAME = packageJson?.productName || 'AI 自动化工具 2.0';
-const REGISTRATION_APP_VERSION = packageJson?.version || '';
+const AUTOMATION_CLIENT_ROLE = 'automation';
+const AUTOMATION_APP_NAME = packageJson?.productName || 'AI 自动化工具 2.0';
+const AUTOMATION_APP_VERSION = packageJson?.version || '';
 
 function packTcpMessage(msgId, msgType, payload = {}) {
     const body = Buffer.from(JSON.stringify(payload), 'utf8');
@@ -64,7 +64,7 @@ function clonePlainObject(value) {
     }
 }
 
-function buildRegistrationHardwareInfo(app) {
+function buildExecutionHardwareInfo(app) {
     const source = app?.hardwareInfo && typeof app.hardwareInfo === 'object' ? app.hardwareInfo : {};
     const cpuList = Array.isArray(os.cpus()) ? os.cpus() : [];
     const cpuModel = String(source.cpu_model || source.cpuModel || cpuList[0]?.model || os.arch() || '').trim();
@@ -97,7 +97,7 @@ function buildRegistrationHardwareInfo(app) {
     };
 }
 
-function getRegistrationTcpInstanceId(app) {
+function getExecutionTcpInstanceId(app) {
     if (!app) {
         return '';
     }
@@ -111,7 +111,7 @@ function getRegistrationTcpInstanceId(app) {
     return generated;
 }
 
-function buildRegistrationTcpSnapshot(app, extra = {}) {
+function buildExecutionTcpSnapshot(app, extra = {}) {
     const runningTaskCount = app?.runningTasks instanceof Map ? app.runningTasks.size : 0;
     const currentCardName = String(app?.currentCardName || app?.currentCard || '').trim();
     const currentTestCardName = String(app?.currentTestCardName || app?.currentTestCard || '').trim();
@@ -132,18 +132,18 @@ function buildRegistrationTcpSnapshot(app, extra = {}) {
         : runtimeBrowserSettings;
     const registrationDefaultExecutionPlan = clonePlainObject(app?.registrationDefaultExecutionPlan);
     const registrationRuntimeConfig = clonePlainObject(app?.registrationRuntimeConfig);
-    const hardwareInfo = buildRegistrationHardwareInfo(app);
+    const hardwareInfo = buildExecutionHardwareInfo(app);
     const timedState = app?.timedRegistrationState && typeof app.timedRegistrationState === 'object'
         ? app.timedRegistrationState
         : null;
     const hasRegistrationDefaultExecutionPlan = Object.keys(registrationDefaultExecutionPlan).length > 0;
 
     return {
-        instanceId: getRegistrationTcpInstanceId(app),
-        appName: REGISTRATION_APP_NAME,
-        appVersion: REGISTRATION_APP_VERSION,
-        clientName: REGISTRATION_APP_NAME,
-        clientRole: REGISTRATION_CLIENT_ROLE,
+        instanceId: getExecutionTcpInstanceId(app),
+        appName: AUTOMATION_APP_NAME,
+        appVersion: AUTOMATION_APP_VERSION,
+        clientName: AUTOMATION_APP_NAME,
+        clientRole: AUTOMATION_CLIENT_ROLE,
         startupMode: app?.startupMode || 'local',
         timestamp: new Date().toISOString(),
         isValidated: app?.isValidated === true,
@@ -221,17 +221,17 @@ function buildRegistrationTcpSnapshot(app, extra = {}) {
     };
 }
 
-function buildRegistrationTcpClientMetadata(app, snapshot) {
+function buildExecutionTcpClientMetadata(app, snapshot) {
     const resolvedSnapshot = snapshot && typeof snapshot === 'object'
         ? snapshot
-        : buildRegistrationTcpSnapshot(app);
+        : buildExecutionTcpSnapshot(app);
 
     return {
         instance_id: resolvedSnapshot.instanceId,
-        client_name: REGISTRATION_APP_NAME,
-        client_role: REGISTRATION_CLIENT_ROLE,
-        app_name: REGISTRATION_APP_NAME,
-        app_version: REGISTRATION_APP_VERSION,
+        client_name: AUTOMATION_APP_NAME,
+        client_role: AUTOMATION_CLIENT_ROLE,
+        app_name: AUTOMATION_APP_NAME,
+        app_version: AUTOMATION_APP_VERSION,
         host: os.hostname(),
         port: app?.webControlConfig?.enabled === true ? app.webControlConfig.port ?? null : null,
         web_ui: app?.webControlConfig?.enabled === true,
@@ -242,7 +242,7 @@ function buildRegistrationTcpClientMetadata(app, snapshot) {
     };
 }
 
-function normalizeRegistrationTcpEndpoint(input = {}) {
+function normalizeExecutionTcpEndpoint(input = {}) {
     const source = input && typeof input === 'object' ? input : {};
 
     const buildEndpoint = (host, port) => {
@@ -314,7 +314,7 @@ function normalizeRegistrationTcpEndpoint(input = {}) {
     return buildEndpoint(DEFAULT_TCP_HOST, DEFAULT_TCP_PORT);
 }
 
-function hasRegistrationTcpConfig(config = {}) {
+function hasExecutionTcpConfig(config = {}) {
     const source = config && typeof config === 'object' ? config : {};
     return [
         'tcp_server_url',
@@ -344,7 +344,7 @@ function hasRegistrationTcpConfig(config = {}) {
     ].some((key) => Object.prototype.hasOwnProperty.call(source, key));
 }
 
-function buildRegistrationTcpConnectionStatus({
+function buildExecutionTcpConnectionStatus({
     configured = false,
     connected = false,
     endpoint = null,
@@ -393,16 +393,17 @@ module.exports = {
     MSG_TYPE_REGISTRATION_HEARTBEAT_RESP,
     MSG_TYPE_REGISTRATION_SUCCESS_REQ,
     MSG_TYPE_REGISTRATION_SUCCESS_RESP,
-    REGISTRATION_CLIENT_ROLE,
-    REGISTRATION_APP_NAME,
-    REGISTRATION_APP_VERSION,
+    AUTOMATION_CLIENT_ROLE,
+    AUTOMATION_APP_NAME,
+    AUTOMATION_APP_VERSION,
     packTcpMessage,
     unpackTcpMessage,
     clonePlainObject,
-    getRegistrationTcpInstanceId,
-    buildRegistrationTcpSnapshot,
-    buildRegistrationTcpClientMetadata,
-    normalizeRegistrationTcpEndpoint,
-    hasRegistrationTcpConfig,
-    buildRegistrationTcpConnectionStatus
+    getExecutionTcpInstanceId,
+    buildExecutionTcpSnapshot,
+    buildExecutionTcpClientMetadata,
+    normalizeExecutionTcpEndpoint,
+    hasExecutionTcpConfig,
+    buildExecutionTcpConnectionStatus
 };
+

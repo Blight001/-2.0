@@ -19,7 +19,7 @@ module.exports = {
         }
     },
 
-    _getRegistrationModeLabel(runMode = this.runMode) {
+    _getExecutionModeLabel(runMode = this.runMode) {
         if (runMode === 2) {
             return '定时执行';
         }
@@ -37,7 +37,7 @@ module.exports = {
         return '定时执行批次';
     },
 
-    _resolveRegistrationStartConfig(config = {}) {
+    _resolveExecutionStartConfig(config = {}) {
         const input = config && typeof config === 'object' ? config : {};
         const runtimePlan = cloneRegistrationCardConfig(this.registrationDefaultExecutionPlan) || {};
         const planBrowserSettings = cloneRegistrationCardConfig(runtimePlan.browser_settings || runtimePlan.browserSettings) || {};
@@ -199,3 +199,4 @@ module.exports = {
         };
     }
 };
+

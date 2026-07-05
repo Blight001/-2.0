@@ -123,16 +123,16 @@ function getPublicServerConfig(config = null) {
 }
 
 async function readSavedConfig(app) {
-    const runtimeConfig = typeof app.readRegistrationRuntimeConfigFromDisk === 'function'
-        ? await app.readRegistrationRuntimeConfigFromDisk()
+    const runtimeConfig = typeof app.readExecutionRuntimeConfigFromDisk === 'function'
+        ? await app.readExecutionRuntimeConfigFromDisk()
         : {};
     return normalizeApiServerSettings(runtimeConfig.apiServerSettings || {});
 }
 
 async function saveConfig(app, settings = {}) {
     const normalized = normalizeApiServerSettings(settings);
-    const existing = typeof app.readRegistrationRuntimeConfigFromDisk === 'function'
-        ? await app.readRegistrationRuntimeConfigFromDisk()
+    const existing = typeof app.readExecutionRuntimeConfigFromDisk === 'function'
+        ? await app.readExecutionRuntimeConfigFromDisk()
         : {};
     const nextConfig = {
         ...(existing && typeof existing === 'object' ? existing : {}),
@@ -748,3 +748,4 @@ module.exports = function registerApiServerHandlers({ app, ipcMain }) {
         }
     });
 };
+

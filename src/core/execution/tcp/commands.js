@@ -1,8 +1,8 @@
 const {
     clonePlainObject,
-    buildRegistrationTcpSnapshot,
-    getRegistrationTcpInstanceId,
-    REGISTRATION_APP_NAME
+    buildExecutionTcpSnapshot,
+    getExecutionTcpInstanceId,
+    AUTOMATION_APP_NAME
 } = require('./protocol');
 
 function _normalizeCardType(cardType = 'automation') {
@@ -16,7 +16,7 @@ function _normalizeCardType(cardType = 'automation') {
     return 'automation';
 }
 
-function _resolveRegistrationCardSaver(app, cardType = 'automation') {
+function _resolveExecutionCardSaver(app, cardType = 'automation') {
     const normalizedType = _normalizeCardType(cardType);
     if (normalizedType === 'test') {
         return {
@@ -41,7 +41,7 @@ function _resolveRegistrationCardSaver(app, cardType = 'automation') {
     };
 }
 
-function _applyRegistrationCurrentCard(app, cardType = 'automation', cardName = '') {
+function _applyExecutionCurrentCard(app, cardType = 'automation', cardName = '') {
     const normalizedType = _normalizeCardType(cardType);
     const normalizedName = String(cardName || '').trim();
     if (!app) {
@@ -86,7 +86,7 @@ function _mergeBrowserSettings(app, input = {}) {
     return normalizedSettings;
 }
 
-async function _persistBrowserSettings(app, browserSettings = {}, source = 'tcp-command') {
+async function _persistExecutionBrowserSettings(app, browserSettings = {}, source = 'tcp-command') {
     if (!app || typeof app.saveBrowserSettingsToConfig !== 'function') {
         return { success: true };
     }
@@ -94,7 +94,7 @@ async function _persistBrowserSettings(app, browserSettings = {}, source = 'tcp-
     return await app.saveBrowserSettingsToConfig(browserSettings, { source });
 }
 
-function _applyRegistrationRuntimePatch(app, patch = {}) {
+function _applyExecutionRuntimePatch(app, patch = {}) {
     const input = patch && typeof patch === 'object' ? patch : {};
     const appliedFields = [];
 
@@ -158,7 +158,7 @@ function _applyRegistrationRuntimePatch(app, patch = {}) {
         const cardType = String(input.card_type || input.cardType || 'automation').trim();
         const cardName = String(input.card_name || input.cardName || '').trim();
         if (cardName) {
-            _applyRegistrationCurrentCard(app, cardType, cardName);
+            _applyExecutionCurrentCard(app, cardType, cardName);
             appliedFields.push('currentCard');
             appliedFields.push('currentCardName');
         }
@@ -167,7 +167,7 @@ function _applyRegistrationRuntimePatch(app, patch = {}) {
     if (Object.prototype.hasOwnProperty.call(input, 'currentCardName') || Object.prototype.hasOwnProperty.call(input, 'currentCard')) {
         const cardName = String(input.currentCardName || input.currentCard || '').trim();
         if (cardName) {
-            _applyRegistrationCurrentCard(app, 'automation', cardName);
+            _applyExecutionCurrentCard(app, 'automation', cardName);
             appliedFields.push('currentCard');
             appliedFields.push('currentCardName');
         }
@@ -176,7 +176,7 @@ function _applyRegistrationRuntimePatch(app, patch = {}) {
     if (Object.prototype.hasOwnProperty.call(input, 'currentTestCardName') || Object.prototype.hasOwnProperty.call(input, 'currentTestCard')) {
         const cardName = String(input.currentTestCardName || input.currentTestCard || '').trim();
         if (cardName) {
-            _applyRegistrationCurrentCard(app, 'test', cardName);
+            _applyExecutionCurrentCard(app, 'test', cardName);
             appliedFields.push('currentTestCard');
             appliedFields.push('currentTestCardName');
         }
@@ -185,7 +185,7 @@ function _applyRegistrationRuntimePatch(app, patch = {}) {
     if (Object.prototype.hasOwnProperty.call(input, 'currentHaikaBindCardName') || Object.prototype.hasOwnProperty.call(input, 'currentHaikaBindCard')) {
         const cardName = String(input.currentHaikaBindCardName || input.currentHaikaBindCard || '').trim();
         if (cardName) {
-            _applyRegistrationCurrentCard(app, 'haikaBind', cardName);
+            _applyExecutionCurrentCard(app, 'haikaBind', cardName);
             appliedFields.push('currentHaikaBindCard');
             appliedFields.push('currentHaikaBindCardName');
         }
@@ -252,7 +252,7 @@ function _applyRegistrationRuntimePatch(app, patch = {}) {
     };
 }
 
-function _resolveStartTaskPayload(app, commandArgs = {}) {
+function _resolveExecutionStartTaskPayload(app, commandArgs = {}) {
     const input = commandArgs && typeof commandArgs === 'object' ? commandArgs : {};
     const browserSettings = clonePlainObject(input.browser_settings || input.browserSettings || app?.browserSettings || {});
     const saveLocalCookie = (() => {
@@ -340,19 +340,19 @@ function _resolveStartTaskPayload(app, commandArgs = {}) {
     };
 }
 
-function _buildCommandResponse(app, payload = {}) {
+function _buildExecutionCommandResponse(app, payload = {}) {
     const basePayload = payload && typeof payload === 'object' ? payload : {};
     return {
-        instance_id: basePayload.instance_id || getRegistrationTcpInstanceId(app),
+        instance_id: basePayload.instance_id || getExecutionTcpInstanceId(app),
         ok: basePayload.ok === true,
         command: basePayload.command || '',
         message: basePayload.message || '',
-        snapshot: basePayload.snapshot || buildRegistrationTcpSnapshot(app, { reason: 'command-response' }),
+        snapshot: basePayload.snapshot || buildExecutionTcpSnapshot(app, { reason: 'command-response' }),
         ...basePayload
     };
 }
 
-function _emitRegistrationControlStateUpdated(app, controlState = {}) {
+function _emitExecutionControlStateUpdated(app, controlState = {}) {
     if (!app) {
         return;
     }
@@ -372,11 +372,11 @@ function _emitRegistrationControlStateUpdated(app, controlState = {}) {
     }
 }
 
-async function executeRegistrationTcpCommand(app, commandPayload = {}) {
+async function executeExecutionTcpCommand(app, commandPayload = {}) {
     const payload = commandPayload && typeof commandPayload === 'object' ? commandPayload : {};
     const command = String(payload.command || '').trim();
     const commandArgs = payload.payload && typeof payload.payload === 'object' ? payload.payload : {};
-    let snapshot = buildRegistrationTcpSnapshot(app, { reason: `command:${command}` });
+    let snapshot = buildExecutionTcpSnapshot(app, { reason: `command:${command}` });
 
     if (!command) {
         return {
@@ -399,8 +399,8 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
 
         if (command === 'get_snapshot' || command === 'get_registration_ui_state') {
             try {
-                const runtimeConfig = typeof app?.readRegistrationRuntimeConfigFromDisk === 'function'
-                    ? await app.readRegistrationRuntimeConfigFromDisk()
+                const runtimeConfig = typeof app?.readExecutionRuntimeConfigFromDisk === 'function'
+                    ? await app.readExecutionRuntimeConfigFromDisk()
                     : {};
                 const runtimeBrowserSettings = runtimeConfig && typeof runtimeConfig === 'object'
                     ? (runtimeConfig.browserSettings && typeof runtimeConfig.browserSettings === 'object'
@@ -413,15 +413,15 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
                 app.registrationRuntimeBrowserSettings = runtimeBrowserSettings && typeof runtimeBrowserSettings === 'object'
                     ? { ...runtimeBrowserSettings }
                     : {};
-                snapshot = buildRegistrationTcpSnapshot(app, { reason: `command:${command}` });
+                snapshot = buildExecutionTcpSnapshot(app, { reason: `command:${command}` });
             } catch (error) {
                 app?.logger?.warning?.(`刷新注册运行配置失败: ${error.message}`);
             }
             const runtimeInfo = typeof app?.getAppRuntimeInfo === 'function'
                 ? await app.getAppRuntimeInfo()
                 : null;
-            const uiState = typeof app?.getRegistrationUiState === 'function'
-                ? await app.getRegistrationUiState({
+            const uiState = typeof app?.getExecutionUiState === 'function'
+                ? await app.getExecutionUiState({
                     cardMode: commandArgs.card_mode || commandArgs.cardMode || commandArgs.card_type || commandArgs.cardType || 'automation',
                     log_limit: commandArgs.log_limit || commandArgs.logLimit
                 })
@@ -440,7 +440,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
 
         if (command === 'update_browser_settings') {
             const normalizedSettings = _mergeBrowserSettings(app, commandArgs.browser_settings || commandArgs.browserSettings || commandArgs.settings);
-            const persistResult = await _persistBrowserSettings(app, normalizedSettings, 'tcp-update-browser-settings');
+            const persistResult = await _persistExecutionBrowserSettings(app, normalizedSettings, 'tcp-update-browser-settings');
             if (persistResult?.success === false) {
                 return {
                     ok: false,
@@ -482,7 +482,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
             const patchInput = commandArgs.patch && typeof commandArgs.patch === 'object'
                 ? commandArgs.patch
                 : commandArgs;
-            const patchResult = _applyRegistrationRuntimePatch(app, patchInput);
+            const patchResult = _applyExecutionRuntimePatch(app, patchInput);
             return {
                 ok: true,
                 command,
@@ -507,7 +507,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
                 };
             }
 
-            const saver = _resolveRegistrationCardSaver(app, cardType);
+            const saver = _resolveExecutionCardSaver(app, cardType);
             if (!saver.save) {
                 return {
                     ok: false,
@@ -540,7 +540,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
                 };
             }
 
-            _applyRegistrationCurrentCard(app, cardType, cardName);
+            _applyExecutionCurrentCard(app, cardType, cardName);
             return {
                 ok: true,
                 command,
@@ -552,12 +552,12 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
         }
 
         if (command === 'start_registration') {
-            const startTask = _resolveStartTaskPayload(app, commandArgs.config && typeof commandArgs.config === 'object'
+            const startTask = _resolveExecutionStartTaskPayload(app, commandArgs.config && typeof commandArgs.config === 'object'
                 ? commandArgs.config
                 : commandArgs);
             if (startTask.browserSettings && Object.keys(startTask.browserSettings).length > 0) {
                 const mergedSettings = _mergeBrowserSettings(app, startTask.browserSettings);
-                await _persistBrowserSettings(app, mergedSettings, 'tcp-start-registration');
+                await _persistExecutionBrowserSettings(app, mergedSettings, 'tcp-start-registration');
                 if (app?.clashManager && typeof app.clashManager.applyDnsLeakProtection === 'function') {
                     try {
                         await app.clashManager.applyDnsLeakProtection(mergedSettings);
@@ -712,7 +712,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
                 source: 'tcp-command',
                 updated_at: new Date().toISOString()
             };
-            _emitRegistrationControlStateUpdated(app, controlState);
+            _emitExecutionControlStateUpdated(app, controlState);
             return {
                 ok: true,
                 command,
@@ -782,11 +782,12 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
 }
 
 module.exports = {
-    REGISTRATION_APP_NAME,
-    _resolveRegistrationCardSaver,
-    _applyRegistrationCurrentCard,
+    AUTOMATION_APP_NAME,
+    _resolveExecutionCardSaver,
+    _applyExecutionCurrentCard,
     _mergeBrowserSettings,
-    _resolveStartTaskPayload,
-    _buildCommandResponse,
-    executeRegistrationTcpCommand
+    _resolveExecutionStartTaskPayload,
+    _buildExecutionCommandResponse,
+    executeExecutionTcpCommand
 };
+

@@ -16,27 +16,27 @@ const {
     packTcpMessage,
     unpackTcpMessage,
     clonePlainObject,
-    getRegistrationTcpInstanceId,
-    buildRegistrationTcpSnapshot,
-    buildRegistrationTcpClientMetadata,
-    normalizeRegistrationTcpEndpoint,
-    hasRegistrationTcpConfig,
-    buildRegistrationTcpConnectionStatus
+    getExecutionTcpInstanceId,
+    buildExecutionTcpSnapshot,
+    buildExecutionTcpClientMetadata,
+    normalizeExecutionTcpEndpoint,
+    hasExecutionTcpConfig,
+    buildExecutionTcpConnectionStatus
 } = require('./protocol');
-const { _processRegistrationTcpIncomingPacket } = require('./bridge');
+const { _processExecutionTcpIncomingPacket } = require('./bridge');
 
 const DEFAULT_TCP_RECONNECT_INTERVAL_MS = 5000;
 const DEFAULT_REGISTRATION_HEARTBEAT_INTERVAL_MS = 15000;
 const DEFAULT_REGISTRATION_STATE_REPORT_INTERVAL_MS = 30000;
 const TCP_HEARTBEAT_RESPONSE_TIMEOUT_MS = 2000;
 
-function _getRegistrationTcpMonitorState(app) {
+function _getExecutionTcpMonitorState(app) {
     if (!app) {
         return null;
     }
 
-    if (!app.registrationTcpMonitorState) {
-        app.registrationTcpMonitorState = {
+    if (!app.executionTcpMonitorState) {
+        app.executionTcpMonitorState = {
             socket: null,
             buffer: Buffer.alloc(0),
             connectPromise: null,
@@ -49,14 +49,14 @@ function _getRegistrationTcpMonitorState(app) {
             lastHealthyAt: 0,
             pendingRequests: new Map(),
         };
-    } else if (!(app.registrationTcpMonitorState.pendingRequests instanceof Map)) {
-        app.registrationTcpMonitorState.pendingRequests = new Map();
+    } else if (!(app.executionTcpMonitorState.pendingRequests instanceof Map)) {
+        app.executionTcpMonitorState.pendingRequests = new Map();
     }
 
-    return app.registrationTcpMonitorState;
+    return app.executionTcpMonitorState;
 }
 
-function _isSameRegistrationTcpEndpoint(left, right) {
+function _isSameExecutionTcpEndpoint(left, right) {
     if (!left || !right || typeof left !== 'object' || typeof right !== 'object') {
         return false;
     }
@@ -72,7 +72,7 @@ function _isSameRegistrationTcpEndpoint(left, right) {
         && leftPort === rightPort;
 }
 
-function _syncRegistrationDefaultExecutionPlanFromResponse(app, response = {}) {
+function _syncExecutionDefaultExecutionPlanFromResponse(app, response = {}) {
     if (!app || !response || typeof response !== 'object') {
         return null;
     }
@@ -143,19 +143,19 @@ function _syncRegistrationDefaultExecutionPlanFromResponse(app, response = {}) {
     return clonedPlan;
 }
 
-function _clearRegistrationTcpTimer(timerRef) {
+function _clearExecutionTcpTimer(timerRef) {
     if (timerRef) {
         clearTimeout(timerRef);
     }
 }
 
-function _clearRegistrationTcpInterval(timerRef) {
+function _clearExecutionTcpInterval(timerRef) {
     if (timerRef) {
         clearInterval(timerRef);
     }
 }
 
-function _rejectRegistrationTcpPendingRequests(state, reason = '连接已关闭') {
+function _rejectExecutionTcpPendingRequests(state, reason = '连接已关闭') {
     if (!state || !(state.pendingRequests instanceof Map) || state.pendingRequests.size === 0) {
         return;
     }
@@ -175,7 +175,7 @@ function _rejectRegistrationTcpPendingRequests(state, reason = '连接已关闭'
     }
 }
 
-function _emitRegistrationTcpConnectionUpdated(app, connectionStatus) {
+function _emitExecutionTcpConnectionUpdated(app, connectionStatus) {
     if (!app?.mainWindow?.webContents || typeof app.mainWindow.webContents.send !== 'function') {
         return;
     }
@@ -200,7 +200,7 @@ function _updateRegistrationTcpConnectionStatus(app, endpoint, connected = false
             ? null
             : app?.registrationTcpEndpoint || null;
 
-    const connectionStatus = buildRegistrationTcpConnectionStatus({
+    const connectionStatus = buildExecutionTcpConnectionStatus({
         configured: app?.registrationTcpConfigured === true || !!resolvedEndpoint,
         connected: connected === true,
         endpoint: resolvedEndpoint,
@@ -217,12 +217,12 @@ function _updateRegistrationTcpConnectionStatus(app, endpoint, connected = false
         }
     }
 
-    _emitRegistrationTcpConnectionUpdated(app, connectionStatus);
+    _emitExecutionTcpConnectionUpdated(app, connectionStatus);
     return connectionStatus;
 }
 
 async function _sendRegistrationTcpRequest(app, socket, requestType, payload, expectedResponseType, options = {}) {
-    const state = _getRegistrationTcpMonitorState(app);
+    const state = _getExecutionTcpMonitorState(app);
     if (!state || !socket || socket.destroyed) {
         throw new Error('连接已关闭');
     }
@@ -272,9 +272,9 @@ async function _sendRegistrationTcpRequest(app, socket, requestType, payload, ex
 }
 
 async function _sendRegistrationTcpHello(app, socket, endpoint) {
-    const snapshot = buildRegistrationTcpSnapshot(app, { reason: 'hello' });
+    const snapshot = buildExecutionTcpSnapshot(app, { reason: 'hello' });
     const payload = {
-        ...buildRegistrationTcpClientMetadata(app, snapshot),
+        ...buildExecutionTcpClientMetadata(app, snapshot),
         host: endpoint?.host || '',
         port: endpoint?.port ?? null,
         snapshot
@@ -295,15 +295,15 @@ async function _sendRegistrationTcpHello(app, socket, endpoint) {
     if (response && response.instance_id) {
         app.registrationTcpInstanceId = String(response.instance_id).trim();
     }
-    await _syncRegistrationDefaultExecutionPlanFromResponse(app, response);
+    await _syncExecutionDefaultExecutionPlanFromResponse(app, response);
 
     return response;
 }
 
 async function _sendRegistrationTcpStateReport(app, socket, reason = 'periodic') {
-    const snapshot = buildRegistrationTcpSnapshot(app, { reason });
+    const snapshot = buildExecutionTcpSnapshot(app, { reason });
     const payload = {
-        ...buildRegistrationTcpClientMetadata(app, snapshot),
+        ...buildExecutionTcpClientMetadata(app, snapshot),
         reason,
         snapshot
     };
@@ -320,14 +320,14 @@ async function _sendRegistrationTcpStateReport(app, socket, reason = 'periodic')
         }
     );
 
-    await _syncRegistrationDefaultExecutionPlanFromResponse(app, response);
+    await _syncExecutionDefaultExecutionPlanFromResponse(app, response);
     return response;
 }
 
 async function _sendRegistrationTcpHeartbeatRequest(app, socket, reason = 'heartbeat') {
-    const snapshot = buildRegistrationTcpSnapshot(app, { reason });
+    const snapshot = buildExecutionTcpSnapshot(app, { reason });
     const payload = {
-        ...buildRegistrationTcpClientMetadata(app, snapshot),
+        ...buildExecutionTcpClientMetadata(app, snapshot),
         probe_id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
         reason,
         snapshot
@@ -345,24 +345,24 @@ async function _sendRegistrationTcpHeartbeatRequest(app, socket, reason = 'heart
         }
     );
 
-    const state = _getRegistrationTcpMonitorState(app);
+    const state = _getExecutionTcpMonitorState(app);
     if (state) {
         state.lastHealthyAt = Date.now();
     }
 
-    await _syncRegistrationDefaultExecutionPlanFromResponse(app, response);
+    await _syncExecutionDefaultExecutionPlanFromResponse(app, response);
     return response;
 }
 
-async function notifyRegistrationTcpSuccess(app, payload = {}) {
-    const state = _getRegistrationTcpMonitorState(app);
+async function notifyExecutionTcpSuccess(app, payload = {}) {
+    const state = _getExecutionTcpMonitorState(app);
     if (!state || !state.socket || state.socket.destroyed || state.helloAcked !== true) {
         return { ok: false, message: 'TCP连接未就绪' };
     }
 
-    const snapshot = buildRegistrationTcpSnapshot(app, { reason: 'registration-success' });
+    const snapshot = buildExecutionTcpSnapshot(app, { reason: 'registration-success' });
     const requestPayload = {
-        ...buildRegistrationTcpClientMetadata(app, snapshot),
+        ...buildExecutionTcpClientMetadata(app, snapshot),
         event: 'registration_success',
         task_id: String(payload?.task_id || payload?.taskId || '').trim(),
         email: String(payload?.email || '').trim(),
@@ -385,20 +385,20 @@ async function notifyRegistrationTcpSuccess(app, payload = {}) {
         }
     );
 
-    await _syncRegistrationDefaultExecutionPlanFromResponse(app, response);
+    await _syncExecutionDefaultExecutionPlanFromResponse(app, response);
     return response;
 }
 
 function _destroyRegistrationTcpMonitorSocket(app, reason = '') {
-    const state = _getRegistrationTcpMonitorState(app);
+    const state = _getExecutionTcpMonitorState(app);
     if (!state) {
         return;
     }
 
-    _clearRegistrationTcpTimer(state.responseTimer);
-    _clearRegistrationTcpInterval(state.heartbeatTimer);
-    _clearRegistrationTcpInterval(state.stateReportTimer);
-    _clearRegistrationTcpTimer(state.retryTimer);
+    _clearExecutionTcpTimer(state.responseTimer);
+    _clearExecutionTcpInterval(state.heartbeatTimer);
+    _clearExecutionTcpInterval(state.stateReportTimer);
+    _clearExecutionTcpTimer(state.retryTimer);
     state.responseTimer = null;
     state.heartbeatTimer = null;
     state.stateReportTimer = null;
@@ -406,7 +406,7 @@ function _destroyRegistrationTcpMonitorSocket(app, reason = '') {
     state.currentEndpoint = null;
     state.helloAcked = false;
     state.lastHealthyAt = 0;
-    _rejectRegistrationTcpPendingRequests(state, reason || '连接已关闭');
+    _rejectExecutionTcpPendingRequests(state, reason || '连接已关闭');
 
     const socket = state.socket;
     state.socket = null;
@@ -426,12 +426,12 @@ function _destroyRegistrationTcpMonitorSocket(app, reason = '') {
 }
 
 function _scheduleRegistrationTcpReconnect(app, endpoint, delayMs = DEFAULT_TCP_RECONNECT_INTERVAL_MS) {
-    const state = _getRegistrationTcpMonitorState(app);
+    const state = _getExecutionTcpMonitorState(app);
     if (!state || app?.registrationTcpReconnectEnabled === false || app?.registrationTcpConnectionMonitorActive !== true) {
         return;
     }
 
-    _clearRegistrationTcpTimer(state.retryTimer);
+    _clearExecutionTcpTimer(state.retryTimer);
     state.retryTimer = setTimeout(() => {
         state.retryTimer = null;
         _openRegistrationTcpMonitorConnection(app, endpoint).catch((error) => {
@@ -441,7 +441,7 @@ function _scheduleRegistrationTcpReconnect(app, endpoint, delayMs = DEFAULT_TCP_
 }
 
 function _sendRegistrationTcpHeartbeat(app) {
-    const state = _getRegistrationTcpMonitorState(app);
+    const state = _getExecutionTcpMonitorState(app);
     if (!state || !state.socket || state.socket.destroyed) {
         return false;
     }
@@ -455,13 +455,13 @@ function _sendRegistrationTcpHeartbeat(app) {
 }
 
 async function _openRegistrationTcpMonitorConnection(app, endpoint) {
-    const state = _getRegistrationTcpMonitorState(app);
+    const state = _getExecutionTcpMonitorState(app);
     if (!state) {
         return null;
     }
 
     let resolvedEndpoint = endpoint && typeof endpoint === 'object'
-        ? normalizeRegistrationTcpEndpoint(endpoint)
+        ? normalizeExecutionTcpEndpoint(endpoint)
         : null;
     if (!resolvedEndpoint) {
         resolvedEndpoint = await resolveRegistrationTcpEndpointFromConfig(app);
@@ -508,7 +508,7 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
 
             state.heartbeatTimer = setInterval(() => {
                 if (!state.socket || state.socket.destroyed || state.helloAcked !== true) {
-                    _clearRegistrationTcpInterval(state.heartbeatTimer);
+                    _clearExecutionTcpInterval(state.heartbeatTimer);
                     state.heartbeatTimer = null;
                     if (state.helloAcked === true) {
                         _scheduleRegistrationTcpReconnect(app, resolvedEndpoint);
@@ -527,7 +527,7 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
 
             state.stateReportTimer = setInterval(() => {
                 if (!state.socket || state.socket.destroyed || state.helloAcked !== true) {
-                    _clearRegistrationTcpInterval(state.stateReportTimer);
+                    _clearExecutionTcpInterval(state.stateReportTimer);
                     state.stateReportTimer = null;
                     if (state.helloAcked === true) {
                         _scheduleRegistrationTcpReconnect(app, resolvedEndpoint);
@@ -548,7 +548,7 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
                 try {
                     _updateRegistrationTcpConnectionStatus(app, resolvedEndpoint, false, '正在握手', 0);
                     const helloResponse = await _sendRegistrationTcpHello(app, socket, resolvedEndpoint);
-                    const instanceId = String(helloResponse?.instance_id || getRegistrationTcpInstanceId(app)).trim();
+                    const instanceId = String(helloResponse?.instance_id || getExecutionTcpInstanceId(app)).trim();
                     if (instanceId) {
                         app.registrationTcpInstanceId = instanceId;
                     }
@@ -588,7 +588,7 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
                 }
                 state.buffer = packet.remaining;
 
-                void _processRegistrationTcpIncomingPacket(app, socket, packet).catch((error) => {
+                void _processExecutionTcpIncomingPacket(app, socket, packet).catch((error) => {
                     app?.logger?.warning?.(`自动化工具TCP消息处理失败: ${error.message}`);
                 });
             }
@@ -617,8 +617,8 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
     return state.connectPromise;
 }
 
-async function probeRegistrationTcpEndpoint(endpoint, timeoutMs = 2000) {
-    const resolved = normalizeRegistrationTcpEndpoint(endpoint);
+async function probeExecutionTcpEndpoint(endpoint, timeoutMs = 2000) {
+    const resolved = normalizeExecutionTcpEndpoint(endpoint);
     return await new Promise((resolve) => {
         const socket = net.createConnection({
             host: resolved.host,
@@ -737,10 +737,10 @@ async function resolveRegistrationTcpEndpointFromConfig(app) {
         ? app.registrationTcpEndpoint
         : null;
 
-    if ((!sourceConfig || !hasRegistrationTcpConfig(sourceConfig)) && typeof app?.readRegistrationTcpConfigFromDisk === 'function') {
+    if ((!sourceConfig || !hasExecutionTcpConfig(sourceConfig)) && typeof app?.readExecutionTcpConfigFromDisk === 'function') {
         try {
-            const diskConfig = await app.readRegistrationTcpConfigFromDisk();
-            if (diskConfig && typeof diskConfig === 'object' && hasRegistrationTcpConfig(diskConfig)) {
+            const diskConfig = await app.readExecutionTcpConfigFromDisk();
+            if (diskConfig && typeof diskConfig === 'object' && hasExecutionTcpConfig(diskConfig)) {
                 sourceConfig = diskConfig;
             }
         } catch (error) {
@@ -748,8 +748,8 @@ async function resolveRegistrationTcpEndpointFromConfig(app) {
         }
     }
 
-    if (sourceConfig && hasRegistrationTcpConfig(sourceConfig)) {
-        return normalizeRegistrationTcpEndpoint(sourceConfig);
+    if (sourceConfig && hasExecutionTcpConfig(sourceConfig)) {
+        return normalizeExecutionTcpEndpoint(sourceConfig);
     }
 
     if (liveEndpoint) {
@@ -759,19 +759,19 @@ async function resolveRegistrationTcpEndpointFromConfig(app) {
     return null;
 }
 
-async function getRegistrationTcpRuntimeInfo(app) {
+async function getExecutionTcpRuntimeInfo(app) {
     const endpoint = await resolveRegistrationTcpEndpointFromConfig(app);
     const configured = app?.registrationTcpConfigured === true || !!endpoint;
-    const monitorState = _getRegistrationTcpMonitorState(app);
+    const monitorState = _getExecutionTcpMonitorState(app);
     const cachedStatus = app?.registrationTcpConnectionStatus || null;
     const cachedEndpoint = cachedStatus?.endpoint || null;
-    const cachedMatchesConfig = !!endpoint && _isSameRegistrationTcpEndpoint(cachedEndpoint, endpoint);
+    const cachedMatchesConfig = !!endpoint && _isSameExecutionTcpEndpoint(cachedEndpoint, endpoint);
     const effectiveCachedStatus = cachedStatus && (!endpoint || cachedMatchesConfig)
         ? cachedStatus
         : null;
 
     if (!configured) {
-        const disabledStatus = buildRegistrationTcpConnectionStatus({
+        const disabledStatus = buildExecutionTcpConnectionStatus({
             configured: false,
             connected: false,
             endpoint: null,
@@ -806,7 +806,7 @@ async function getRegistrationTcpRuntimeInfo(app) {
             registrationTcpEndpoint: endpoint || null,
             registrationTcpEndpointUrl: endpoint?.url || '',
             registrationTcpReconnectEnabled: app?.registrationTcpReconnectEnabled !== false,
-            registrationTcpConnectionStatus: effectiveCachedStatus || buildRegistrationTcpConnectionStatus({
+            registrationTcpConnectionStatus: effectiveCachedStatus || buildExecutionTcpConnectionStatus({
                 configured: true,
                 connected: false,
                 endpoint: endpoint || cachedEndpoint || null,
@@ -817,9 +817,9 @@ async function getRegistrationTcpRuntimeInfo(app) {
     }
 
     let connectionStatus = effectiveCachedStatus;
-    if (!connectionStatus || connectionStatus.enabled !== true || (endpoint && connectionStatus.endpoint && !_isSameRegistrationTcpEndpoint(connectionStatus.endpoint, endpoint))) {
+    if (!connectionStatus || connectionStatus.enabled !== true || (endpoint && connectionStatus.endpoint && !_isSameExecutionTcpEndpoint(connectionStatus.endpoint, endpoint))) {
         if (!endpoint) {
-            connectionStatus = buildRegistrationTcpConnectionStatus({
+            connectionStatus = buildExecutionTcpConnectionStatus({
                 configured: true,
                 connected: false,
                 endpoint: cachedEndpoint || null,
@@ -827,8 +827,8 @@ async function getRegistrationTcpRuntimeInfo(app) {
                 statusCode: cachedStatus?.statusCode || 0
             });
         } else {
-            const connection = await probeRegistrationTcpEndpoint(endpoint);
-            connectionStatus = buildRegistrationTcpConnectionStatus({
+            const connection = await probeExecutionTcpEndpoint(endpoint);
+            connectionStatus = buildExecutionTcpConnectionStatus({
                 configured: true,
                 connected: connection.connected === true,
                 endpoint: connection.endpoint || endpoint || null,
@@ -856,13 +856,13 @@ async function getRegistrationTcpRuntimeInfo(app) {
     };
 }
 
-async function refreshRegistrationTcpConnection(app) {
+async function refreshExecutionTcpConnection(app) {
     const endpoint = await resolveRegistrationTcpEndpointFromConfig(app);
     const configured = app?.registrationTcpConfigured === true || !!endpoint;
-    const monitorState = _getRegistrationTcpMonitorState(app);
+    const monitorState = _getExecutionTcpMonitorState(app);
 
     if (!configured) {
-        const disabledStatus = buildRegistrationTcpConnectionStatus({
+        const disabledStatus = buildExecutionTcpConnectionStatus({
             configured: false,
             connected: false,
             endpoint: null,
@@ -876,7 +876,7 @@ async function refreshRegistrationTcpConnection(app) {
     }
 
     if (monitorState && ((monitorState.socket && !monitorState.socket.destroyed) || monitorState.connectPromise)) {
-        const activeStatus = app?.registrationTcpConnectionStatus || buildRegistrationTcpConnectionStatus({
+        const activeStatus = app?.registrationTcpConnectionStatus || buildExecutionTcpConnectionStatus({
             configured: true,
             connected: true,
             endpoint: endpoint || app?.registrationTcpConnectionStatus?.endpoint || null,
@@ -900,14 +900,14 @@ async function refreshRegistrationTcpConnection(app) {
     }
 
     const connectionStatus = endpoint
-        ? buildRegistrationTcpConnectionStatus({
+        ? buildExecutionTcpConnectionStatus({
             configured: true,
             connected: false,
             endpoint,
             lastConnectError: '连接中',
             statusCode: 0
         })
-        : buildRegistrationTcpConnectionStatus({
+        : buildExecutionTcpConnectionStatus({
             configured: true,
             connected: false,
             endpoint: app?.registrationTcpConnectionStatus?.endpoint || null,
@@ -916,7 +916,7 @@ async function refreshRegistrationTcpConnection(app) {
         });
 
     if (endpoint) {
-        const connection = await probeRegistrationTcpEndpoint(endpoint);
+        const connection = await probeExecutionTcpEndpoint(endpoint);
         connectionStatus.connected = connection.connected === true;
         connectionStatus.endpoint = connection.endpoint || endpoint || null;
         connectionStatus.lastConnectError = connection.lastConnectError || '';
@@ -944,7 +944,7 @@ async function refreshRegistrationTcpConnection(app) {
     return connectionStatus;
 }
 
-async function startRegistrationTcpConnectionMonitor(app, options = {}) {
+async function startExecutionTcpConnectionMonitor(app, options = {}) {
     const source = options && typeof options === 'object' ? options : {};
     const immediate = source.immediate !== false;
 
@@ -967,7 +967,7 @@ async function startRegistrationTcpConnectionMonitor(app, options = {}) {
     return latestStatus;
 }
 
-function stopRegistrationTcpConnectionMonitor(app) {
+function stopExecutionTcpConnectionMonitor(app) {
     if (!app) {
         return;
     }
@@ -976,7 +976,7 @@ function stopRegistrationTcpConnectionMonitor(app) {
     _destroyRegistrationTcpMonitorSocket(app, '连接已停止');
 }
 
-async function applyRegistrationTcpUserConfig(app, config = {}, options = {}) {
+async function applyExecutionTcpUserConfig(app, config = {}, options = {}) {
     const source = config && typeof config === 'object' ? config : {};
     const summary = {
         emailApplied: false,
@@ -984,9 +984,9 @@ async function applyRegistrationTcpUserConfig(app, config = {}, options = {}) {
         tcpReconnectApplied: false,
         tcpRestarted: false,
         tcpRestartError: '',
-        registrationTcpEndpoint: typeof app?.getRegistrationTcpEndpoint === 'function'
-            ? app.getRegistrationTcpEndpoint()
-            : normalizeRegistrationTcpEndpoint(),
+        registrationTcpEndpoint: typeof app?.getExecutionTcpEndpoint === 'function'
+            ? app.getExecutionTcpEndpoint()
+            : normalizeExecutionTcpEndpoint(),
         registrationTcpReconnectEnabled: app?.registrationTcpReconnectEnabled !== false
     };
 
@@ -1038,13 +1038,13 @@ async function applyRegistrationTcpUserConfig(app, config = {}, options = {}) {
         }
     }
 
-    if (hasRegistrationTcpConfig(source)) {
-        const endpoint = normalizeRegistrationTcpEndpoint(source);
+    if (hasExecutionTcpConfig(source)) {
+        const endpoint = normalizeExecutionTcpEndpoint(source);
         if (app) {
             app.registrationTcpEndpoint = endpoint;
             app.registrationTcpConfigured = true;
             app.registrationTcpConfigSource = { ...source };
-            app.registrationTcpConnectionStatus = buildRegistrationTcpConnectionStatus({
+            app.registrationTcpConnectionStatus = buildExecutionTcpConnectionStatus({
                 configured: true,
                 connected: false,
                 endpoint,
@@ -1056,12 +1056,12 @@ async function applyRegistrationTcpUserConfig(app, config = {}, options = {}) {
         summary.registrationTcpEndpoint = endpoint;
     } else if (app) {
         if (app.registrationTcpConnectionMonitorActive === true) {
-            stopRegistrationTcpConnectionMonitor(app);
+            stopExecutionTcpConnectionMonitor(app);
         }
         app.registrationTcpEndpoint = null;
         app.registrationTcpConfigured = false;
         app.registrationTcpConfigSource = null;
-        app.registrationTcpConnectionStatus = buildRegistrationTcpConnectionStatus({
+        app.registrationTcpConnectionStatus = buildExecutionTcpConnectionStatus({
             configured: false,
             connected: false,
             endpoint: null,
@@ -1094,9 +1094,9 @@ async function applyRegistrationTcpUserConfig(app, config = {}, options = {}) {
     if (options.restartTcpBridge === true && app) {
         try {
             if (app.registrationTcpConnectionMonitorActive === true) {
-                stopRegistrationTcpConnectionMonitor(app);
+                stopExecutionTcpConnectionMonitor(app);
             }
-            await startRegistrationTcpConnectionMonitor(app, { immediate: true });
+            await startExecutionTcpConnectionMonitor(app, { immediate: true });
             summary.tcpRestarted = true;
         } catch (error) {
             summary.tcpRestartError = error?.message || String(error || 'TCP重连失败');
@@ -1109,15 +1109,18 @@ async function applyRegistrationTcpUserConfig(app, config = {}, options = {}) {
 module.exports = {
     DEFAULT_TCP_HOST,
     DEFAULT_TCP_PORT,
-    normalizeRegistrationTcpEndpoint,
-    hasRegistrationTcpConfig,
-    probeRegistrationTcpEndpoint,
-    getRegistrationTcpRuntimeInfo,
-    refreshRegistrationTcpConnection,
-    startRegistrationTcpConnectionMonitor,
-    stopRegistrationTcpConnectionMonitor,
-    notifyRegistrationTcpSuccess,
-    buildRegistrationTcpConnectionStatus,
-    applyRegistrationTcpUserConfig,
-    _getRegistrationTcpMonitorState
+    normalizeExecutionTcpEndpoint,
+    hasExecutionTcpConfig,
+    probeExecutionTcpEndpoint,
+    getExecutionTcpRuntimeInfo,
+    refreshExecutionTcpConnection,
+    startExecutionTcpConnectionMonitor,
+    stopExecutionTcpConnectionMonitor,
+    notifyExecutionTcpSuccess,
+    buildExecutionTcpConnectionStatus,
+    applyExecutionTcpUserConfig,
+    _getExecutionTcpMonitorState
 };
+
+
+

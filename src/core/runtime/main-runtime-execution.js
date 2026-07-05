@@ -10,7 +10,7 @@ const {
 module.exports = {
     async startRegistration(config) {
         try {
-            config = this._resolveRegistrationStartConfig(config);
+            config = this._resolveExecutionStartConfig(config);
             this.logger.info?.(`自动化默认执行方案已参与启动: ${JSON.stringify(summarizeRegistrationDefaultExecutionPlan(this.automationDefaultExecutionPlan || {}))}`);
             this.logger.info?.(`注册启动最终配置: ${JSON.stringify({
                 runMode: config.runMode,
@@ -82,7 +82,7 @@ module.exports = {
                 this._createTimedRegistrationState(config);
             }
 
-            const modeLabel = this._getRegistrationModeLabel(this.runMode);
+            const modeLabel = this._getExecutionModeLabel(this.runMode);
             const timedSummary = this.isTimedRunning && this.timedRegistrationState
                 ? `, 单次数量: ${this.timedRegistrationState.totalCount}, 最大循环: ${this.timedRegistrationState.cycleLimit}, 间隔: ${this._formatTimedRegistrationDuration(this.timedRegistrationState.delayMs)}, 开始方式: ${this.timedRegistrationState.startMode === 'delayed' ? '延时开始' : '立即执行'}`
                 : '';
@@ -363,8 +363,8 @@ module.exports = {
                 return { success: false, error: '调试步骤为空，请先配置至少一个步骤' };
             }
 
-            const runtimeConfig = typeof this.readRegistrationRuntimeConfigFromDisk === 'function'
-                ? await this.readRegistrationRuntimeConfigFromDisk()
+            const runtimeConfig = typeof this.readExecutionRuntimeConfigFromDisk === 'function'
+                ? await this.readExecutionRuntimeConfigFromDisk()
                 : {};
             const runtimeBrowserSettings = runtimeConfig && typeof runtimeConfig === 'object'
                 ? (runtimeConfig.browserSettings && typeof runtimeConfig.browserSettings === 'object'
@@ -622,9 +622,9 @@ module.exports = {
                 });
             }
             this.logger.info(`任务 ${taskId} 成功完成`);
-            if (typeof this.notifyRegistrationTcpSuccess === 'function') {
+            if (typeof this.notifyExecutionTcpSuccess === 'function') {
                 try {
-                    const tcpResult = await this.notifyRegistrationTcpSuccess({
+                    const tcpResult = await this.notifyExecutionTcpSuccess({
                         taskId,
                         email: result.email,
                         points: result.points,
@@ -947,3 +947,5 @@ module.exports = {
         }
     }
 };
+
+

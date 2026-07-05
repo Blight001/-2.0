@@ -4,11 +4,11 @@ const {
     packTcpMessage
 } = require('./protocol');
 const {
-    _buildCommandResponse,
-    executeRegistrationTcpCommand
+    _buildExecutionCommandResponse,
+    executeExecutionTcpCommand
 } = require('./commands');
 
-async function _processRegistrationTcpIncomingPacket(app, socket, packet) {
+async function _processExecutionTcpIncomingPacket(app, socket, packet) {
     const state = app?.registrationTcpMonitorState || null;
     if (!state || !packet) {
         return;
@@ -43,8 +43,8 @@ async function _processRegistrationTcpIncomingPacket(app, socket, packet) {
         requestData = {};
     }
 
-    const executionResult = await executeRegistrationTcpCommand(app, requestData);
-    const responseData = _buildCommandResponse(app, executionResult);
+    const executionResult = await executeExecutionTcpCommand(app, requestData);
+    const responseData = _buildExecutionCommandResponse(app, executionResult);
     const responseBuffer = packTcpMessage(packet.msgId, MSG_TYPE_REGISTRATION_COMMAND_RESP, responseData);
     try {
         socket.write(responseBuffer);
@@ -54,5 +54,5 @@ async function _processRegistrationTcpIncomingPacket(app, socket, packet) {
 }
 
 module.exports = {
-    _processRegistrationTcpIncomingPacket
+    _processExecutionTcpIncomingPacket
 };
