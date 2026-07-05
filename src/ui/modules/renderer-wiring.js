@@ -41,7 +41,7 @@ module.exports = function createRendererWiring(deps) {
         startHaikaBinding,
         stopHaikaBinding,
         startRegistration,
-        stopRegistration,
+        stopExecution,
         parseCookieAccountInfo,
         hideCookieAccountContextMenu,
         hideCookieBatchContextMenu,
@@ -1106,5 +1106,6 @@ window.selectClashNodeGlobal = function(nodeName) {
 });
 
 };
+
 
 

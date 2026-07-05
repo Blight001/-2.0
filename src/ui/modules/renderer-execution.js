@@ -1142,7 +1142,7 @@ module.exports = function createRendererExecution(deps) {
             }
         }
 
-        async function stopRegistration() {
+        async function stopExecution() {
             if (state.registrationTcpControlLocked) {
                 utils.showMessage('服务器已禁止本地控制，不能由本地手动停止', 'info', elements);
                 return;
@@ -1264,9 +1264,10 @@ module.exports = function createRendererExecution(deps) {
             getExecutionUploadConfig,
             uploadRegisteredCookie,
             startRegistration,
-            stopRegistration,
+            stopExecution,
             handleCustomTestAccountAction,
             updateCustomTestAccountButtons
         };
 };
+
 

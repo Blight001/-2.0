@@ -394,7 +394,7 @@ async function syncBuiltinBrowserChromeState(options = {}) {
     return state;
 }
 
-function registerBuiltinBrowserWindow(win, details = {}) {
+function initBuiltinBrowserWindow(win, details = {}) {
     if (!win || typeof win !== 'object' || typeof win.isDestroyed === 'function' && win.isDestroyed()) {
         return null;
     }
@@ -974,7 +974,7 @@ app.on('web-contents-created', (_event, contents) => {
             }
 
             const includeInTabStrip = !isBuiltinBrowserAuxiliaryWindow(childWindow, details);
-            registerBuiltinBrowserWindow(childWindow, {
+            initBuiltinBrowserWindow(childWindow, {
                 includeInTabStrip
             });
 
@@ -1024,7 +1024,7 @@ function createBuiltinBrowserWindow(options = {}) {
         win.removeMenu();
     }
 
-    registerBuiltinBrowserWindow(win, {
+    initBuiltinBrowserWindow(win, {
         includeInTabStrip: options.includeInTabStrip !== false
     });
     installDevToolsShortcuts(win);
@@ -1095,3 +1095,4 @@ app.on('will-quit', () => {
     } catch (_error) {
     }
 });
+

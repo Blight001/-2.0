@@ -1,4 +1,4 @@
-module.exports = function registerWebLoginHandlers({ app, ipcMain }) {
+module.exports = function initWebLoginHandlers({ app, ipcMain }) {
 
     if (!app.__rpcExitAppHandlerRegistered) {
         ipcMain.handle('exit-app', async () => {
@@ -120,3 +120,4 @@ module.exports = function registerWebLoginHandlers({ app, ipcMain }) {
     });
 
 };
+

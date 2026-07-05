@@ -675,7 +675,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                 };
             }
 
-            if (typeof app?.stopRegistration !== 'function') {
+            if (typeof app?.stopExecution !== 'function') {
                 return {
                     ok: false,
                     command,
@@ -684,12 +684,12 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                 };
             }
 
-            const result = await app.stopRegistration(clonePlainObject(commandArgs));
+            const result = await app.stopExecution(clonePlainObject(commandArgs));
             return {
                 ok: result && result.success !== false,
                 command,
                 message: result && result.success !== false ? '执行已停止' : (result?.error || '停止执行失败'),
-                entrypoint: 'stopRegistration',
+                entrypoint: 'stopExecution',
                 result,
                 snapshot
             };
@@ -790,4 +790,5 @@ module.exports = {
     _buildExecutionCommandResponse,
     executeExecutionTcpCommand
 };
+
 

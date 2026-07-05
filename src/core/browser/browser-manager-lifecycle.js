@@ -139,7 +139,7 @@ module.exports = {
                 if (shouldLoadExtensionsInPersistentContext) {
                     persistentUserDataDir = String(browserOptions.userDataDir || '').trim();
                     if (!persistentUserDataDir) {
-                        persistentUserDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-register-browser-'));
+                        persistentUserDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-automation-browser-'));
                         cleanupPersistentUserDataDir = true;
                     }
 
@@ -392,3 +392,4 @@ module.exports = {
         }
     }
 };
+

@@ -15,7 +15,7 @@ module.exports = function createRendererWiringIpc(deps) {
         uploadRegisteredCookie,
         updateTaskCount,
         taskProgress,
-        stopRegistration,
+        stopExecution,
         isHaikaBindingTask,
         tempEmail
     } = deps;
@@ -141,7 +141,7 @@ module.exports = function createRendererWiringIpc(deps) {
                 taskId,
                 taskNumber,
                 taskLabel,
-                stopRegistration,
+                stopExecution,
                 stopButtonText,
                 {
                     className: 'task-progress--timed',
@@ -755,3 +755,4 @@ module.exports = function createRendererWiringIpc(deps) {
         handlePointsCookieTest
     };
 };
+

@@ -24,7 +24,7 @@ module.exports = function createRendererWiringEvents(deps) {
         startHaikaBinding,
         stopHaikaBinding,
         startRegistration,
-        stopRegistration,
+        stopExecution,
         parseCookieAccountInfo,
         hideCookieAccountContextMenu,
         hideCookieBatchContextMenu,
@@ -692,7 +692,7 @@ module.exports = function createRendererWiringEvents(deps) {
         });
 
         elements.startBtn.addEventListener('click', startRegistration);
-        elements.stopBtn.addEventListener('click', stopRegistration);
+        elements.stopBtn.addEventListener('click', stopExecution);
         if (elements.customTestAccountBtn && typeof handleCustomTestAccountAction === 'function') {
             elements.customTestAccountBtn.addEventListener('click', () => {
                 void handleCustomTestAccountAction(loadCookies);
@@ -1093,3 +1093,4 @@ module.exports = function createRendererWiringEvents(deps) {
         setupEventListeners
     };
 };
+

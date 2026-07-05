@@ -6,8 +6,8 @@ const https = require('https');
 
 const HaikaManager = require('../haika/haika-manager');
 const HaikaStateStore = require('../haika/haika-state-store');
-const registerLoginIpcHandlers = require('../ipc/login-ipc');
-const registerWebLoginHandlers = require('../ipc/login-web-ipc');
+const initLoginIpcHandlers = require('../ipc/login-ipc');
+const initWebLoginHandlers = require('../ipc/login-web-ipc');
 const {
     extractLicenseExpiryText,
     extractLicenseUsageInfo,
@@ -88,27 +88,27 @@ module.exports = {
     isDevModeEnabled,
 
     setupLoginIpcHandlers() {
-        if (this.loginIpcHandlersRegistered) {
+        if (this.loginIpcHandlersInitialized) {
             return;
         }
 
-        registerLoginIpcHandlers({
+        initLoginIpcHandlers({
             app: this,
             ipcMain
         });
-        this.loginIpcHandlersRegistered = true;
+        this.loginIpcHandlersInitialized = true;
     },
 
     setupWebLoginRpcHandlers() {
-        if (this.webLoginRpcHandlersRegistered) {
+        if (this.webLoginRpcHandlersInitialized) {
             return;
         }
 
-        registerWebLoginHandlers({
+        initWebLoginHandlers({
             app: this,
             ipcMain: this.rpcRegistry
         });
-        this.webLoginRpcHandlersRegistered = true;
+        this.webLoginRpcHandlersInitialized = true;
     },
 
     async createLoginWindow() {
@@ -837,7 +837,7 @@ module.exports = {
             this.isValidated = false;
 
             try {
-                await this.stopRegistration?.({ closeBrowsers: true, reason: 'license_expired' });
+                await this.stopExecution?.({ closeBrowsers: true, reason: 'license_expired' });
             } catch (stopError) {
                 this.logger?.warning?.(`到期后停止执行流程失败: ${stopError.message}`);
             }
@@ -1314,4 +1314,5 @@ module.exports = {
     },
 
 };
+
 

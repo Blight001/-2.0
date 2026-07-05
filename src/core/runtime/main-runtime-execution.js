@@ -870,7 +870,7 @@ module.exports = {
         });
     },
 
-    async stopRegistration(options = {}) {
+    async stopExecution(options = {}) {
         const {
             closeBrowsers = true
         } = options;
@@ -947,5 +947,6 @@ module.exports = {
         }
     }
 };
+
 
 

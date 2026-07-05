@@ -284,7 +284,7 @@ class BuiltinElectronBrowserContextAdapter {
 
         if (this._electronApp && typeof this._electronApp.on === 'function') {
             this._electronApp.on('window', (page) => {
-                this._registerPage(page);
+                this._setupPage(page);
             });
 
             this._electronApp.on('close', () => {
@@ -294,7 +294,7 @@ class BuiltinElectronBrowserContextAdapter {
 
         if (this._actualContext && typeof this._actualContext.on === 'function') {
             this._actualContext.on('page', (page) => {
-                this._registerPage(page);
+                this._setupPage(page);
             });
 
             this._actualContext.on('close', () => {
@@ -307,7 +307,7 @@ class BuiltinElectronBrowserContextAdapter {
         return this._closed === true;
     }
 
-    _registerPage(page) {
+    _setupPage(page) {
         if (!page || this._pages.has(page)) {
             return page || null;
         }
@@ -344,7 +344,7 @@ class BuiltinElectronBrowserContextAdapter {
             }
 
             pages.push(page);
-            this._registerPage(page);
+            this._setupPage(page);
         };
 
         if (this._actualContext && typeof this._actualContext.pages === 'function') {
@@ -374,7 +374,7 @@ class BuiltinElectronBrowserContextAdapter {
 
         if (this._browserKind !== 'electron' && this._actualContext && typeof this._actualContext.newPage === 'function') {
             const page = await this._actualContext.newPage(options);
-            return this._registerPage(page);
+            return this._setupPage(page);
         }
 
         if (!this._electronApp || typeof this._electronApp.evaluate !== 'function') {
@@ -493,7 +493,7 @@ class BuiltinElectronBrowserContextAdapter {
         });
 
         const page = await waitForWindow;
-        return this._registerPage(page);
+        return this._setupPage(page);
     }
 
     async cookies(urls) {
@@ -744,7 +744,7 @@ async function launchBuiltinElectronBrowser(options = {}) {
         ? Math.max(240, parseInt(browserProfile.viewport.height, 10))
         : 768;
     const userDataDir = String(browserOptions.userDataDir || '').trim()
-        || fs.mkdtempSync(path.join(os.tmpdir(), 'ai-register-electron-'));
+        || fs.mkdtempSync(path.join(os.tmpdir(), 'ai-automation-electron-'));
     const windowVisible = visible !== undefined ? visible !== false : headless !== true;
     const env = {
         ...process.env,
@@ -825,7 +825,7 @@ async function launchBuiltinElectronBrowser(options = {}) {
         throw new Error('内置 Electron 浏览器窗口未能创建');
     }
 
-    adapter._registerPage(page);
+    adapter._setupPage(page);
 
     let browserVersion = String(process?.versions?.chrome || '').trim()
         ? `Chrome/${String(process.versions.chrome).trim()}`
@@ -860,4 +860,5 @@ module.exports = {
     launchBuiltinElectronBrowser,
     buildBuiltinBrowserToolbarInitScript
 };
+
 

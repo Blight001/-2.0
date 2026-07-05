@@ -83,9 +83,9 @@ class AutomationApp {
             hostApp: this.webControlConfig.hostApp
         });
         this.ipcHandlersRegistered = false;
-        this.loginIpcHandlersRegistered = false;
+        this.loginIpcHandlersInitialized = false;
         this.rpcHandlersRegistered = false;
-        this.webLoginRpcHandlersRegistered = false;
+        this.webLoginRpcHandlersInitialized = false;
         this.emailUiEventsBound = false;
         this.webControlPageOpened = false;
         this.mainUiStartupPromise = null;
@@ -875,7 +875,7 @@ class AutomationApp {
         return await this.startRegistrationTcpBridge();
     }
 
-    async stopRegistrationTcpBridge() {
+    async stopExecutionTcpBridge() {
         this.stopExecutionTcpConnectionMonitor();
         return { success: true };
     }
@@ -960,12 +960,13 @@ class AutomationApp {
     onRegistrationError(taskId, error) { return mainRuntime.onRegistrationError.call(this, taskId, error); }
     async onHaikaBindingFinished(taskId, result, accountInfo) { return mainRuntime.onHaikaBindingFinished.call(this, taskId, result, accountInfo); }
     onHaikaBindingError(taskId, error, accountInfo) { return mainRuntime.onHaikaBindingError.call(this, taskId, error, accountInfo); }
-    async stopRegistration(...args) { return mainRuntime.stopRegistration.call(this, ...args); }
+    async stopExecution(...args) { return mainRuntime.stopExecution.call(this, ...args); }
     async updateStats() { return mainRuntime.updateStats.call(this); }
     async cleanupAndExit() { return mainRuntime.cleanupAndExit.call(this); }
 }
 
 // 创建应用程序实例
 const appInstance = new AutomationApp();
+
 
 

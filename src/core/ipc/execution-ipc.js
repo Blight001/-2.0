@@ -53,7 +53,7 @@ module.exports = function registerExecutionHandlers({ app, ipcMain }) {
         if (isControlLocked()) {
             return blockLockedAction('本地手动停止执行');
         }
-        return await app.stopRegistration();
+        return await app.stopExecution();
     });
 
     ipcMain.handle('stop-task', async (_event, taskId) => {
@@ -124,4 +124,5 @@ module.exports = function registerExecutionHandlers({ app, ipcMain }) {
         }
     });
 };
+
 
