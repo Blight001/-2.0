@@ -137,16 +137,16 @@ module.exports = function registerAppHandlers({ app, ipcMain }) {
                 webControlEnabled: false,
                 webControlHeadless: false,
                 webControlUrl: '',
-                registrationTcpEnabled: false,
-                registrationTcpControlLocked: false,
-                registrationTcpControlState: {},
-                registrationTcpReconnectEnabled: true,
-                registrationTcpConnectionStatus: null
+                executionTcpEnabled: false,
+                executionTcpControlLocked: false,
+                executionTcpControlState: {},
+                executionTcpReconnectEnabled: true,
+                executionTcpConnectionStatus: null
             };
         }
     });
 
-    ipcMain.handle('get-registration-ui-state', async (_event, options = {}) => {
+    ipcMain.handle('get-execution-ui-state', async (_event, options = {}) => {
         try {
             if (typeof app.getExecutionUiState !== 'function') {
                 return {
@@ -157,12 +157,12 @@ module.exports = function registerAppHandlers({ app, ipcMain }) {
                     cards: [],
                     currentCardName: '',
                     currentCard: '',
-                    registrationTcpEnabled: false,
-                    registrationTcpControlLocked: false,
-                    registrationTcpControlState: {},
-                    registrationTcpEndpoint: null,
-                    registrationTcpReconnectEnabled: false,
-                    registrationTcpConnectionStatus: null,
+                    executionTcpEnabled: false,
+                    executionTcpControlLocked: false,
+                    executionTcpControlState: {},
+                    executionTcpEndpoint: null,
+                    executionTcpReconnectEnabled: false,
+                    executionTcpConnectionStatus: null,
                     options
                 };
             }
@@ -180,7 +180,7 @@ module.exports = function registerAppHandlers({ app, ipcMain }) {
         }
     });
 
-    ipcMain.handle('refresh-registration-tab', async (event) => {
+    ipcMain.handle('refresh-execution-tab', async (event) => {
         try {
             const sender = event?.sender || null;
             const senderWindow = sender ? BrowserWindow.fromWebContents(sender) : null;
@@ -208,7 +208,7 @@ module.exports = function registerAppHandlers({ app, ipcMain }) {
         }
     });
 
-    ipcMain.handle('close-registration-tab', async (event) => {
+    ipcMain.handle('close-execution-tab', async (event) => {
         try {
             const sender = event?.sender || null;
             const senderWindow = sender ? BrowserWindow.fromWebContents(sender) : null;
@@ -233,7 +233,7 @@ module.exports = function registerAppHandlers({ app, ipcMain }) {
         }
     });
 
-    ipcMain.handle('get-current-registration-tab-id', async (event) => {
+    ipcMain.handle('get-current-execution-tab-id', async (event) => {
         try {
             const senderTabId = resolveWindowIdFromEvent(event);
             const activeWindow = app?.desktopWindow || app?.loginWindow || null;
@@ -255,7 +255,7 @@ module.exports = function registerAppHandlers({ app, ipcMain }) {
         }
     });
 
-    ipcMain.handle('set-registration-tab-title', async (_event, title) => {
+    ipcMain.handle('set-execution-tab-title', async (_event, title) => {
         try {
             const text = String(title || '').trim();
             if (text && app?.desktopWindow && typeof app.desktopWindow.setTitle === 'function' && !app.desktopWindow.isDestroyed?.()) {
@@ -275,7 +275,7 @@ module.exports = function registerAppHandlers({ app, ipcMain }) {
         }
     });
 
-    ipcMain.handle('post-registration-event', async (_event, payload = {}) => {
+    ipcMain.handle('post-execution-event', async (_event, payload = {}) => {
         try {
             const channel = String(payload.channel || payload.type || '').trim();
             const args = Array.isArray(payload.args) ? payload.args : [payload.payload || payload.data || payload];

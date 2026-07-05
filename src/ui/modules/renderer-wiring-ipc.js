@@ -34,11 +34,11 @@ module.exports = function createRendererWiringIpc(deps) {
         }
     }
 
-    function clearTimedRegistrationProgress(removeRow = true) {
-        if (removeRow && state.currentTimedRegistrationTaskId && taskProgress && typeof taskProgress.removeTaskProgress === 'function') {
-            taskProgress.removeTaskProgress(state.currentTimedRegistrationTaskId);
+    function clearTimedExecutionProgress(removeRow = true) {
+        if (removeRow && state.currentTimedExecutionTaskId && taskProgress && typeof taskProgress.removeTaskProgress === 'function') {
+            taskProgress.removeTaskProgress(state.currentTimedExecutionTaskId);
         }
-        state.currentTimedRegistrationTaskId = null;
+        state.currentTimedExecutionTaskId = null;
     }
 
     function clearCardDebugProgress() {
@@ -112,8 +112,8 @@ module.exports = function createRendererWiringIpc(deps) {
         }
     }
 
-    function renderTimedRegistrationProgress(payload = {}) {
-        const taskId = payload.taskId || state.currentTimedRegistrationTaskId;
+    function renderTimedExecutionProgress(payload = {}) {
+        const taskId = payload.taskId || state.currentTimedExecutionTaskId;
         if (!taskId || !taskProgress) {
             return;
         }
@@ -132,8 +132,8 @@ module.exports = function createRendererWiringIpc(deps) {
         const stopButtonText = payload.completed ? '已完成' : '⏹ 停止定时';
         const stopDisabled = !!payload.completed;
 
-        if (state.currentTimedRegistrationTaskId && state.currentTimedRegistrationTaskId !== taskId) {
-            taskProgress.removeTaskProgress(state.currentTimedRegistrationTaskId);
+        if (state.currentTimedExecutionTaskId && state.currentTimedExecutionTaskId !== taskId) {
+            taskProgress.removeTaskProgress(state.currentTimedExecutionTaskId);
         }
 
         if (!state.taskProgressBars.has(taskId)) {
@@ -145,7 +145,7 @@ module.exports = function createRendererWiringIpc(deps) {
                 stopButtonText,
                 {
                     className: 'task-progress--timed',
-                    taskType: payload.taskType || 'timed-registration-summary',
+                    taskType: payload.taskType || 'timed-execution-summary',
                     statusText,
                     progress: progressValue,
                     message,
@@ -162,7 +162,7 @@ module.exports = function createRendererWiringIpc(deps) {
             stopDisabled
         });
 
-        state.currentTimedRegistrationTaskId = taskId;
+        state.currentTimedExecutionTaskId = taskId;
     }
 
     function escapeHtml(text) {
@@ -336,7 +336,7 @@ module.exports = function createRendererWiringIpc(deps) {
             elements.stopBtn.disabled = true;
             elements.statusLabel.textContent = '就绪';
             state.runningTasks.clear();
-            clearTimedRegistrationProgress(true);
+            clearTimedExecutionProgress(true);
             clearCardDebugProgress();
 
             for (const [taskId, progressElement] of state.taskProgressBars) {
@@ -357,7 +357,7 @@ module.exports = function createRendererWiringIpc(deps) {
             updateTaskCount();
         });
 
-        ipcRenderer.on('registration-success', (_event, payload = {}) => {
+        ipcRenderer.on('execution-success', (_event, payload = {}) => {
             const email = String(payload.email || '').trim();
             const points = payload.points;
             logger.info(`执行成功: ${email || '未知邮箱'} / ${points ?? '未知积分'}`);
@@ -367,7 +367,7 @@ module.exports = function createRendererWiringIpc(deps) {
             window.dispatchEvent(new CustomEvent('license-usage-updated', { detail: payload }));
         });
 
-        ipcRenderer.on('registration-result', async (_event, payload) => {
+        ipcRenderer.on('execution-result', async (_event, payload) => {
             const taskId = payload?.taskId || '';
             const result = payload?.result || payload;
             if (!result || !result.success) {
@@ -377,12 +377,12 @@ module.exports = function createRendererWiringIpc(deps) {
             await uploadRegisteredCookie(result, taskId);
         });
 
-        ipcRenderer.on('registration-error', (_event, payload = {}) => {
+        ipcRenderer.on('execution-error', (_event, payload = {}) => {
             const error = String(payload.error || '').trim();
             logger.error(`执行失败: ${error || '未知错误'}`);
         });
 
-        ipcRenderer.on('registration-cycle-status', (_event, payload) => {
+        ipcRenderer.on('execution-cycle-status', (_event, payload) => {
             if (!payload) {
                 return;
             }
@@ -394,7 +394,7 @@ module.exports = function createRendererWiringIpc(deps) {
             if (payload.mode === 'timed') {
                 taskProgress.focusTaskProgressTab();
                 if (payload.completed) {
-                    taskProgress.handleTimedRegistrationCompleted(payload);
+                    taskProgress.handleTimedExecutionCompleted(payload);
                 }
             }
         });

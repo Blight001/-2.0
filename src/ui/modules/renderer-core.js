@@ -43,7 +43,7 @@ let currentModelCard = null;
 let currentHaikaBindBatchId = null;
 let currentHaikaBindBatchActive = false;
 let currentHaikaBindBatchTotal = 0;
-let currentTimedRegistrationTaskId = null;
+let currentTimedExecutionTaskId = null;
 let currentCardDebugTaskId = null;
 let currentCardDebugState = null;
 let hideHaikaSuggestionsTimer = null;
@@ -177,11 +177,11 @@ const elements = {
 
     // 运行控制
     runModeButtons: document.querySelectorAll('.run-mode-btn'),
-    registrationTimedSettings: document.getElementById('registration-timed-settings'),
-    registrationTimedCount: document.getElementById('registration-timed-count'),
-    registrationTimedCycleCount: document.getElementById('registration-timed-cycle-count'),
-    registrationTimedStartMode: document.getElementById('registration-timed-start-mode'),
-    registrationTimedDelaySeconds: document.getElementById('registration-timed-delay-seconds'),
+    executionTimedSettings: document.getElementById('execution-timed-settings'),
+    executionTimedCount: document.getElementById('execution-timed-count'),
+    executionTimedCycleCount: document.getElementById('execution-timed-cycle-count'),
+    executionTimedStartMode: document.getElementById('execution-timed-start-mode'),
+    executionTimedDelaySeconds: document.getElementById('execution-timed-delay-seconds'),
     concurrentCount: document.getElementById('concurrent-count'),
     proxyRecoveryAttempts: document.getElementById('proxy-recovery-attempts'),
     startBtn: document.getElementById('start-btn'),
@@ -191,10 +191,10 @@ const elements = {
     customTestAccountBtn: document.getElementById('custom-test-account-btn'),
     syncControlWrapper: document.getElementById('sync-control-wrapper'),
     syncExecution: document.getElementById('sync-execution'),
-    registrationAutoUpload: document.getElementById('registration-auto-upload'),
-    registrationSaveLocalCookie: document.getElementById('registration-save-local-cookie'),
-    registrationUploadServerUrl: document.getElementById('registration-upload-server-url'),
-    registrationUploadCardKey: document.getElementById('registration-upload-card-key'),
+    executionAutoUpload: document.getElementById('execution-auto-upload'),
+    executionSaveLocalCookie: document.getElementById('execution-save-local-cookie'),
+    executionUploadServerUrl: document.getElementById('execution-upload-server-url'),
+    executionUploadCardKey: document.getElementById('execution-upload-card-key'),
     cardUploadConfigGroup: document.getElementById('card-upload-config-group'),
     cardUploadTargetScoreScope: document.getElementById('card-upload-target-score-scope'),
     cardUploadTargetScoreTypes: document.getElementById('card-upload-target-score-types'),
@@ -532,7 +532,7 @@ bindState('currentModelCard', () => currentModelCard, value => { currentModelCar
 bindState('currentHaikaBindBatchId', () => currentHaikaBindBatchId, value => { currentHaikaBindBatchId = value; });
 bindState('currentHaikaBindBatchActive', () => currentHaikaBindBatchActive, value => { currentHaikaBindBatchActive = value; });
 bindState('currentHaikaBindBatchTotal', () => currentHaikaBindBatchTotal, value => { currentHaikaBindBatchTotal = value; });
-bindState('currentTimedRegistrationTaskId', () => currentTimedRegistrationTaskId, value => { currentTimedRegistrationTaskId = value; });
+bindState('currentTimedExecutionTaskId', () => currentTimedExecutionTaskId, value => { currentTimedExecutionTaskId = value; });
 bindState('currentCardDebugTaskId', () => currentCardDebugTaskId, value => { currentCardDebugTaskId = value; });
 bindState('currentCardDebugState', () => currentCardDebugState, value => { currentCardDebugState = value; });
 bindState('hideHaikaSuggestionsTimer', () => hideHaikaSuggestionsTimer, value => { hideHaikaSuggestionsTimer = value; });

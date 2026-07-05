@@ -1,11 +1,11 @@
 module.exports = function registerExecutionHandlers({ app, ipcMain }) {
-    const isControlLocked = () => typeof app.isRegistrationControlLocked === 'function' && app.isRegistrationControlLocked();
+    const isControlLocked = () => typeof app.isExecutionControlLocked === 'function' && app.isExecutionControlLocked();
     const blockLockedAction = (actionLabel) => ({
         success: false,
         error: `服务器已禁止控制，${actionLabel}已禁用`
     });
 
-    ipcMain.handle('start-registration', async (_event, config) => {
+    ipcMain.handle('start-execution', async (_event, config) => {
         if (isControlLocked()) {
             return blockLockedAction('本地手动开始执行');
         }
@@ -32,7 +32,7 @@ module.exports = function registerExecutionHandlers({ app, ipcMain }) {
             }
         }
 
-        return await app.startRegistration(mergedConfig);
+        return await app.startExecution(mergedConfig);
     });
 
     ipcMain.handle('start-haika-binding', async (_event, config) => {
@@ -49,7 +49,7 @@ module.exports = function registerExecutionHandlers({ app, ipcMain }) {
         return await app.stopHaikaBinding();
     });
 
-    ipcMain.handle('stop-registration', async () => {
+    ipcMain.handle('stop-execution', async () => {
         if (isControlLocked()) {
             return blockLockedAction('本地手动停止执行');
         }

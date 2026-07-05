@@ -115,9 +115,9 @@ async function buildAutomationUiState(app, options = {}) {
             : 'local-browser';
 
     return {
-        enabled: tcpInfo.registrationTcpEnabled === true,
-        running: tcpInfo.registrationTcpEnabled === true,
-        connected: tcpInfo.registrationTcpConnectionStatus?.connected === true,
+        enabled: tcpInfo.executionTcpEnabled === true,
+        running: tcpInfo.executionTcpEnabled === true,
+        connected: tcpInfo.executionTcpConnectionStatus?.connected === true,
         cards,
         console_logs: Array.isArray(recentLogs) ? recentLogs : [],
         consoleLogs: Array.isArray(recentLogs) ? recentLogs : [],
@@ -134,12 +134,12 @@ async function buildAutomationUiState(app, options = {}) {
         browserSource,
         run_mode: Number.isFinite(Number(browserSettings.run_mode)) ? Number(browserSettings.run_mode) : 0,
         concurrent_count: Number.isFinite(Number(browserSettings.concurrent_count)) ? Number(browserSettings.concurrent_count) : 1,
-        registrationRuntimeConfig: runtimeConfig,
-        registration_runtime_config: runtimeConfig,
+        executionRuntimeConfig: runtimeConfig,
+        execution_runtime_config: runtimeConfig,
         runtimeConfig,
         runtime_config: runtimeConfig,
-        registrationRuntimeBrowserSettings: runtimeBrowserSettings,
-        registration_runtime_browser_settings: runtimeBrowserSettings,
+        executionRuntimeBrowserSettings: runtimeBrowserSettings,
+        execution_runtime_browser_settings: runtimeBrowserSettings,
         ...tcpInfo,
         options: source
     };

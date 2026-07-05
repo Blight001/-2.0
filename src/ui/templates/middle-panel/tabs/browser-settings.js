@@ -2,7 +2,7 @@ module.exports = function renderBrowserSettingsTab() {
   return `<!-- 浏览器管理 -->
                         <div id="middle-tab-browser-settings" class="middle-tab-content" role="tabpanel" style="display:none;">
                             <div class="browser-settings-panel">
-                                <div class="browser-settings-section registration-browser-settings-section" id="registration-browser-settings-section">
+                                <div class="browser-settings-section execution-browser-settings-section" id="execution-browser-settings-section">
                                     <div class="panel-header browser-settings-header">
                                         <div>
                                             <h3>浏览器设置</h3>
@@ -33,9 +33,9 @@ module.exports = function renderBrowserSettingsTab() {
                                         </div>
                                         <div class="setting-item">
                                             <div class="setting-row">
-                                                <label for="registration-save-local-cookie" class="setting-switch-label">是否保存本地Cookie</label>
+                                                <label for="execution-save-local-cookie" class="setting-switch-label">是否保存本地Cookie</label>
                                                 <label class="toggle-switch">
-                                                    <input type="checkbox" id="registration-save-local-cookie">
+                                                    <input type="checkbox" id="execution-save-local-cookie">
                                                     <span class="toggle-slider"></span>
                                                 </label>
                                             </div>

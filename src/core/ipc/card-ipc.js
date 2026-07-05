@@ -7,7 +7,7 @@ const {
 } = require('../execution/execution-ui-state');
 
 module.exports = function registerCardHandlers({ app, ipcMain, dialog, fs, path }) {
-    const isControlLocked = () => typeof app.isRegistrationControlLocked === 'function' && app.isRegistrationControlLocked();
+    const isControlLocked = () => typeof app.isExecutionControlLocked === 'function' && app.isExecutionControlLocked();
     const blockLockedAction = (actionLabel) => ({
         success: false,
         error: `服务器已禁止控制，${actionLabel}已禁用`

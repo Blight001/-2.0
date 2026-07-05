@@ -1,4 +1,4 @@
-function cloneRegistrationCardConfig(cardConfig = null) {
+function cloneExecutionCardConfig(cardConfig = null) {
     if (!cardConfig || typeof cardConfig !== 'object') {
         return null;
     }
@@ -15,7 +15,7 @@ function toPositiveInteger(value, fallback = 1, minimum = 1, maximum = Number.MA
     return Math.max(minimum, Math.min(maximum, parsed));
 }
 
-function summarizeRegistrationDefaultExecutionPlan(plan = {}) {
+function summarizeDefaultExecutionPlan(plan = {}) {
     const source = plan && typeof plan === 'object' ? plan : {};
     const browserSettings = source.browser_settings || source.browserSettings || {};
     const browserSource = String(
@@ -31,7 +31,7 @@ function summarizeRegistrationDefaultExecutionPlan(plan = {}) {
 
     return {
         enabled: source.enabled === true,
-        auto_start_registration: source.auto_start_registration === true || source.autoStartRegistration === true,
+        auto_start_execution: source.auto_start_execution === true || source.autoStartExecution === true,
         server_card_name: String(source.server_card_name || source.serverCardName || '').trim(),
         control_locked: source.control_locked === true || source.controlLocked === true,
         browser_settings: {
@@ -45,14 +45,14 @@ function summarizeRegistrationDefaultExecutionPlan(plan = {}) {
                 || browserSettings.captchaCompatibilityMode === 'true',
             sync_execution: browserSettings.sync_execution !== false,
             max_proxy_recovery_attempts: toPositiveInteger(browserSettings.max_proxy_recovery_attempts, 3, 1, 20),
-            registration_auto_upload: browserSettings.registration_auto_upload !== false,
+            execution_auto_upload: browserSettings.execution_auto_upload !== false,
             save_local_cookie: browserSettings.save_local_cookie === true,
             concurrent_count: toPositiveInteger(browserSettings.concurrent_count, 1, 1, 99),
             run_mode: toPositiveInteger(browserSettings.run_mode, 0, 0, 2),
-            timed_registration_count: toPositiveInteger(browserSettings.timed_registration_count, 1, 1, 99999),
-            timed_registration_cycle_count: toPositiveInteger(browserSettings.timed_registration_cycle_count, 1, 1, 99999),
-            timed_registration_start_mode: String(browserSettings.timed_registration_start_mode || '').trim() === 'delayed' ? 'delayed' : 'immediate',
-            timed_registration_delay_seconds: toPositiveInteger(browserSettings.timed_registration_delay_seconds, 0, 0, 3600)
+            timed_execution_count: toPositiveInteger(browserSettings.timed_execution_count, 1, 1, 99999),
+            timed_execution_cycle_count: toPositiveInteger(browserSettings.timed_execution_cycle_count, 1, 1, 99999),
+            timed_execution_start_mode: String(browserSettings.timed_execution_start_mode || '').trim() === 'delayed' ? 'delayed' : 'immediate',
+            timed_execution_delay_seconds: toPositiveInteger(browserSettings.timed_execution_delay_seconds, 0, 0, 3600)
         }
     };
 }
@@ -90,8 +90,8 @@ function normalizeHaikaExpiryDateValue(expiryDate = '') {
 }
 
 module.exports = {
-    cloneRegistrationCardConfig,
+    cloneExecutionCardConfig,
     normalizeHaikaExpiryDateValue,
-    summarizeRegistrationDefaultExecutionPlan,
+    summarizeDefaultExecutionPlan,
     toPositiveInteger
 };

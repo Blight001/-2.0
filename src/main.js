@@ -79,7 +79,7 @@ class AutomationApp {
             uiChannelManager: this.uiChannelManager,
             host: this.webControlConfig.host,
             port: this.webControlConfig.port,
-            registrationMode: this.webControlConfig.registrationMode,
+            executionMode: this.webControlConfig.executionMode,
             hostApp: this.webControlConfig.hostApp
         });
         this.ipcHandlersRegistered = false;
@@ -132,10 +132,10 @@ class AutomationApp {
         this.automationTcpEndpoint = null;
         this.automationTcpConfigured = false;
         this.automationTcpConfigSource = null;
-        this.registrationTcpReconnectEnabled = true;
-        this.registrationTcpConnectionStatus = null;
-        this.registrationTcpConnectionMonitorTimer = null;
-        this.registrationTcpConnectionMonitorActive = false;
+        this.executionTcpReconnectEnabled = true;
+        this.executionTcpConnectionStatus = null;
+        this.executionTcpConnectionMonitorTimer = null;
+        this.executionTcpConnectionMonitorActive = false;
         this.hardwareInfo = buildHardwareInfoFallback();
         this.hardwareInfoUpdatedAt = String(this.hardwareInfo.updated_at || '').trim();
         this.haikaManager = null;
@@ -147,7 +147,7 @@ class AutomationApp {
             clashManager: this.clashManager,
             mainWindow: this.mainWindow
         });
-        this.registrationTcpControlState = {};
+        this.executionTcpControlState = {};
         this.runningTasks = new Map();
         this.currentCard = null;
         this.currentTestCard = null; // 当前选中的测试卡片
@@ -160,8 +160,8 @@ class AutomationApp {
         this.runMode = 0; // 0: 单次运行, 1: 循环运行
         this.currentBrowserType = 'electron'; // 默认使用内置 Electron 浏览器
         this.browserSettings = {};
-        this.registrationDefaultExecutionPlan = null;
-        this.registrationDefaultExecutionPlanUpdatedAt = '';
+        this.defaultExecutionPlan = null;
+        this.defaultExecutionPlanUpdatedAt = '';
         this.cookieMigrationDone = false; // 防止重复迁移的标志
         this.lastAutomationConfig = null;
         this.activeAutomationCardConfig = null;
@@ -399,7 +399,7 @@ class AutomationApp {
         return false;
     }
     isAutomationControlLocked() {
-        return this.registrationTcpControlState && this.registrationTcpControlState.control_locked === true;
+        return this.executionTcpControlState && this.executionTcpControlState.control_locked === true;
     }
     shouldAutoLoadLocalCards() {
         return true;
@@ -422,9 +422,9 @@ class AutomationApp {
 
         return {
             startupMode: this.startupMode,
-            registrationMode: normalizeRegistrationMode(this.webControlConfig?.registrationMode, 'standalone'),
-            registrationEmbedded: this.webControlConfig?.embedded === true,
-            registrationHostApp: String(this.webControlConfig?.hostApp || '').trim(),
+            executionMode: normalizeExecutionMode(this.webControlConfig?.executionMode, 'standalone'),
+            executionEmbedded: this.webControlConfig?.embedded === true,
+            executionHostApp: String(this.webControlConfig?.hostApp || '').trim(),
             browserSource: normalizeBrowserSource(
                 this.browserSettings?.browser_source
                 || this.browserSettings?.browserSource
@@ -446,10 +446,10 @@ class AutomationApp {
             licenseUsageSnapshot: this.currentCardUsageSnapshot ? { ...this.currentCardUsageSnapshot } : null,
             hardwareInfo: this.hardwareInfo ? { ...this.hardwareInfo } : null,
             hardwareInfoUpdatedAt: String(this.hardwareInfoUpdatedAt || '').trim(),
-            registrationRuntimeConfig: runtimeConfig,
-            registration_runtime_config: runtimeConfig,
-            registrationRuntimeBrowserSettings: runtimeBrowserSettings,
-            registration_runtime_browser_settings: runtimeBrowserSettings,
+            executionRuntimeConfig: runtimeConfig,
+            execution_runtime_config: runtimeConfig,
+            executionRuntimeBrowserSettings: runtimeBrowserSettings,
+            execution_runtime_browser_settings: runtimeBrowserSettings,
             ...(await getExecutionTcpRuntimeInfo(this))
         };
     }
@@ -548,13 +548,13 @@ class AutomationApp {
     stopExecutionTcpConnectionMonitor() {
         return stopExecutionTcpConnectionMonitor(this);
     }
-    async persistRegistrationTcpEndpoint() {
+    async persistExecutionTcpEndpoint() {
         return false;
     }
     applyConnectionConfig(config = {}, options = {}) {
         return {
             validateServerConfig: { ...(this.licenseManager?.validateServerConfig || {}) },
-            registrationTcpEndpoint: this.getExecutionTcpEndpoint()
+            executionTcpEndpoint: this.getExecutionTcpEndpoint()
         };
     }
     async loadAndApplyUserConfig() {
@@ -609,9 +609,9 @@ class AutomationApp {
         this.startupUserConfigApplied = true;
         this.logger.info(`已从配置加载邮箱服务器: ${this.emailClient.serverHost}:${this.emailClient.serverPort}`);
         this.logger.info(`已从配置加载邮箱后缀: ${this.emailAddressSuffix}`);
-        const registrationTcpEndpoint = this.getExecutionTcpEndpoint?.();
-        if (registrationTcpEndpoint?.url) {
-            this.logger.info(`已从配置加载TCP服务地址: ${registrationTcpEndpoint.url}`);
+        const executionTcpEndpoint = this.getExecutionTcpEndpoint?.();
+        if (executionTcpEndpoint?.url) {
+            this.logger.info(`已从配置加载TCP服务地址: ${executionTcpEndpoint.url}`);
         }
         return config;
     }
@@ -639,7 +639,7 @@ class AutomationApp {
             bundled: path.join(process.resourcesPath, resourceTcpConfigPath)
         };
     }
-    async ensureRegistrationTcpConfigPathReady() {
+    async ensureExecutionTcpConfigPathReady() {
         const paths = this.getExecutionTcpConfigPath();
         const targetPath = paths.dev || paths.installed;
         const legacyPath = paths.legacyDev || paths.legacyInstalled;
@@ -697,7 +697,7 @@ class AutomationApp {
     }
     async readExecutionTcpConfigFromDisk() {
         try {
-            const paths = await this.ensureRegistrationTcpConfigPathReady();
+            const paths = await this.ensureExecutionTcpConfigPathReady();
             const targetPath = paths.installed || paths.dev;
             const legacyPath = paths.legacyDev || paths.legacyInstalled;
 
@@ -736,7 +736,7 @@ class AutomationApp {
     }
     async saveAutomationTcpConfigToDisk(config = {}) {
         try {
-            const paths = await this.ensureRegistrationTcpConfigPathReady();
+            const paths = await this.ensureExecutionTcpConfigPathReady();
             const targetPath = paths.installed || paths.dev;
             if (!targetPath) {
                 return { success: false, error: 'TCP配置路径不可用' };
@@ -862,7 +862,7 @@ class AutomationApp {
         return result;
     }
 
-    async startRegistrationTcpBridge() {
+    async startExecutionTcpBridge() {
         try {
             await this.startExecutionTcpConnectionMonitor({ immediate: true });
             return { success: true };
@@ -871,8 +871,8 @@ class AutomationApp {
         }
     }
 
-    async restartRegistrationTcpBridge() {
-        return await this.startRegistrationTcpBridge();
+    async restartExecutionTcpBridge() {
+        return await this.startExecutionTcpBridge();
     }
 
     async stopExecutionTcpBridge() {
@@ -929,16 +929,16 @@ class AutomationApp {
     }
 
     async loadCards() { return mainRuntime.loadCards.call(this); }
-    async startRegistration(config) { return mainRuntime.startRegistration.call(this, config); }
-    async startSingleRegistrationTask(...args) { return mainRuntime.startSingleRegistrationTask.call(this, ...args); }
+    async startExecution(config) { return mainRuntime.startExecution.call(this, config); }
+    async startSingleExecutionTask(...args) { return mainRuntime.startSingleExecutionTask.call(this, ...args); }
     _getExecutionModeLabel(...args) { return mainRuntime._getExecutionModeLabel.call(this, ...args); }
-    _clearTimedRegistrationTimers(...args) { return mainRuntime._clearTimedRegistrationTimers.call(this, ...args); }
-    _isTimedRegistrationSessionActive(...args) { return mainRuntime._isTimedRegistrationSessionActive.call(this, ...args); }
+    _clearTimedExecutionTimers(...args) { return mainRuntime._clearTimedExecutionTimers.call(this, ...args); }
+    _isTimedExecutionSessionActive(...args) { return mainRuntime._isTimedExecutionSessionActive.call(this, ...args); }
     _emitExecutionCycleStatus(...args) { return mainRuntime._emitExecutionCycleStatus.call(this, ...args); }
-    _createTimedRegistrationState(...args) { return mainRuntime._createTimedRegistrationState.call(this, ...args); }
-    _finalizeTimedRegistrationSession(...args) { return mainRuntime._finalizeTimedRegistrationSession.call(this, ...args); }
-    _launchTimedRegistrationTask(...args) { return mainRuntime._launchTimedRegistrationTask.call(this, ...args); }
-    _scheduleTimedRegistrationContinuation(...args) { return mainRuntime._scheduleTimedRegistrationContinuation.call(this, ...args); }
+    _createTimedExecutionState(...args) { return mainRuntime._createTimedExecutionState.call(this, ...args); }
+    _finalizeTimedExecutionSession(...args) { return mainRuntime._finalizeTimedExecutionSession.call(this, ...args); }
+    _launchTimedExecutionTask(...args) { return mainRuntime._launchTimedExecutionTask.call(this, ...args); }
+    _scheduleTimedExecutionContinuation(...args) { return mainRuntime._scheduleTimedExecutionContinuation.call(this, ...args); }
     async startCardDebugTask(config) { return mainRuntime.startCardDebugTask.call(this, config); }
     async startHaikaBindingTask(config) { return mainRuntime.startHaikaBindingTask.call(this, config); }
     async stopHaikaBinding() { return mainRuntime.stopHaikaBinding.call(this); }
@@ -956,8 +956,8 @@ class AutomationApp {
     async stopRunningTasksForRecovery() { return mainRuntime.stopRunningTasksForRecovery.call(this); }
     async getNextProxyNodeForRecovery() { return mainRuntime.getNextProxyNodeForRecovery.call(this); }
     async recoverFromProxyError(taskId, error) { return mainRuntime.recoverFromProxyError.call(this, taskId, error); }
-    async onRegistrationFinished(taskId, result) { return mainRuntime.onRegistrationFinished.call(this, taskId, result); }
-    onRegistrationError(taskId, error) { return mainRuntime.onRegistrationError.call(this, taskId, error); }
+    async onExecutionFinished(taskId, result) { return mainRuntime.onExecutionFinished.call(this, taskId, result); }
+    onExecutionError(taskId, error) { return mainRuntime.onExecutionError.call(this, taskId, error); }
     async onHaikaBindingFinished(taskId, result, accountInfo) { return mainRuntime.onHaikaBindingFinished.call(this, taskId, result, accountInfo); }
     onHaikaBindingError(taskId, error, accountInfo) { return mainRuntime.onHaikaBindingError.call(this, taskId, error, accountInfo); }
     async stopExecution(...args) { return mainRuntime.stopExecution.call(this, ...args); }

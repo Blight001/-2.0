@@ -158,10 +158,10 @@ module.exports = {
             this.logger.error(`代理自动恢复已达到最大次数 ${this.maxProxyRecoveryAttempts}，停止自动切换`);
             this.isLoopRunning = false;
             this.isTimedRunning = false;
-            if (this.timedRegistrationState) {
-                this._clearTimedRegistrationTimers();
-                this.timedRegistrationState.active = false;
-                this.timedRegistrationState.stopRequested = true;
+            if (this.timedExecutionState) {
+                this._clearTimedExecutionTimers();
+                this.timedExecutionState.active = false;
+                this.timedExecutionState.stopRequested = true;
             }
             return false;
         }
@@ -204,9 +204,9 @@ module.exports = {
                 }
 
                 for (let i = 0; i < this.concurrentCount; i++) {
-                    await this.startSingleRegistrationTask();
+                    await this.startSingleExecutionTask();
                 }
-            } else if (this.isTimedRunning && this.timedRegistrationState) {
+            } else if (this.isTimedRunning && this.timedExecutionState) {
                 this.logger.info('代理恢复完成，定时执行将按原有延时策略继续');
             }
 
@@ -215,10 +215,10 @@ module.exports = {
             this.logger.error(`代理自动切换恢复失败: ${recoverError.message}`);
             this.isLoopRunning = false;
             this.isTimedRunning = false;
-            if (this.timedRegistrationState) {
-                this._clearTimedRegistrationTimers();
-                this.timedRegistrationState.active = false;
-                this.timedRegistrationState.stopRequested = true;
+            if (this.timedExecutionState) {
+                this._clearTimedExecutionTimers();
+                this.timedExecutionState.active = false;
+                this.timedExecutionState.stopRequested = true;
             }
             return false;
         } finally {

@@ -1,5 +1,5 @@
 module.exports = {
-    _getTimedRegistrationPlanTotals(state = this.timedRegistrationState) {
+    _getTimedExecutionPlanTotals(state = this.timedExecutionState) {
         const batchSize = Math.max(1, parseInt(state?.totalCount, 10) || 1);
         const cycleLimit = Math.max(1, parseInt(state?.cycleLimit, 10) || 1);
         return {
@@ -9,8 +9,8 @@ module.exports = {
         };
     },
 
-    _getTimedRegistrationCycleLabel(state = this.timedRegistrationState, cycleIndex = null) {
-        const { cycleLimit } = this._getTimedRegistrationPlanTotals(state);
+    _getTimedExecutionCycleLabel(state = this.timedExecutionState, cycleIndex = null) {
+        const { cycleLimit } = this._getTimedExecutionPlanTotals(state);
         const normalizedCycleIndex = Math.max(
             1,
             Math.min(
@@ -22,15 +22,15 @@ module.exports = {
         return `第 ${normalizedCycleIndex}/${cycleLimit} 轮`;
     },
 
-    _getTimedRegistrationProgressTaskId(state = this.timedRegistrationState) {
+    _getTimedExecutionProgressTaskId(state = this.timedExecutionState) {
         if (!state || !state.sessionId) {
             return null;
         }
 
-        return `timed-registration-${state.sessionId}`;
+        return `timed-execution-${state.sessionId}`;
     },
 
-    _formatTimedRegistrationDuration(durationMs = 0) {
+    _formatTimedExecutionDuration(durationMs = 0) {
         const totalSeconds = Math.max(0, Math.ceil(Number(durationMs) / 1000));
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -47,7 +47,7 @@ module.exports = {
         return parts.join('');
     },
 
-    _getNextTimedRegistrationLaunchAt(state = this.timedRegistrationState) {
+    _getNextTimedExecutionLaunchAt(state = this.timedExecutionState) {
         if (!state || !state.pendingTimers || state.pendingTimers.size === 0) {
             return null;
         }
@@ -67,7 +67,7 @@ module.exports = {
         return nextLaunchAt;
     },
 
-    _buildTimedRegistrationProgressPayload(state = this.timedRegistrationState, options = {}) {
+    _buildTimedExecutionProgressPayload(state = this.timedExecutionState, options = {}) {
         if (!state) {
             return null;
         }
@@ -76,7 +76,7 @@ module.exports = {
             batchSize,
             cycleLimit,
             totalPlannedCount
-        } = this._getTimedRegistrationPlanTotals(state);
+        } = this._getTimedExecutionPlanTotals(state);
         const completedCount = Math.max(0, Math.min(parseInt(state.completedCount, 10) || 0, totalPlannedCount));
         const startedCount = Math.max(0, Math.min(parseInt(state.startedCount, 10) || 0, totalPlannedCount));
         const cycleCompletedCount = Math.max(0, Math.min(parseInt(state.cycleCompletedCount, 10) || 0, batchSize));
@@ -92,13 +92,13 @@ module.exports = {
             )
         );
         const completedCyclesBeforeCurrent = Math.max(0, Math.min(parseInt(state.completedCycleCount, 10) || 0, Math.max(0, cycleLimit - 1)));
-        const taskId = options.taskId || this._getTimedRegistrationProgressTaskId(state);
-        const taskLabel = options.taskLabel || this._getTimedRegistrationBatchLabel();
-        const taskNumber = options.taskNumber !== undefined ? String(options.taskNumber) : this._getTimedRegistrationCycleLabel(state, currentCycleIndex);
+        const taskId = options.taskId || this._getTimedExecutionProgressTaskId(state);
+        const taskLabel = options.taskLabel || this._getTimedExecutionBatchLabel();
+        const taskNumber = options.taskNumber !== undefined ? String(options.taskNumber) : this._getTimedExecutionCycleLabel(state, currentCycleIndex);
         const progress = batchSize > 0 ? Math.round((cycleCompletedCount / batchSize) * 100) : 100;
         const nextLaunchAt = options.nextLaunchAt !== undefined
             ? options.nextLaunchAt
-            : this._getNextTimedRegistrationLaunchAt(state);
+            : this._getNextTimedExecutionLaunchAt(state);
         const normalizedNextLaunchAt = Number.isFinite(Number(nextLaunchAt)) ? Number(nextLaunchAt) : null;
         const nextLaunchInMs = normalizedNextLaunchAt !== null
             ? Math.max(0, normalizedNextLaunchAt - Date.now())
@@ -135,14 +135,14 @@ module.exports = {
             if (options.completed || (sessionCompletedCount >= totalPlannedCount && currentCycleIndex >= cycleLimit && cycleCompletedCount >= batchSize)) {
                 messageParts.push(`定时执行完成，共完成 ${sessionCompletedCount}/${totalPlannedCount}`);
             } else if (nextLaunchInMs !== null && cycleCompletedCount === 0 && cycleStartedCount === 0 && completedCount === 0 && completedCyclesBeforeCurrent === 0) {
-                messageParts.push(`准备开始定时执行，首轮将在 ${this._formatTimedRegistrationDuration(nextLaunchInMs)} 后开始`);
+                messageParts.push(`准备开始定时执行，首轮将在 ${this._formatTimedExecutionDuration(nextLaunchInMs)} 后开始`);
                 messageParts.push(`共 ${cycleLimit} 轮，每轮 ${batchSize} 个`);
             } else if (nextLaunchInMs !== null && remainingCount <= 0) {
-                messageParts.push(`${this._getTimedRegistrationCycleLabel(state, currentCycleIndex)}已完成`);
-                messageParts.push(`下一轮还有 ${this._formatTimedRegistrationDuration(nextLaunchInMs)}`);
+                messageParts.push(`${this._getTimedExecutionCycleLabel(state, currentCycleIndex)}已完成`);
+                messageParts.push(`下一轮还有 ${this._formatTimedExecutionDuration(nextLaunchInMs)}`);
                 messageParts.push(`累计已完成 ${sessionCompletedCount}/${totalPlannedCount}`);
             } else {
-                messageParts.push(`${this._getTimedRegistrationCycleLabel(state, currentCycleIndex)}进行中`);
+                messageParts.push(`${this._getTimedExecutionCycleLabel(state, currentCycleIndex)}进行中`);
                 messageParts.push(`本轮已完成 ${cycleCompletedCount}/${batchSize}`);
                 if (remainingCount > 0) {
                     messageParts.push(`本轮剩余 ${remainingCount} 个`);
@@ -157,7 +157,7 @@ module.exports = {
 
         return {
             mode: 'timed',
-            taskType: 'timed-registration-summary',
+            taskType: 'timed-execution-summary',
             sessionId: state.sessionId,
             taskId,
             taskLabel,
@@ -197,12 +197,12 @@ module.exports = {
         };
     },
 
-    _emitTimedRegistrationProgress(state = this.timedRegistrationState, options = {}) {
+    _emitTimedExecutionProgress(state = this.timedExecutionState, options = {}) {
         if (!state || !this.mainWindow) {
             return null;
         }
 
-        const payload = this._buildTimedRegistrationProgressPayload(state, options);
+        const payload = this._buildTimedExecutionProgressPayload(state, options);
         if (!payload) {
             return null;
         }
@@ -211,7 +211,7 @@ module.exports = {
         return payload;
     },
 
-    _clearTimedRegistrationCountdownReporter(state = this.timedRegistrationState) {
+    _clearTimedExecutionCountdownReporter(state = this.timedExecutionState) {
         if (!state) {
             return;
         }
@@ -224,16 +224,16 @@ module.exports = {
         state.nextLaunchAt = null;
     },
 
-    _syncTimedRegistrationCountdownReporter(state = this.timedRegistrationState) {
+    _syncTimedExecutionCountdownReporter(state = this.timedExecutionState) {
         if (!state) {
             return;
         }
 
-        const nextLaunchAt = this._getNextTimedRegistrationLaunchAt(state);
+        const nextLaunchAt = this._getNextTimedExecutionLaunchAt(state);
         state.nextLaunchAt = nextLaunchAt;
 
         if (!state.active || state.stopRequested || nextLaunchAt === null) {
-            this._clearTimedRegistrationCountdownReporter(state);
+            this._clearTimedExecutionCountdownReporter(state);
             return;
         }
 
@@ -242,21 +242,21 @@ module.exports = {
         }
 
         state.reportTimer = setInterval(() => {
-            const currentState = this.timedRegistrationState;
-            if (!currentState || currentState !== state || currentState.sessionId !== this.timedRegistrationSessionId) {
-                this._clearTimedRegistrationCountdownReporter(state);
+            const currentState = this.timedExecutionState;
+            if (!currentState || currentState !== state || currentState.sessionId !== this.timedExecutionSessionId) {
+                this._clearTimedExecutionCountdownReporter(state);
                 return;
             }
 
             if (!currentState.active || currentState.stopRequested) {
-                this._clearTimedRegistrationCountdownReporter(state);
+                this._clearTimedExecutionCountdownReporter(state);
                 return;
             }
 
-            const currentNextLaunchAt = this._getNextTimedRegistrationLaunchAt(currentState);
+            const currentNextLaunchAt = this._getNextTimedExecutionLaunchAt(currentState);
             currentState.nextLaunchAt = currentNextLaunchAt;
             if (currentNextLaunchAt === null) {
-                this._clearTimedRegistrationCountdownReporter(currentState);
+                this._clearTimedExecutionCountdownReporter(currentState);
                 return;
             }
 
@@ -264,7 +264,7 @@ module.exports = {
                 batchSize,
                 cycleLimit,
                 totalPlannedCount
-            } = this._getTimedRegistrationPlanTotals(currentState);
+            } = this._getTimedExecutionPlanTotals(currentState);
             const currentCycleIndex = Math.max(
                 1,
                 Math.min(
@@ -274,13 +274,13 @@ module.exports = {
             );
             const isInitialWaiting = currentState.completedCount === 0 && currentState.cycleCompletedCount === 0 && currentCycleIndex === 1;
             const countdownLabel = isInitialWaiting ? '首轮' : '下一轮';
-            const cycleLabel = this._getTimedRegistrationCycleLabel(currentState, currentCycleIndex);
-            const payload = this._buildTimedRegistrationProgressPayload(currentState, {
+            const cycleLabel = this._getTimedExecutionCycleLabel(currentState, currentCycleIndex);
+            const payload = this._buildTimedExecutionProgressPayload(currentState, {
                 nextLaunchAt: currentNextLaunchAt,
                 statusText: '等待下一次执行',
                 message: isInitialWaiting
-                    ? `定时执行倒计时：${countdownLabel}还有 ${this._formatTimedRegistrationDuration(currentNextLaunchAt - Date.now())}，本轮已完成 ${Math.max(0, currentState.cycleCompletedCount || 0)}/${batchSize}，累计已完成 ${Math.max(0, currentState.completedCount || 0)}/${totalPlannedCount}`
-                    : `定时执行倒计时：${countdownLabel}还有 ${this._formatTimedRegistrationDuration(currentNextLaunchAt - Date.now())}，${cycleLabel}已完成，本轮已完成 ${Math.max(0, currentState.cycleCompletedCount || 0)}/${batchSize}，累计已完成 ${Math.max(0, currentState.completedCount || 0)}/${totalPlannedCount}`,
+                    ? `定时执行倒计时：${countdownLabel}还有 ${this._formatTimedExecutionDuration(currentNextLaunchAt - Date.now())}，本轮已完成 ${Math.max(0, currentState.cycleCompletedCount || 0)}/${batchSize}，累计已完成 ${Math.max(0, currentState.completedCount || 0)}/${totalPlannedCount}`
+                    : `定时执行倒计时：${countdownLabel}还有 ${this._formatTimedExecutionDuration(currentNextLaunchAt - Date.now())}，${cycleLabel}已完成，本轮已完成 ${Math.max(0, currentState.cycleCompletedCount || 0)}/${batchSize}，累计已完成 ${Math.max(0, currentState.completedCount || 0)}/${totalPlannedCount}`,
                 stage: 'waiting'
             });
 
@@ -293,8 +293,8 @@ module.exports = {
         }, 1000);
     },
 
-    _clearTimedRegistrationTimers() {
-        const state = this.timedRegistrationState;
+    _clearTimedExecutionTimers() {
+        const state = this.timedExecutionState;
         if (!state) {
             return;
         }
@@ -306,28 +306,28 @@ module.exports = {
             state.pendingTimers.clear();
         }
 
-        this._clearTimedRegistrationCountdownReporter(state);
+        this._clearTimedExecutionCountdownReporter(state);
     },
 
-    _isTimedRegistrationSessionActive() {
-        const state = this.timedRegistrationState;
+    _isTimedExecutionSessionActive() {
+        const state = this.timedExecutionState;
         return !!(state && state.active && !state.stopRequested);
     },
 
     _emitExecutionCycleStatus(text, extra = {}) {
         if (this.mainWindow && text) {
-            this.mainWindow.webContents.send('registration-cycle-status', {
+            this.mainWindow.webContents.send('execution-cycle-status', {
                 text,
                 ...extra
             });
         }
     },
 
-    _createTimedRegistrationState(config = {}) {
-        const totalCount = Math.max(1, parseInt(config.timedRegistrationCount, 10) || 1);
-        const cycleLimit = Math.max(1, parseInt(config.timedRegistrationCycleCount, 10) || 1);
-        const delayMs = Math.max(0, parseInt(config.timedRegistrationDelayMs, 10) || 0);
-        const startMode = config.timedRegistrationStartMode === 'delayed' ? 'delayed' : 'immediate';
+    _createTimedExecutionState(config = {}) {
+        const totalCount = Math.max(1, parseInt(config.timedExecutionCount, 10) || 1);
+        const cycleLimit = Math.max(1, parseInt(config.timedExecutionCycleCount, 10) || 1);
+        const delayMs = Math.max(0, parseInt(config.timedExecutionDelayMs, 10) || 0);
+        const startMode = config.timedExecutionStartMode === 'delayed' ? 'delayed' : 'immediate';
         const state = {
             active: true,
             stopRequested: false,
@@ -348,14 +348,14 @@ module.exports = {
             nextLaunchAt: null
         };
 
-        this.timedRegistrationState = state;
-        this.timedRegistrationSessionId = state.sessionId;
+        this.timedExecutionState = state;
+        this.timedExecutionSessionId = state.sessionId;
         this.isTimedRunning = true;
         return state;
     },
 
-    _finalizeTimedRegistrationSession(reason = '定时执行已完成') {
-        const state = this.timedRegistrationState;
+    _finalizeTimedExecutionSession(reason = '定时执行已完成') {
+        const state = this.timedExecutionState;
         if (!state) {
             return false;
         }
@@ -364,7 +364,7 @@ module.exports = {
             batchSize,
             cycleLimit,
             totalPlannedCount
-        } = this._getTimedRegistrationPlanTotals(state);
+        } = this._getTimedExecutionPlanTotals(state);
         const currentCycleIndex = Math.max(
             1,
             Math.min(
@@ -372,7 +372,7 @@ module.exports = {
                 cycleLimit
             )
         );
-        const finalPayload = this._buildTimedRegistrationProgressPayload(state, {
+        const finalPayload = this._buildTimedExecutionProgressPayload(state, {
             completed: true,
             stage: 'completed',
             statusText: '已完成',
@@ -381,9 +381,9 @@ module.exports = {
 
         state.active = false;
         state.stopRequested = false;
-        this._clearTimedRegistrationTimers();
-        this.timedRegistrationState = null;
-        this.timedRegistrationSessionId = null;
+        this._clearTimedExecutionTimers();
+        this.timedExecutionState = null;
+        this.timedExecutionSessionId = null;
         this.isTimedRunning = false;
 
         if (finalPayload) {
@@ -402,8 +402,8 @@ module.exports = {
         return true;
     },
 
-    async _launchTimedRegistrationCycle(state = this.timedRegistrationState, options = {}) {
-        if (this.registrationStopRequested || !state || !state.active || state.stopRequested) {
+    async _launchTimedExecutionCycle(state = this.timedExecutionState, options = {}) {
+        if (this.executionStopRequested || !state || !state.active || state.stopRequested) {
             return false;
         }
 
@@ -411,7 +411,7 @@ module.exports = {
             batchSize,
             cycleLimit,
             totalPlannedCount
-        } = this._getTimedRegistrationPlanTotals(state);
+        } = this._getTimedExecutionPlanTotals(state);
         const normalizedCycleIndex = Math.max(
             1,
             Math.min(
@@ -424,12 +424,12 @@ module.exports = {
         state.cycleStartedCount = 0;
         state.cycleCompletedCount = 0;
         state.startingCount = 0;
-        this._clearTimedRegistrationCountdownReporter(state);
+        this._clearTimedExecutionCountdownReporter(state);
 
-        const cycleLabel = this._getTimedRegistrationCycleLabel(state, normalizedCycleIndex);
+        const cycleLabel = this._getTimedExecutionCycleLabel(state, normalizedCycleIndex);
         const initialMessage = options.message || `${cycleLabel}开始，本轮 ${batchSize} 个，累计计划 ${totalPlannedCount} 个`;
 
-        this._emitTimedRegistrationProgress(state, {
+        this._emitTimedExecutionProgress(state, {
             statusText: options.statusText || '执行中',
             message: initialMessage,
             stage: options.stage || 'running',
@@ -438,11 +438,11 @@ module.exports = {
 
         const initialLaunchCount = Math.min(this.concurrentCount, batchSize);
         for (let i = 0; i < initialLaunchCount; i++) {
-            if (this.registrationStopRequested || !state.active || state.stopRequested || this.timedRegistrationState !== state) {
+            if (this.executionStopRequested || !state.active || state.stopRequested || this.timedExecutionState !== state) {
                 break;
             }
 
-            const launched = await this._launchTimedRegistrationTask(options.trigger || 'timed-cycle');
+            const launched = await this._launchTimedExecutionTask(options.trigger || 'timed-cycle');
             if (!launched) {
                 break;
             }
@@ -451,8 +451,8 @@ module.exports = {
         return true;
     },
 
-    _scheduleTimedRegistrationCycleStart(state = this.timedRegistrationState, launchCycleIndex = 1, delayMs = 0, options = {}) {
-        if (!state || !state.active || state.stopRequested || this.registrationStopRequested) {
+    _scheduleTimedExecutionCycleStart(state = this.timedExecutionState, launchCycleIndex = 1, delayMs = 0, options = {}) {
+        if (!state || !state.active || state.stopRequested || this.executionStopRequested) {
             return false;
         }
 
@@ -460,7 +460,7 @@ module.exports = {
             batchSize,
             cycleLimit,
             totalPlannedCount
-        } = this._getTimedRegistrationPlanTotals(state);
+        } = this._getTimedExecutionPlanTotals(state);
         const normalizedLaunchCycleIndex = Math.max(
             1,
             Math.min(parseInt(launchCycleIndex, 10) || 1, cycleLimit)
@@ -486,18 +486,18 @@ module.exports = {
                 state.pendingTimers.delete(timerId);
             }
 
-            if (this.timedRegistrationState !== state || state.sessionId !== this.timedRegistrationSessionId) {
-                this._clearTimedRegistrationCountdownReporter(state);
+            if (this.timedExecutionState !== state || state.sessionId !== this.timedExecutionSessionId) {
+                this._clearTimedExecutionCountdownReporter(state);
                 return false;
             }
 
-            if (!state.active || state.stopRequested || this.registrationStopRequested) {
-                this._clearTimedRegistrationCountdownReporter(state);
+            if (!state.active || state.stopRequested || this.executionStopRequested) {
+                this._clearTimedExecutionCountdownReporter(state);
                 return false;
             }
 
             state.completedCycleCount = Math.max(0, Math.min(normalizedLaunchCycleIndex - 1, Math.max(0, cycleLimit - 1)));
-            return this._launchTimedRegistrationCycle(state, {
+            return this._launchTimedExecutionCycle(state, {
                 cycleIndex: normalizedLaunchCycleIndex,
                 trigger: options.trigger || (normalizedLaunchCycleIndex === 1 ? 'timed-start' : 'timed-delay')
             });
@@ -522,36 +522,36 @@ module.exports = {
 
         const isInitialStart = displayCycleIndex <= 0 && normalizedLaunchCycleIndex === 1 && state.completedCount === 0 && state.cycleCompletedCount === 0 && state.completedCycleCount === 0;
         const cycleLabel = displayCycleIndex > 0
-            ? this._getTimedRegistrationCycleLabel(state, displayCycleIndex)
+            ? this._getTimedExecutionCycleLabel(state, displayCycleIndex)
             : '首轮';
         const message = options.message || (
             isInitialStart
-                ? `准备开始定时执行批次，共 ${cycleLimit} 轮，每轮 ${batchSize} 个，首轮将在 ${this._formatTimedRegistrationDuration(normalizedDelayMs)} 后开始`
-                : `${cycleLabel}已完成，下一轮将在 ${this._formatTimedRegistrationDuration(normalizedDelayMs)} 后开始，累计计划 ${totalPlannedCount} 个`
+                ? `准备开始定时执行批次，共 ${cycleLimit} 轮，每轮 ${batchSize} 个，首轮将在 ${this._formatTimedExecutionDuration(normalizedDelayMs)} 后开始`
+                : `${cycleLabel}已完成，下一轮将在 ${this._formatTimedExecutionDuration(normalizedDelayMs)} 后开始，累计计划 ${totalPlannedCount} 个`
         );
 
-        this._emitTimedRegistrationProgress(state, {
+        this._emitTimedExecutionProgress(state, {
             statusText: options.statusText || (isInitialStart ? '等待开始' : '等待下一轮'),
             message,
             stage: 'waiting',
-            taskNumber: isInitialStart ? this._getTimedRegistrationCycleLabel(state, 1) : cycleLabel,
+            taskNumber: isInitialStart ? this._getTimedExecutionCycleLabel(state, 1) : cycleLabel,
             nextLaunchAt
         });
 
-        this._syncTimedRegistrationCountdownReporter(state);
+        this._syncTimedExecutionCountdownReporter(state);
         return true;
     },
 
-    async _launchTimedRegistrationTask(trigger = 'timed-delay') {
-        const state = this.timedRegistrationState;
-        if (this.registrationStopRequested || !state || !state.active || state.stopRequested) {
+    async _launchTimedExecutionTask(trigger = 'timed-delay') {
+        const state = this.timedExecutionState;
+        if (this.executionStopRequested || !state || !state.active || state.stopRequested) {
             return false;
         }
 
         const {
             batchSize,
             totalPlannedCount
-        } = this._getTimedRegistrationPlanTotals(state);
+        } = this._getTimedExecutionPlanTotals(state);
 
         if (state.cycleStartedCount + state.startingCount >= batchSize) {
             return false;
@@ -564,11 +564,11 @@ module.exports = {
         state.startingCount += 1;
 
         try {
-            const startResult = await this.startSingleRegistrationTask({
-                taskLabel: this._getTimedRegistrationTaskLabel()
+            const startResult = await this.startSingleExecutionTask({
+                taskLabel: this._getTimedExecutionTaskLabel()
             });
 
-            if (state.stopRequested || !state.active || this.timedRegistrationState !== state) {
+            if (state.stopRequested || !state.active || this.timedExecutionState !== state) {
                 if (startResult && startResult.taskId && this.runningTasks.has(startResult.taskId)) {
                     const launchedTask = this.runningTasks.get(startResult.taskId);
                     if (launchedTask && typeof launchedTask.stop === 'function') {
@@ -595,10 +595,10 @@ module.exports = {
                 )
             );
             const statusText = remainingToLaunch > 0
-                ? `${this._getTimedRegistrationCycleLabel(state, currentCycleIndex)}进行中... 已启动 ${state.cycleStartedCount}/${batchSize} 个，剩余 ${remainingToLaunch} 个`
-                : `${this._getTimedRegistrationCycleLabel(state, currentCycleIndex)}已启动最后一个，本轮共 ${batchSize} 个`;
+                ? `${this._getTimedExecutionCycleLabel(state, currentCycleIndex)}进行中... 已启动 ${state.cycleStartedCount}/${batchSize} 个，剩余 ${remainingToLaunch} 个`
+                : `${this._getTimedExecutionCycleLabel(state, currentCycleIndex)}已启动最后一个，本轮共 ${batchSize} 个`;
 
-            this._emitTimedRegistrationProgress(state, {
+            this._emitTimedExecutionProgress(state, {
                 statusText: '执行中',
                 message: statusText,
                 trigger
@@ -614,15 +614,15 @@ module.exports = {
         }
     },
 
-    _scheduleTimedRegistrationContinuation(taskId, result = {}) {
-        const state = this.timedRegistrationState;
+    _scheduleTimedExecutionContinuation(taskId, result = {}) {
+        const state = this.timedExecutionState;
         if (!state || !state.active || state.stopRequested) {
             return false;
         }
 
         const {
             cycleLimit
-        } = this._getTimedRegistrationPlanTotals(state);
+        } = this._getTimedExecutionPlanTotals(state);
         const currentCycleIndex = Math.max(
             1,
             Math.min(
@@ -633,18 +633,18 @@ module.exports = {
 
         if (currentCycleIndex >= cycleLimit) {
             if (this.runningTasks.size === 0 && state.startingCount === 0) {
-                this._finalizeTimedRegistrationSession('定时执行已完成');
+                this._finalizeTimedExecutionSession('定时执行已完成');
             }
             return false;
         }
 
         const delayMs = Math.max(0, state.delayMs || 0);
         const nextCycleIndex = currentCycleIndex + 1;
-        const schedulePayload = this._buildTimedRegistrationProgressPayload(state, {
+        const schedulePayload = this._buildTimedExecutionProgressPayload(state, {
             statusText: delayMs > 0 ? '等待下一轮' : '执行中',
             message: delayMs > 0
-                ? `${this._getTimedRegistrationCycleLabel(state, currentCycleIndex)}已完成，下一轮将在 ${this._formatTimedRegistrationDuration(delayMs)} 后开始`
-                : `${this._getTimedRegistrationCycleLabel(state, currentCycleIndex)}已完成，立即开始下一轮`,
+                ? `${this._getTimedExecutionCycleLabel(state, currentCycleIndex)}已完成，下一轮将在 ${this._formatTimedExecutionDuration(delayMs)} 后开始`
+                : `${this._getTimedExecutionCycleLabel(state, currentCycleIndex)}已完成，立即开始下一轮`,
             stage: delayMs > 0 ? 'waiting' : 'running'
         });
 
@@ -653,7 +653,7 @@ module.exports = {
             this._emitExecutionCycleStatus(schedulePayload.message, schedulePayload);
         }
 
-        return this._scheduleTimedRegistrationCycleStart(state, nextCycleIndex, delayMs, {
+        return this._scheduleTimedExecutionCycleStart(state, nextCycleIndex, delayMs, {
             displayCycleIndex: currentCycleIndex,
             trigger: 'timed-delay',
             statusText: delayMs > 0 ? '等待下一轮' : '执行中',
@@ -661,8 +661,8 @@ module.exports = {
         });
     },
 
-    async _handleTimedRegistrationTaskCompletion(taskId, result = {}, options = {}) {
-        const state = this.timedRegistrationState;
+    async _handleTimedExecutionTaskCompletion(taskId, result = {}, options = {}) {
+        const state = this.timedExecutionState;
         if (!state || !state.active || state.stopRequested) {
             return false;
         }
@@ -671,7 +671,7 @@ module.exports = {
             batchSize,
             cycleLimit,
             totalPlannedCount
-        } = this._getTimedRegistrationPlanTotals(state);
+        } = this._getTimedExecutionPlanTotals(state);
         const currentCycleIndex = Math.max(
             1,
             Math.min(
@@ -684,34 +684,34 @@ module.exports = {
         state.cycleCompletedCount = Math.min(batchSize, (state.cycleCompletedCount || 0) + 1);
 
         const remainingToLaunch = Math.max(0, batchSize - state.cycleStartedCount - state.startingCount);
-        if (remainingToLaunch > 0 && !this.registrationStopRequested) {
-            await this._launchTimedRegistrationTask(options.trigger || 'timed-cycle');
+        if (remainingToLaunch > 0 && !this.executionStopRequested) {
+            await this._launchTimedExecutionTask(options.trigger || 'timed-cycle');
         }
 
         const waitingCount = this.runningTasks.size + state.startingCount;
         if (state.cycleCompletedCount >= batchSize) {
             if (waitingCount <= 0) {
                 if (currentCycleIndex >= cycleLimit) {
-                    this._finalizeTimedRegistrationSession('定时执行已完成');
+                    this._finalizeTimedExecutionSession('定时执行已完成');
                     return true;
                 }
 
-                return this._scheduleTimedRegistrationContinuation(taskId, result);
+                return this._scheduleTimedExecutionContinuation(taskId, result);
             }
 
-            this._emitTimedRegistrationProgress(state, {
+            this._emitTimedExecutionProgress(state, {
                 waitingCount,
                 statusText: '等待当前任务结束',
-                message: `${this._getTimedRegistrationCycleLabel(state, currentCycleIndex)}已完成，等待 ${waitingCount} 个任务结束`,
+                message: `${this._getTimedExecutionCycleLabel(state, currentCycleIndex)}已完成，等待 ${waitingCount} 个任务结束`,
                 stage: 'finishing'
             });
             return true;
         }
 
-        this._emitTimedRegistrationProgress(state, {
+        this._emitTimedExecutionProgress(state, {
             waitingCount,
             statusText: waitingCount > 0 ? '执行中' : '等待任务启动',
-            message: `${this._getTimedRegistrationCycleLabel(state, currentCycleIndex)}进行中，已完成 ${state.cycleCompletedCount}/${batchSize}，累计已完成 ${state.completedCount}/${totalPlannedCount}`,
+            message: `${this._getTimedExecutionCycleLabel(state, currentCycleIndex)}进行中，已完成 ${state.cycleCompletedCount}/${batchSize}，累计已完成 ${state.completedCount}/${totalPlannedCount}`,
             stage: 'running'
         });
         return true;

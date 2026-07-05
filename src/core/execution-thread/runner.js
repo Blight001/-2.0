@@ -29,7 +29,7 @@ const normalizeNavigationUrl = (value) => {
     return raw;
 };
 
-const normalizeRegistrationSteps = (cardConfig = {}, logger = null) => {
+const normalizeExecutionSteps = (cardConfig = {}, logger = null) => {
     const steps = Array.isArray(cardConfig.steps) ? [...cardConfig.steps] : [];
     const website = normalizeNavigationUrl(cardConfig.website);
 
@@ -57,8 +57,8 @@ const normalizeRegistrationSteps = (cardConfig = {}, logger = null) => {
     ];
 };
 
-const reloadLatestRegistrationCardConfig = async (thread) => {
-    const cardName = String(thread?.cardConfig?.name || thread?.app?.activeRegistrationCardName || '').trim();
+const reloadLatestExecutionCardConfig = async (thread) => {
+    const cardName = String(thread?.cardConfig?.name || thread?.app?.activeExecutionCardName || '').trim();
     const cardManager = thread?.app?.cardManager;
     if (!cardName || !cardManager || typeof cardManager.getCard !== 'function') {
         return false;
@@ -275,7 +275,7 @@ module.exports = {
             debugMode: this.debugMode === true
         };
 
-        let steps = normalizeRegistrationSteps(this.cardConfig, this.logger);
+        let steps = normalizeExecutionSteps(this.cardConfig, this.logger);
         let totalSteps = steps.length;
         const debugMode = this.debugMode === true;
         const jumpCounters = new Map();
@@ -287,12 +287,12 @@ module.exports = {
             }
 
             this._debugCardConfigRefreshPending = false;
-            const refreshed = await reloadLatestRegistrationCardConfig(this);
+            const refreshed = await reloadLatestExecutionCardConfig(this);
             if (!refreshed) {
                 return false;
             }
 
-            steps = normalizeRegistrationSteps(this.cardConfig, this.logger);
+            steps = normalizeExecutionSteps(this.cardConfig, this.logger);
             totalSteps = steps.length;
             this.logger.info(`调试继续前已重新加载最新卡片步骤: ${String(this.cardConfig?.name || '').trim() || 'unknown'}`);
             return true;
@@ -614,7 +614,7 @@ module.exports = {
                 }
             } catch (error) {
                 const normalizedError = this._normalizeRuntimeError(error, `步骤 ${stepName}`);
-                this.logger.error(`execute_registration_steps异常时step状态: 类型=${typeof step}, 值=${JSON.stringify(step)}`);
+                this.logger.error(`execute_execution_steps异常时step状态: 类型=${typeof step}, 值=${JSON.stringify(step)}`);
                 this.logger.error(`异常信息: ${normalizedError.message}`);
                 let failedStepName;
                 try {

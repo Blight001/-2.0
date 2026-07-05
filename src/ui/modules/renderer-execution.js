@@ -133,9 +133,9 @@ module.exports = function createRendererExecution(deps) {
         return fallback;
     }
 
-    async function readSavedRegistrationConfig() {
+    async function readSavedExecutionConfig() {
         try {
-            const runtimeResult = await ipcRenderer.invoke('get-registration-runtime-config');
+            const runtimeResult = await ipcRenderer.invoke('get-execution-runtime-config');
             if (runtimeResult && runtimeResult.success === true && runtimeResult.config && typeof runtimeResult.config === 'object') {
                 return runtimeResult.config;
             }
@@ -227,14 +227,14 @@ module.exports = function createRendererExecution(deps) {
             block_images_videos: elements.browserBlockImagesVideos ? elements.browserBlockImagesVideos.checked === true : false,
             sync_execution: elements.syncExecution ? elements.syncExecution.checked === true : true,
             max_proxy_recovery_attempts: getExecutionRecoveryAttempts(),
-            registration_auto_upload: elements.registrationAutoUpload ? elements.registrationAutoUpload.checked === true : true,
-            save_local_cookie: elements.registrationSaveLocalCookie ? elements.registrationSaveLocalCookie.checked === true : false,
+            execution_auto_upload: elements.executionAutoUpload ? elements.executionAutoUpload.checked === true : true,
+            save_local_cookie: elements.executionSaveLocalCookie ? elements.executionSaveLocalCookie.checked === true : false,
             concurrent_count: elements.concurrentCount ? Math.max(1, Math.min(10, parseInt(elements.concurrentCount.value, 10) || 1)) : 1,
             run_mode: getSelectedRunMode(),
-            timed_registration_count: getTimedRegistrationCount(),
-            timed_registration_cycle_count: getTimedRegistrationCycleCount(),
-            timed_registration_start_mode: getTimedRegistrationStartMode(),
-            timed_registration_delay_seconds: getTimedRegistrationDelaySeconds()
+            timed_execution_count: getTimedExecutionCount(),
+            timed_execution_cycle_count: getTimedExecutionCycleCount(),
+            timed_execution_start_mode: getTimedExecutionStartMode(),
+            timed_execution_delay_seconds: getTimedExecutionDelaySeconds()
         };
 
         return browserSettings;
@@ -245,10 +245,10 @@ module.exports = function createRendererExecution(deps) {
         const savedSaveLocalCookie = getConfigValue(
             savedBrowserSettings,
             ['save_local_cookie', 'saveLocalCookie'],
-            getConfigValue(savedConfig, ['registration_save_local_cookie', 'registrationSaveLocalCookie', 'save_local_cookie', 'saveLocalCookie'], false)
+            getConfigValue(savedConfig, ['execution_save_local_cookie', 'executionSaveLocalCookie', 'save_local_cookie', 'saveLocalCookie'], false)
         );
         const savedRunMode = parseSavedNumberValue(
-            getConfigValue(savedBrowserSettings, ['run_mode', 'runMode'], getConfigValue(savedConfig, ['registration_run_mode', 'registrationRunMode'], getSelectedRunMode())),
+            getConfigValue(savedBrowserSettings, ['run_mode', 'runMode'], getConfigValue(savedConfig, ['execution_run_mode', 'executionRunMode'], getSelectedRunMode())),
             DEFAULT_REGISTRATION_RUN_MODE,
             0,
             2
@@ -266,23 +266,23 @@ module.exports = function createRendererExecution(deps) {
             1,
             20
         );
-        const savedTimedRegistrationCount = parseSavedNumberValue(
-            getConfigValue(savedBrowserSettings, ['timed_registration_count', 'timedRegistrationCount'], getConfigValue(savedConfig, ['timed_registration_count', 'timedRegistrationCount'], elements.registrationTimedCount ? elements.registrationTimedCount.value : 1)),
+        const savedTimedExecutionCount = parseSavedNumberValue(
+            getConfigValue(savedBrowserSettings, ['timed_execution_count', 'timedExecutionCount'], getConfigValue(savedConfig, ['timed_execution_count', 'timedExecutionCount'], elements.executionTimedCount ? elements.executionTimedCount.value : 1)),
             1,
             1,
             9999
         );
-        const savedTimedRegistrationCycleCount = parseSavedNumberValue(
-            getConfigValue(savedBrowserSettings, ['timed_registration_cycle_count', 'timedRegistrationCycleCount'], getConfigValue(savedConfig, ['timed_registration_cycle_count', 'timedRegistrationCycleCount'], elements.registrationTimedCycleCount ? elements.registrationTimedCycleCount.value : 1)),
+        const savedTimedExecutionCycleCount = parseSavedNumberValue(
+            getConfigValue(savedBrowserSettings, ['timed_execution_cycle_count', 'timedExecutionCycleCount'], getConfigValue(savedConfig, ['timed_execution_cycle_count', 'timedExecutionCycleCount'], elements.executionTimedCycleCount ? elements.executionTimedCycleCount.value : 1)),
             1,
             1,
             9999
         );
-        const savedTimedRegistrationStartMode = String(
-            getConfigValue(savedBrowserSettings, ['timed_registration_start_mode', 'timedRegistrationStartMode'], getConfigValue(savedConfig, ['timed_registration_start_mode', 'timedRegistrationStartMode'], getTimedRegistrationStartMode()))
+        const savedTimedExecutionStartMode = String(
+            getConfigValue(savedBrowserSettings, ['timed_execution_start_mode', 'timedExecutionStartMode'], getConfigValue(savedConfig, ['timed_execution_start_mode', 'timedExecutionStartMode'], getTimedExecutionStartMode()))
         ).trim() === 'delayed' ? 'delayed' : 'immediate';
-        const savedTimedRegistrationDelaySeconds = parseSavedNumberValue(
-            getConfigValue(savedBrowserSettings, ['timed_registration_delay_seconds', 'timedRegistrationDelaySeconds'], getConfigValue(savedConfig, ['timed_registration_delay_seconds', 'timedRegistrationDelaySeconds'], elements.registrationTimedDelaySeconds ? elements.registrationTimedDelaySeconds.value : 0)),
+        const savedTimedExecutionDelaySeconds = parseSavedNumberValue(
+            getConfigValue(savedBrowserSettings, ['timed_execution_delay_seconds', 'timedExecutionDelaySeconds'], getConfigValue(savedConfig, ['timed_execution_delay_seconds', 'timedExecutionDelaySeconds'], elements.executionTimedDelaySeconds ? elements.executionTimedDelaySeconds.value : 0)),
             0,
             0,
             3600
@@ -294,18 +294,18 @@ module.exports = function createRendererExecution(deps) {
                 getConfigValue(savedBrowserSettings, ['browser_type', 'browserType'], elements.browserType ? elements.browserType.value : ''),
                 elements.browserType ? elements.browserType.value : 'electron'
             ),
-            headless: getConfigValue(savedBrowserSettings, ['headless', 'headlessMode'], getConfigValue(savedConfig, ['registration_headless_mode', 'registrationHeadlessMode'], elements.headlessMode ? elements.headlessMode.checked : true)) === true
-                || parseSavedBooleanValue(getConfigValue(savedBrowserSettings, ['headless', 'headlessMode'], getConfigValue(savedConfig, ['registration_headless_mode', 'registrationHeadlessMode'], elements.headlessMode ? elements.headlessMode.checked : true)), true),
-            block_images_videos: getConfigValue(savedBrowserSettings, ['block_images_videos', 'blockImagesVideos'], getConfigValue(savedConfig, ['registration_block_images_videos', 'registrationBlockImagesVideos'], elements.browserBlockImagesVideos ? elements.browserBlockImagesVideos.checked : false)) === true
-                || parseSavedBooleanValue(getConfigValue(savedBrowserSettings, ['block_images_videos', 'blockImagesVideos'], getConfigValue(savedConfig, ['registration_block_images_videos', 'registrationBlockImagesVideos'], elements.browserBlockImagesVideos ? elements.browserBlockImagesVideos.checked : false)), false),
+            headless: getConfigValue(savedBrowserSettings, ['headless', 'headlessMode'], getConfigValue(savedConfig, ['execution_headless_mode', 'executionHeadlessMode'], elements.headlessMode ? elements.headlessMode.checked : true)) === true
+                || parseSavedBooleanValue(getConfigValue(savedBrowserSettings, ['headless', 'headlessMode'], getConfigValue(savedConfig, ['execution_headless_mode', 'executionHeadlessMode'], elements.headlessMode ? elements.headlessMode.checked : true)), true),
+            block_images_videos: getConfigValue(savedBrowserSettings, ['block_images_videos', 'blockImagesVideos'], getConfigValue(savedConfig, ['execution_block_images_videos', 'executionBlockImagesVideos'], elements.browserBlockImagesVideos ? elements.browserBlockImagesVideos.checked : false)) === true
+                || parseSavedBooleanValue(getConfigValue(savedBrowserSettings, ['block_images_videos', 'blockImagesVideos'], getConfigValue(savedConfig, ['execution_block_images_videos', 'executionBlockImagesVideos'], elements.browserBlockImagesVideos ? elements.browserBlockImagesVideos.checked : false)), false),
             sync_execution: savedSyncExecution === true || parseSavedBooleanValue(savedSyncExecution, true),
             max_proxy_recovery_attempts: savedMaxProxyRecoveryAttempts,
             concurrent_count: savedConcurrentCount,
             run_mode: savedRunMode,
-            timed_registration_count: savedTimedRegistrationCount,
-            timed_registration_cycle_count: savedTimedRegistrationCycleCount,
-            timed_registration_start_mode: savedTimedRegistrationStartMode,
-            timed_registration_delay_seconds: savedTimedRegistrationDelaySeconds,
+            timed_execution_count: savedTimedExecutionCount,
+            timed_execution_cycle_count: savedTimedExecutionCycleCount,
+            timed_execution_start_mode: savedTimedExecutionStartMode,
+            timed_execution_delay_seconds: savedTimedExecutionDelaySeconds,
             save_local_cookie: parseSavedBooleanValue(savedSaveLocalCookie, false)
         };
 
@@ -326,20 +326,20 @@ module.exports = function createRendererExecution(deps) {
         browserSettings.skip_cookie_save = browserSettings.skipCookieSave;
         browserSettings.concurrentCount = browserSettings.concurrent_count;
         browserSettings.runMode = browserSettings.run_mode;
-        browserSettings.timedRegistrationCount = browserSettings.timed_registration_count;
-        browserSettings.timedRegistrationCycleCount = browserSettings.timed_registration_cycle_count;
-        browserSettings.timedRegistrationStartMode = browserSettings.timed_registration_start_mode;
-        browserSettings.timedRegistrationDelaySeconds = browserSettings.timed_registration_delay_seconds;
+        browserSettings.timedExecutionCount = browserSettings.timed_execution_count;
+        browserSettings.timedExecutionCycleCount = browserSettings.timed_execution_cycle_count;
+        browserSettings.timedExecutionStartMode = browserSettings.timed_execution_start_mode;
+        browserSettings.timedExecutionDelaySeconds = browserSettings.timed_execution_delay_seconds;
 
         return {
             runMode: savedRunMode,
             concurrentCount: savedConcurrentCount,
             syncEnabled: savedSyncExecution === true || parseSavedBooleanValue(savedSyncExecution, true),
             maxProxyRecoveryAttempts: savedMaxProxyRecoveryAttempts,
-            timedRegistrationCount: savedTimedRegistrationCount,
-            timedRegistrationCycleCount: savedTimedRegistrationCycleCount,
-            timedRegistrationStartMode: savedTimedRegistrationStartMode,
-            timedRegistrationDelayMs: Math.max(0, Math.round(savedTimedRegistrationDelaySeconds * 1000)),
+            timedExecutionCount: savedTimedExecutionCount,
+            timedExecutionCycleCount: savedTimedExecutionCycleCount,
+            timedExecutionStartMode: savedTimedExecutionStartMode,
+            timedExecutionDelayMs: Math.max(0, Math.round(savedTimedExecutionDelaySeconds * 1000)),
             browserSettings,
             saveLocalCookie: browserSettings.saveLocalCookie,
             skipCookieSave: browserSettings.skipCookieSave
@@ -355,7 +355,7 @@ module.exports = function createRendererExecution(deps) {
                 }
             }
 
-            const savedMode = parseInt(localStorage.getItem('registration-run-mode'), 10);
+            const savedMode = parseInt(localStorage.getItem('execution-run-mode'), 10);
             if (Number.isFinite(savedMode) && (savedMode === 0 || savedMode === 1 || savedMode === 2)) {
                 return savedMode;
             }
@@ -376,10 +376,10 @@ module.exports = function createRendererExecution(deps) {
             }
 
             if (persist) {
-                localStorage.setItem('registration-run-mode', String(normalizedMode));
+                localStorage.setItem('execution-run-mode', String(normalizedMode));
             }
 
-            updateTimedRegistrationControlState(normalizedMode);
+            updateTimedExecutionControlState(normalizedMode);
             return normalizedMode;
         }
 
@@ -392,8 +392,8 @@ module.exports = function createRendererExecution(deps) {
             return 3;
         }
 
-        function getTimedRegistrationCount() {
-            const rawValue = elements.registrationTimedCount ? elements.registrationTimedCount.value : '';
+        function getTimedExecutionCount() {
+            const rawValue = elements.executionTimedCount ? elements.executionTimedCount.value : '';
             const parsed = parseInt(rawValue, 10);
             if (Number.isFinite(parsed)) {
                 return Math.max(1, Math.min(9999, parsed));
@@ -401,8 +401,8 @@ module.exports = function createRendererExecution(deps) {
             return 1;
         }
 
-        function getTimedRegistrationCycleCount() {
-            const rawValue = elements.registrationTimedCycleCount ? elements.registrationTimedCycleCount.value : '';
+        function getTimedExecutionCycleCount() {
+            const rawValue = elements.executionTimedCycleCount ? elements.executionTimedCycleCount.value : '';
             const parsed = parseInt(rawValue, 10);
             if (Number.isFinite(parsed)) {
                 return Math.max(1, Math.min(9999, parsed));
@@ -410,13 +410,13 @@ module.exports = function createRendererExecution(deps) {
             return 1;
         }
 
-        function getTimedRegistrationStartMode() {
-            const rawValue = elements.registrationTimedStartMode ? String(elements.registrationTimedStartMode.value || '').trim() : '';
+        function getTimedExecutionStartMode() {
+            const rawValue = elements.executionTimedStartMode ? String(elements.executionTimedStartMode.value || '').trim() : '';
             return rawValue === 'delayed' ? 'delayed' : 'immediate';
         }
 
-        function getTimedRegistrationDelaySeconds() {
-            const rawValue = elements.registrationTimedDelaySeconds ? elements.registrationTimedDelaySeconds.value : '';
+        function getTimedExecutionDelaySeconds() {
+            const rawValue = elements.executionTimedDelaySeconds ? elements.executionTimedDelaySeconds.value : '';
             const parsed = parseFloat(rawValue);
             if (Number.isFinite(parsed)) {
                 return Math.max(0, Math.min(3600, parsed));
@@ -424,44 +424,44 @@ module.exports = function createRendererExecution(deps) {
             return 0;
         }
 
-        function getTimedRegistrationDelayMs() {
-            return Math.max(0, Math.round(getTimedRegistrationDelaySeconds() * 1000));
+        function getTimedExecutionDelayMs() {
+            return Math.max(0, Math.round(getTimedExecutionDelaySeconds() * 1000));
         }
 
-        function updateTimedRegistrationControlState(mode = getSelectedRunMode()) {
+        function updateTimedExecutionControlState(mode = getSelectedRunMode()) {
             const isTimedMode = mode === 2;
 
-            if (elements.registrationTimedSettings) {
-                elements.registrationTimedSettings.classList.toggle('is-disabled', !isTimedMode);
-                elements.registrationTimedSettings.setAttribute('aria-disabled', isTimedMode ? 'false' : 'true');
-                elements.registrationTimedSettings.hidden = !isTimedMode;
-                elements.registrationTimedSettings.setAttribute('aria-hidden', isTimedMode ? 'false' : 'true');
+            if (elements.executionTimedSettings) {
+                elements.executionTimedSettings.classList.toggle('is-disabled', !isTimedMode);
+                elements.executionTimedSettings.setAttribute('aria-disabled', isTimedMode ? 'false' : 'true');
+                elements.executionTimedSettings.hidden = !isTimedMode;
+                elements.executionTimedSettings.setAttribute('aria-hidden', isTimedMode ? 'false' : 'true');
             }
 
-            if (elements.registrationTimedCount) {
-                elements.registrationTimedCount.disabled = !isTimedMode;
+            if (elements.executionTimedCount) {
+                elements.executionTimedCount.disabled = !isTimedMode;
             }
 
-            if (elements.registrationTimedCycleCount) {
-                elements.registrationTimedCycleCount.disabled = !isTimedMode;
+            if (elements.executionTimedCycleCount) {
+                elements.executionTimedCycleCount.disabled = !isTimedMode;
             }
 
-            if (elements.registrationTimedStartMode) {
-                elements.registrationTimedStartMode.disabled = !isTimedMode;
+            if (elements.executionTimedStartMode) {
+                elements.executionTimedStartMode.disabled = !isTimedMode;
             }
 
-            if (elements.registrationTimedDelaySeconds) {
-                elements.registrationTimedDelaySeconds.disabled = !isTimedMode;
+            if (elements.executionTimedDelaySeconds) {
+                elements.executionTimedDelaySeconds.disabled = !isTimedMode;
             }
         }
 
-        async function loadRegistrationControls() {
-            const savedConfig = await readSavedRegistrationConfig();
+        async function loadExecutionControls() {
+            const savedConfig = await readSavedExecutionConfig();
             const savedBrowserSettings = getSavedBrowserSettings(savedConfig);
 
             if (elements.proxyRecoveryAttempts) {
                 const savedRecoveryAttempts = parseSavedNumberValue(
-                    getConfigValue(savedConfig, ['max_proxy_recovery_attempts', 'maxProxyRecoveryAttempts'], localStorage.getItem('registration-max-proxy-recovery-attempts')),
+                    getConfigValue(savedConfig, ['max_proxy_recovery_attempts', 'maxProxyRecoveryAttempts'], localStorage.getItem('execution-max-proxy-recovery-attempts')),
                     3,
                     1,
                     20
@@ -469,46 +469,46 @@ module.exports = function createRendererExecution(deps) {
                 elements.proxyRecoveryAttempts.value = String(savedRecoveryAttempts);
             }
 
-            if (elements.registrationTimedCount) {
+            if (elements.executionTimedCount) {
                 const savedTimedCount = parseSavedNumberValue(
-                    getConfigValue(savedConfig, ['timed_registration_count', 'timedRegistrationCount'], localStorage.getItem('registration-timed-count')),
+                    getConfigValue(savedConfig, ['timed_execution_count', 'timedExecutionCount'], localStorage.getItem('execution-timed-count')),
                     1,
                     1,
                     9999
                 );
-                elements.registrationTimedCount.value = String(savedTimedCount);
+                elements.executionTimedCount.value = String(savedTimedCount);
             }
 
-            if (elements.registrationTimedCycleCount) {
+            if (elements.executionTimedCycleCount) {
                 const savedTimedCycleCount = parseSavedNumberValue(
-                    getConfigValue(savedConfig, ['timed_registration_cycle_count', 'timedRegistrationCycleCount'], localStorage.getItem('registration-timed-cycle-count')),
+                    getConfigValue(savedConfig, ['timed_execution_cycle_count', 'timedExecutionCycleCount'], localStorage.getItem('execution-timed-cycle-count')),
                     1,
                     1,
                     9999
                 );
-                elements.registrationTimedCycleCount.value = String(savedTimedCycleCount);
+                elements.executionTimedCycleCount.value = String(savedTimedCycleCount);
             }
 
-            if (elements.registrationTimedStartMode) {
+            if (elements.executionTimedStartMode) {
                 const savedTimedStartMode = String(
-                    getConfigValue(savedConfig, ['timed_registration_start_mode', 'timedRegistrationStartMode'], localStorage.getItem('registration-timed-start-mode'))
+                    getConfigValue(savedConfig, ['timed_execution_start_mode', 'timedExecutionStartMode'], localStorage.getItem('execution-timed-start-mode'))
                 ).trim();
-                elements.registrationTimedStartMode.value = savedTimedStartMode === 'delayed' ? 'delayed' : 'immediate';
+                elements.executionTimedStartMode.value = savedTimedStartMode === 'delayed' ? 'delayed' : 'immediate';
             }
 
-            if (elements.registrationTimedDelaySeconds) {
+            if (elements.executionTimedDelaySeconds) {
                 const savedTimedDelaySeconds = parseSavedNumberValue(
-                    getConfigValue(savedConfig, ['timed_registration_delay_seconds', 'timedRegistrationDelaySeconds'], localStorage.getItem('registration-timed-delay-seconds')),
+                    getConfigValue(savedConfig, ['timed_execution_delay_seconds', 'timedExecutionDelaySeconds'], localStorage.getItem('execution-timed-delay-seconds')),
                     0,
                     0,
                     3600
                 );
-                elements.registrationTimedDelaySeconds.value = String(savedTimedDelaySeconds);
+                elements.executionTimedDelaySeconds.value = String(savedTimedDelaySeconds);
             }
 
             if (elements.concurrentCount) {
                 const savedConcurrentCount = parseSavedNumberValue(
-                    getConfigValue(savedBrowserSettings, ['concurrent_count', 'concurrentCount'], getConfigValue(savedConfig, ['concurrent_count', 'concurrentCount'], localStorage.getItem('registration-concurrent-count'))),
+                    getConfigValue(savedBrowserSettings, ['concurrent_count', 'concurrentCount'], getConfigValue(savedConfig, ['concurrent_count', 'concurrentCount'], localStorage.getItem('execution-concurrent-count'))),
                     1,
                     1,
                     10
@@ -517,7 +517,7 @@ module.exports = function createRendererExecution(deps) {
             }
 
             if (elements.syncExecution) {
-                const savedSyncExecution = getConfigValue(savedBrowserSettings, ['sync_execution', 'syncExecution'], getConfigValue(savedConfig, ['sync_execution', 'syncEnabled'], localStorage.getItem('registration-sync-execution')));
+                const savedSyncExecution = getConfigValue(savedBrowserSettings, ['sync_execution', 'syncExecution'], getConfigValue(savedConfig, ['sync_execution', 'syncEnabled'], localStorage.getItem('execution-sync-execution')));
                 elements.syncExecution.checked = savedSyncExecution === undefined
                     ? true
                     : parseSavedBooleanValue(savedSyncExecution, true);
@@ -525,7 +525,7 @@ module.exports = function createRendererExecution(deps) {
 
             if (elements.browserDisplayMode) {
                 const savedBrowserDisplayMode = normalizeBrowserDisplayModeValue(
-                    getConfigValue(savedBrowserSettings, ['browser_display_mode', 'browserDisplayMode'], localStorage.getItem('registration-browser-display-mode')),
+                    getConfigValue(savedBrowserSettings, ['browser_display_mode', 'browserDisplayMode'], localStorage.getItem('execution-browser-display-mode')),
                     'window'
                 );
                 elements.browserDisplayMode.checked = savedBrowserDisplayMode === 'embedded';
@@ -538,7 +538,7 @@ module.exports = function createRendererExecution(deps) {
                     getConfigValue(
                         savedBrowserSettings,
                         ['browser_type', 'browserType'],
-                        getConfigValue(savedBrowserSettings, ['browser_source', 'browserSource'], localStorage.getItem('registration-browser-type'))
+                        getConfigValue(savedBrowserSettings, ['browser_source', 'browserSource'], localStorage.getItem('execution-browser-type'))
                     )
                     || ''
                 ).trim();
@@ -555,21 +555,21 @@ module.exports = function createRendererExecution(deps) {
                 }
             }
             if (elements.headlessMode) {
-                const savedHeadlessMode = getConfigValue(savedBrowserSettings, ['headless', 'headlessMode'], getConfigValue(savedConfig, ['registration_headless_mode', 'registrationHeadlessMode'], undefined));
+                const savedHeadlessMode = getConfigValue(savedBrowserSettings, ['headless', 'headlessMode'], getConfigValue(savedConfig, ['execution_headless_mode', 'executionHeadlessMode'], undefined));
                 elements.headlessMode.checked = savedHeadlessMode !== undefined
                     ? parseSavedBooleanValue(savedHeadlessMode, true)
-                    : (localStorage.getItem('registration-headless-mode') === null
+                    : (localStorage.getItem('execution-headless-mode') === null
                         ? true
-                        : localStorage.getItem('registration-headless-mode') === 'true');
+                        : localStorage.getItem('execution-headless-mode') === 'true');
             }
             applyLimitedLicenseBrowserConstraints();
             if (elements.browserBlockImagesVideos) {
                 const savedBlockImagesVideos = getConfigValue(savedBrowserSettings, ['block_images_videos', 'blockImagesVideos'], undefined);
                 elements.browserBlockImagesVideos.checked = savedBlockImagesVideos !== undefined
                     ? parseSavedBooleanValue(savedBlockImagesVideos, false)
-                    : (localStorage.getItem('registration-block-images-videos') === null
+                    : (localStorage.getItem('execution-block-images-videos') === null
                         ? true
-                        : localStorage.getItem('registration-block-images-videos') !== 'false');
+                        : localStorage.getItem('execution-block-images-videos') !== 'false');
             }
             if (elements.browserRemoveWatermarkPlugin) {
                 const savedRemoveWatermarkPlugin = getConfigValue(
@@ -579,9 +579,9 @@ module.exports = function createRendererExecution(deps) {
                 );
                 elements.browserRemoveWatermarkPlugin.checked = savedRemoveWatermarkPlugin !== undefined
                     ? parseSavedBooleanValue(savedRemoveWatermarkPlugin, true)
-                    : (localStorage.getItem('registration-remove-watermark-plugin') === null
+                    : (localStorage.getItem('execution-remove-watermark-plugin') === null
                         ? true
-                        : localStorage.getItem('registration-remove-watermark-plugin') !== 'false');
+                        : localStorage.getItem('execution-remove-watermark-plugin') !== 'false');
             }
             if (elements.customTestAccountAccount) {
                 const savedCustomTestAccount = normalizeCustomTestAccountValue(
@@ -596,26 +596,26 @@ module.exports = function createRendererExecution(deps) {
                 elements.customTestAccountPassword.value = savedCustomTestPassword;
             }
 
-            if (elements.registrationAutoUpload) {
-                const savedAutoUpload = getConfigValue(savedBrowserSettings, ['registration_auto_upload', 'registrationAutoUpload'], getConfigValue(savedConfig, ['registration_auto_upload', 'registrationAutoUpload'], localStorage.getItem('registration-auto-upload')));
-                elements.registrationAutoUpload.checked = savedAutoUpload === undefined
+            if (elements.executionAutoUpload) {
+                const savedAutoUpload = getConfigValue(savedBrowserSettings, ['execution_auto_upload', 'executionAutoUpload'], getConfigValue(savedConfig, ['execution_auto_upload', 'executionAutoUpload'], localStorage.getItem('execution-auto-upload')));
+                elements.executionAutoUpload.checked = savedAutoUpload === undefined
                     ? true
                     : parseSavedBooleanValue(savedAutoUpload, true);
             }
 
-            if (elements.registrationSaveLocalCookie) {
+            if (elements.executionSaveLocalCookie) {
                 const savedSaveLocalCookie = getConfigValue(
                     savedBrowserSettings,
                     ['save_local_cookie', 'saveLocalCookie'],
-                    getConfigValue(savedConfig, ['registration_save_local_cookie', 'registrationSaveLocalCookie', 'save_local_cookie', 'saveLocalCookie'], localStorage.getItem('registration-save-local-cookie'))
+                    getConfigValue(savedConfig, ['execution_save_local_cookie', 'executionSaveLocalCookie', 'save_local_cookie', 'saveLocalCookie'], localStorage.getItem('execution-save-local-cookie'))
                 );
-                elements.registrationSaveLocalCookie.checked = savedSaveLocalCookie === undefined
+                elements.executionSaveLocalCookie.checked = savedSaveLocalCookie === undefined
                     ? false
                     : parseSavedBooleanValue(savedSaveLocalCookie, false);
             }
 
             const savedRunMode = parseSavedNumberValue(
-                getConfigValue(savedBrowserSettings, ['run_mode', 'runMode'], getConfigValue(savedConfig, ['registration_run_mode', 'registrationRunMode', 'run_mode', 'runMode'], localStorage.getItem('registration-run-mode'))),
+                getConfigValue(savedBrowserSettings, ['run_mode', 'runMode'], getConfigValue(savedConfig, ['execution_run_mode', 'executionRunMode', 'run_mode', 'runMode'], localStorage.getItem('execution-run-mode'))),
                 DEFAULT_REGISTRATION_RUN_MODE,
                 0,
                 2
@@ -632,108 +632,108 @@ module.exports = function createRendererExecution(deps) {
             }
         }
 
-        async function saveRegistrationControls() {
+        async function saveExecutionControls() {
             applyLimitedLicenseBrowserConstraints();
             if (elements.proxyRecoveryAttempts) {
                 const normalizedRecoveryAttempts = getExecutionRecoveryAttempts();
                 elements.proxyRecoveryAttempts.value = String(normalizedRecoveryAttempts);
-                localStorage.setItem('registration-max-proxy-recovery-attempts', String(normalizedRecoveryAttempts));
+                localStorage.setItem('execution-max-proxy-recovery-attempts', String(normalizedRecoveryAttempts));
             }
-            if (elements.registrationTimedCount) {
-                const normalizedTimedCount = getTimedRegistrationCount();
-                elements.registrationTimedCount.value = String(normalizedTimedCount);
-                localStorage.setItem('registration-timed-count', String(normalizedTimedCount));
+            if (elements.executionTimedCount) {
+                const normalizedTimedCount = getTimedExecutionCount();
+                elements.executionTimedCount.value = String(normalizedTimedCount);
+                localStorage.setItem('execution-timed-count', String(normalizedTimedCount));
             }
-            if (elements.registrationTimedCycleCount) {
-                const normalizedTimedCycleCount = getTimedRegistrationCycleCount();
-                elements.registrationTimedCycleCount.value = String(normalizedTimedCycleCount);
-                localStorage.setItem('registration-timed-cycle-count', String(normalizedTimedCycleCount));
+            if (elements.executionTimedCycleCount) {
+                const normalizedTimedCycleCount = getTimedExecutionCycleCount();
+                elements.executionTimedCycleCount.value = String(normalizedTimedCycleCount);
+                localStorage.setItem('execution-timed-cycle-count', String(normalizedTimedCycleCount));
             }
-            if (elements.registrationTimedStartMode) {
-                const normalizedTimedStartMode = getTimedRegistrationStartMode();
-                elements.registrationTimedStartMode.value = normalizedTimedStartMode;
-                localStorage.setItem('registration-timed-start-mode', normalizedTimedStartMode);
+            if (elements.executionTimedStartMode) {
+                const normalizedTimedStartMode = getTimedExecutionStartMode();
+                elements.executionTimedStartMode.value = normalizedTimedStartMode;
+                localStorage.setItem('execution-timed-start-mode', normalizedTimedStartMode);
             }
-            if (elements.registrationTimedDelaySeconds) {
-                const normalizedTimedDelaySeconds = getTimedRegistrationDelaySeconds();
-                elements.registrationTimedDelaySeconds.value = String(normalizedTimedDelaySeconds);
-                localStorage.setItem('registration-timed-delay-seconds', String(normalizedTimedDelaySeconds));
+            if (elements.executionTimedDelaySeconds) {
+                const normalizedTimedDelaySeconds = getTimedExecutionDelaySeconds();
+                elements.executionTimedDelaySeconds.value = String(normalizedTimedDelaySeconds);
+                localStorage.setItem('execution-timed-delay-seconds', String(normalizedTimedDelaySeconds));
             }
             if (elements.concurrentCount) {
                 const normalizedConcurrentCount = Math.max(1, Math.min(10, parseInt(elements.concurrentCount.value, 10) || 1));
                 elements.concurrentCount.value = String(normalizedConcurrentCount);
-                localStorage.setItem('registration-concurrent-count', String(normalizedConcurrentCount));
+                localStorage.setItem('execution-concurrent-count', String(normalizedConcurrentCount));
             }
             if (elements.syncExecution) {
-                localStorage.setItem('registration-sync-execution', elements.syncExecution.checked ? 'true' : 'false');
+                localStorage.setItem('execution-sync-execution', elements.syncExecution.checked ? 'true' : 'false');
             }
             if (elements.browserDisplayMode) {
                 localStorage.setItem(
-                    'registration-browser-display-mode',
+                    'execution-browser-display-mode',
                     getBrowserDisplayModeValue()
                 );
             }
             if (elements.browserType) {
-                localStorage.setItem('registration-browser-type', elements.browserType.value || '');
+                localStorage.setItem('execution-browser-type', elements.browserType.value || '');
             }
             if (elements.headlessMode) {
                 localStorage.setItem(
-                    'registration-headless-mode',
+                    'execution-headless-mode',
                     elements.headlessMode.checked ? 'true' : 'false'
                 );
             }
             if (elements.browserBlockImagesVideos) {
                 localStorage.setItem(
-                    'registration-block-images-videos',
+                    'execution-block-images-videos',
                     elements.browserBlockImagesVideos.checked ? 'true' : 'false'
                 );
             }
             if (elements.browserRemoveWatermarkPlugin) {
                 localStorage.setItem(
-                    'registration-remove-watermark-plugin',
+                    'execution-remove-watermark-plugin',
                     elements.browserRemoveWatermarkPlugin.checked ? 'true' : 'false'
                 );
             }
-            if (elements.registrationSaveLocalCookie) {
+            if (elements.executionSaveLocalCookie) {
                 localStorage.setItem(
-                    'registration-save-local-cookie',
-                    elements.registrationSaveLocalCookie.checked ? 'true' : 'false'
+                    'execution-save-local-cookie',
+                    elements.executionSaveLocalCookie.checked ? 'true' : 'false'
                 );
             }
             persistCustomTestAccountPreset();
 
             const normalizedRunMode = getSelectedRunMode();
-            localStorage.setItem('registration-run-mode', String(normalizedRunMode));
+            localStorage.setItem('execution-run-mode', String(normalizedRunMode));
 
             const browserSettings = buildBrowserSettingsForSave();
             const runtimeConfig = {
                 browserSettings,
-                registration_headless_mode: elements.headlessMode ? elements.headlessMode.checked === true : true,
-                registration_run_mode: normalizedRunMode,
-                registration_timed_count: getTimedRegistrationCount(),
-                registration_timed_cycle_count: getTimedRegistrationCycleCount(),
-                registration_timed_start_mode: getTimedRegistrationStartMode(),
-                registration_timed_delay_seconds: getTimedRegistrationDelaySeconds(),
+                execution_headless_mode: elements.headlessMode ? elements.headlessMode.checked === true : true,
+                execution_run_mode: normalizedRunMode,
+                execution_timed_count: getTimedExecutionCount(),
+                execution_timed_cycle_count: getTimedExecutionCycleCount(),
+                execution_timed_start_mode: getTimedExecutionStartMode(),
+                execution_timed_delay_seconds: getTimedExecutionDelaySeconds(),
                 concurrent_count: elements.concurrentCount ? Math.max(1, Math.min(10, parseInt(elements.concurrentCount.value, 10) || 1)) : 1,
                 sync_execution: elements.syncExecution ? elements.syncExecution.checked === true : true,
                 max_proxy_recovery_attempts: getExecutionRecoveryAttempts(),
-                registration_auto_upload: elements.registrationAutoUpload ? elements.registrationAutoUpload.checked === true : true,
-                registration_save_local_cookie: elements.registrationSaveLocalCookie ? elements.registrationSaveLocalCookie.checked === true : false,
-                save_local_cookie: elements.registrationSaveLocalCookie ? elements.registrationSaveLocalCookie.checked === true : false,
+                execution_auto_upload: elements.executionAutoUpload ? elements.executionAutoUpload.checked === true : true,
+                execution_save_local_cookie: elements.executionSaveLocalCookie ? elements.executionSaveLocalCookie.checked === true : false,
+                save_local_cookie: elements.executionSaveLocalCookie ? elements.executionSaveLocalCookie.checked === true : false,
                 browser_source: getBrowserSourceValue()
             };
 
-            updateTimedRegistrationControlState();
+            updateTimedExecutionControlState();
 
             try {
-                return await ipcRenderer.invoke('save-registration-runtime-config', runtimeConfig);
+                return await ipcRenderer.invoke('save-execution-runtime-config', runtimeConfig);
             } catch (error) {
                 logger.warning(`保存运行配置失败: ${error.message}`);
                 return { success: false, error: error.message };
             }
         }
 
-        function updateRegistrationUploadStatus(text, type = '') {
+        function updateExecutionUploadStatus(text, type = '') {
             const message = text || '等待配置';
             const prefix = '[自动上传]';
             if (type === 'error') {
@@ -745,40 +745,40 @@ module.exports = function createRendererExecution(deps) {
             }
         }
 
-        async function saveRegistrationUploadControls() {
-            if (elements.registrationAutoUpload) {
-                localStorage.setItem('registration-auto-upload', elements.registrationAutoUpload.checked ? 'true' : 'false');
+        async function saveExecutionUploadControls() {
+            if (elements.executionAutoUpload) {
+                localStorage.setItem('execution-auto-upload', elements.executionAutoUpload.checked ? 'true' : 'false');
             }
-            if (elements.registrationSaveLocalCookie) {
-                localStorage.setItem('registration-save-local-cookie', elements.registrationSaveLocalCookie.checked ? 'true' : 'false');
+            if (elements.executionSaveLocalCookie) {
+                localStorage.setItem('execution-save-local-cookie', elements.executionSaveLocalCookie.checked ? 'true' : 'false');
             }
 
             const browserSettings = buildBrowserSettingsForSave();
             const runtimeConfig = {
                 browserSettings,
-                registration_headless_mode: elements.headlessMode ? elements.headlessMode.checked === true : true,
-                registration_run_mode: getSelectedRunMode(),
-                registration_timed_count: getTimedRegistrationCount(),
-                registration_timed_cycle_count: getTimedRegistrationCycleCount(),
-                registration_timed_start_mode: getTimedRegistrationStartMode(),
-                registration_timed_delay_seconds: getTimedRegistrationDelaySeconds(),
+                execution_headless_mode: elements.headlessMode ? elements.headlessMode.checked === true : true,
+                execution_run_mode: getSelectedRunMode(),
+                execution_timed_count: getTimedExecutionCount(),
+                execution_timed_cycle_count: getTimedExecutionCycleCount(),
+                execution_timed_start_mode: getTimedExecutionStartMode(),
+                execution_timed_delay_seconds: getTimedExecutionDelaySeconds(),
                 concurrent_count: elements.concurrentCount ? Math.max(1, Math.min(10, parseInt(elements.concurrentCount.value, 10) || 1)) : 1,
                 sync_execution: elements.syncExecution ? elements.syncExecution.checked === true : true,
                 max_proxy_recovery_attempts: getExecutionRecoveryAttempts(),
-                registration_auto_upload: elements.registrationAutoUpload ? elements.registrationAutoUpload.checked === true : true,
-                registration_save_local_cookie: elements.registrationSaveLocalCookie ? elements.registrationSaveLocalCookie.checked === true : false,
-                save_local_cookie: elements.registrationSaveLocalCookie ? elements.registrationSaveLocalCookie.checked === true : false
+                execution_auto_upload: elements.executionAutoUpload ? elements.executionAutoUpload.checked === true : true,
+                execution_save_local_cookie: elements.executionSaveLocalCookie ? elements.executionSaveLocalCookie.checked === true : false,
+                save_local_cookie: elements.executionSaveLocalCookie ? elements.executionSaveLocalCookie.checked === true : false
             };
 
             try {
-                return await ipcRenderer.invoke('save-registration-runtime-config', runtimeConfig);
+                return await ipcRenderer.invoke('save-execution-runtime-config', runtimeConfig);
             } catch (error) {
                 logger.warning(`保存运行配置失败: ${error.message}`);
                 return { success: false, error: error.message };
             }
         }
 
-        async function loadRegistrationUploadControls() {
+        async function loadExecutionUploadControls() {
             try {
                 const result = await ipcRenderer.invoke('get-cookie-user-config');
                 if (!result || !result.success || !result.config || typeof result.config !== 'object') {
@@ -786,13 +786,13 @@ module.exports = function createRendererExecution(deps) {
                 }
                 const config = result.config;
                 const browserSettings = getConfigValue(config, ['browserSettings', 'browser_settings'], {});
-                if (elements.registrationAutoUpload) {
+                if (elements.executionAutoUpload) {
                     const savedAutoUpload = getConfigValue(
                         browserSettings,
-                        ['registration_auto_upload', 'registrationAutoUpload'],
-                        getConfigValue(config, ['registration_auto_upload', 'registrationAutoUpload'], localStorage.getItem('registration-auto-upload'))
+                        ['execution_auto_upload', 'executionAutoUpload'],
+                        getConfigValue(config, ['execution_auto_upload', 'executionAutoUpload'], localStorage.getItem('execution-auto-upload'))
                     );
-                    elements.registrationAutoUpload.checked = savedAutoUpload === undefined
+                    elements.executionAutoUpload.checked = savedAutoUpload === undefined
                         ? true
                         : parseSavedBooleanValue(savedAutoUpload, true);
                 }
@@ -927,8 +927,8 @@ module.exports = function createRendererExecution(deps) {
                     };
                 }
 
-                const legacyServerUrl = (localStorage.getItem('registration-upload-server-url') || '').trim();
-                const legacyCardKey = (localStorage.getItem('registration-upload-card-key') || '').trim();
+                const legacyServerUrl = (localStorage.getItem('execution-upload-server-url') || '').trim();
+                const legacyCardKey = (localStorage.getItem('execution-upload-card-key') || '').trim();
                 if (legacyServerUrl && legacyCardKey) {
                     logger.warning(`自动上传使用旧的全局配置: ${resolvedCardName}`);
                     return {
@@ -950,7 +950,7 @@ module.exports = function createRendererExecution(deps) {
             }
         }
 
-        function getInlineRegistrationUploadConfig(result = {}) {
+        function getInlineExecutionUploadConfig(result = {}) {
             const inlineConfig = result && typeof result.cardUploadConfig === 'object' ? result.cardUploadConfig : null;
             if (!inlineConfig) {
                 return null;
@@ -992,7 +992,7 @@ module.exports = function createRendererExecution(deps) {
                     sizeDetails.push(`要求 ${minBytes} 字节`);
                 }
                 const detailText = sizeDetails.length ? `（${sizeDetails.join('，')}）` : '';
-                updateRegistrationUploadStatus(`Cookie 未保存成功，已跳过上传${detailText}`, 'warning');
+                updateExecutionUploadStatus(`Cookie 未保存成功，已跳过上传${detailText}`, 'warning');
                 logger.warning(`自动上传已跳过：Cookie 未保存成功${detailText}`);
                 return false;
             }
@@ -1001,30 +1001,30 @@ module.exports = function createRendererExecution(deps) {
                 logger.info('本地 Cookie 未写入磁盘，继续使用浏览器中的 Cookie 执行自动上传');
             }
 
-            const autoUploadEnabled = elements.registrationAutoUpload ? elements.registrationAutoUpload.checked : true;
+            const autoUploadEnabled = elements.executionAutoUpload ? elements.executionAutoUpload.checked : true;
             if (!autoUploadEnabled) {
-                updateRegistrationUploadStatus('自动上传已关闭', 'warning');
+                updateExecutionUploadStatus('自动上传已关闭', 'warning');
                 return false;
             }
 
-            const uploadConfig = getInlineRegistrationUploadConfig(result)
+            const uploadConfig = getInlineExecutionUploadConfig(result)
                 || await getExecutionUploadConfig(result.cardName || '');
             if (!uploadConfig) {
-                updateRegistrationUploadStatus('未找到可用的上传配置，已跳过上传', 'warning');
+                updateExecutionUploadStatus('未找到可用的上传配置，已跳过上传', 'warning');
                 return false;
             }
             const { serverUrl, cardKey, cardName, targetScoreScope, targetScoreTypes } = uploadConfig;
 
             const deviceId = await getExecutionUploadDeviceId();
             if (!deviceId) {
-                updateRegistrationUploadStatus('获取设备ID失败，已跳过上传', 'error');
+                updateExecutionUploadStatus('获取设备ID失败，已跳过上传', 'error');
                 logger.warning('自动上传已跳过：获取设备ID失败');
                 return false;
             }
 
             const cookies = Array.isArray(result.cookies) ? result.cookies : [];
             if (cookies.length === 0) {
-                updateRegistrationUploadStatus('没有可上传的 Cookie', 'warning');
+                updateExecutionUploadStatus('没有可上传的 Cookie', 'warning');
                 logger.warning(`自动上传已跳过：任务 ${taskId || 'unknown'} 没有可上传的 Cookie`);
                 return false;
             }
@@ -1032,12 +1032,12 @@ module.exports = function createRendererExecution(deps) {
             const sizeCheck = validateCookieUploadSize(cookies, result.minCookieSizeBytes ?? uploadConfig.minCookieSizeBytes ?? DEFAULT_MIN_COOKIE_SIZE_BYTES);
             if (!sizeCheck.allowed) {
                 const sizeText = `（当前 ${sizeCheck.payloadBytes} 字节，要求 ${sizeCheck.minBytes} 字节）`;
-                updateRegistrationUploadStatus(`Cookie 大小不足，已跳过上传${sizeText}`, 'warning');
+                updateExecutionUploadStatus(`Cookie 大小不足，已跳过上传${sizeText}`, 'warning');
                 logger.warning(`自动上传已跳过：Cookie 大小不足${sizeText}`);
                 return false;
             }
 
-            updateRegistrationUploadStatus('正在上传 Cookie 到服务器...', '');
+            updateExecutionUploadStatus('正在上传 Cookie 到服务器...', '');
 
             try {
                 const uploadPayload = {
@@ -1059,24 +1059,24 @@ module.exports = function createRendererExecution(deps) {
 
                 const uploadResult = await ipcRenderer.invoke('cookie-upload-ai-cookie', serverUrl, uploadPayload);
                 if (uploadResult && uploadResult.success) {
-                    updateRegistrationUploadStatus('Cookie 已上传到服务器', 'success');
+                    updateExecutionUploadStatus('Cookie 已上传到服务器', 'success');
                     logger.info(`自动上传成功: ${result.email || '未知账号'} (${cardName}) -> ${serverUrl}`);
                     return true;
                 }
 
                 const errorText = uploadResult?.error || '上传失败';
-                updateRegistrationUploadStatus(`上传失败: ${errorText}`, 'error');
+                updateExecutionUploadStatus(`上传失败: ${errorText}`, 'error');
                 logger.error(`自动上传失败: ${errorText}`);
                 return false;
             } catch (error) {
-                updateRegistrationUploadStatus(`上传异常: ${error.message}`, 'error');
+                updateExecutionUploadStatus(`上传异常: ${error.message}`, 'error');
                 logger.error(`自动上传异常: ${error.message}`);
                 return false;
             }
         }
 
-        async function startRegistration() {
-            if (state.registrationTcpControlLocked) {
+        async function startExecution() {
+            if (state.executionTcpControlLocked) {
                 utils.showMessage('服务器已禁止本地控制，不能由本地手动启动', 'info', elements);
                 return;
             }
@@ -1091,8 +1091,8 @@ module.exports = function createRendererExecution(deps) {
                 return;
             }
 
-            const controlSaveResult = await saveRegistrationControls();
-            const uploadSaveResult = await saveRegistrationUploadControls();
+            const controlSaveResult = await saveExecutionControls();
+            const uploadSaveResult = await saveExecutionUploadControls();
 
             if (controlSaveResult && controlSaveResult.success === false) {
                 logger.warning(`开始前保存运行配置失败: ${controlSaveResult.error || '未知错误'}`);
@@ -1101,16 +1101,16 @@ module.exports = function createRendererExecution(deps) {
                 logger.warning(`开始前保存上传配置失败: ${uploadSaveResult.error || '未知错误'}`);
             }
 
-            const latestConfig = await readSavedRegistrationConfig();
+            const latestConfig = await readSavedExecutionConfig();
             const runtimeConfig = buildExecutionStartConfig(latestConfig);
-            const timedRegistrationCount = runtimeConfig.timedRegistrationCount;
-            const timedRegistrationCycleCount = runtimeConfig.timedRegistrationCycleCount;
-            const timedRegistrationDelaySeconds = Math.max(0, Math.floor(runtimeConfig.timedRegistrationDelayMs / 1000));
-            const timedRegistrationStartMode = runtimeConfig.timedRegistrationStartMode;
-            const timedStartModeText = timedRegistrationStartMode === 'delayed' ? '延时开始' : '立即执行';
+            const timedExecutionCount = runtimeConfig.timedExecutionCount;
+            const timedExecutionCycleCount = runtimeConfig.timedExecutionCycleCount;
+            const timedExecutionDelaySeconds = Math.max(0, Math.floor(runtimeConfig.timedExecutionDelayMs / 1000));
+            const timedExecutionStartMode = runtimeConfig.timedExecutionStartMode;
+            const timedStartModeText = timedExecutionStartMode === 'delayed' ? '延时开始' : '立即执行';
             const config = {
                 ...runtimeConfig,
-                timedRegistrationDelayMs: runtimeConfig.timedRegistrationDelayMs,
+                timedExecutionDelayMs: runtimeConfig.timedExecutionDelayMs,
                 browserSettings: runtimeConfig.browserSettings,
                 browser_settings: runtimeConfig.browserSettings
             };
@@ -1119,12 +1119,12 @@ module.exports = function createRendererExecution(deps) {
                 elements.startBtn.disabled = true;
                 elements.stopBtn.disabled = false;
                 elements.statusLabel.textContent = config.runMode === 2
-                    ? `定时执行进行中... (单次数量: ${timedRegistrationCount}, 循环次数: ${timedRegistrationCycleCount}, 并发: ${config.concurrentCount}, 间隔: ${timedRegistrationDelaySeconds}s, 开始: ${timedStartModeText})`
+                    ? `定时执行进行中... (单次数量: ${timedExecutionCount}, 循环次数: ${timedExecutionCycleCount}, 并发: ${config.concurrentCount}, 间隔: ${timedExecutionDelaySeconds}s, 开始: ${timedStartModeText})`
                     : config.runMode === 1
                         ? `循环执行进行中... (并发: ${config.concurrentCount})`
                         : `执行进行中... (并发: ${config.concurrentCount})`;
 
-                const result = await ipcRenderer.invoke('start-registration', config);
+                const result = await ipcRenderer.invoke('start-execution', config);
 
                 if (config.runMode === 0) {
                     elements.startBtn.disabled = false;
@@ -1143,13 +1143,13 @@ module.exports = function createRendererExecution(deps) {
         }
 
         async function stopExecution() {
-            if (state.registrationTcpControlLocked) {
+            if (state.executionTcpControlLocked) {
                 utils.showMessage('服务器已禁止本地控制，不能由本地手动停止', 'info', elements);
                 return;
             }
 
             try {
-                const result = await ipcRenderer.invoke('stop-registration');
+                const result = await ipcRenderer.invoke('stop-execution');
                 if (result.success) {
                     utils.logToConsole('执行已停止', 'info');
                 } else {
@@ -1245,25 +1245,25 @@ module.exports = function createRendererExecution(deps) {
             getSelectedRunMode,
             setRunMode,
             getExecutionRecoveryAttempts,
-            getTimedRegistrationCount,
-            getTimedRegistrationCycleCount,
-            getTimedRegistrationStartMode,
-            getTimedRegistrationDelaySeconds,
-            getTimedRegistrationDelayMs,
-            updateTimedRegistrationControlState,
+            getTimedExecutionCount,
+            getTimedExecutionCycleCount,
+            getTimedExecutionStartMode,
+            getTimedExecutionDelaySeconds,
+            getTimedExecutionDelayMs,
+            updateTimedExecutionControlState,
             applyLimitedLicenseBrowserConstraints,
-            loadRegistrationControls,
-            saveRegistrationControls,
-            updateRegistrationUploadStatus,
-            saveRegistrationUploadControls,
-            loadRegistrationUploadControls,
+            loadExecutionControls,
+            saveExecutionControls,
+            updateExecutionUploadStatus,
+            saveExecutionUploadControls,
+            loadExecutionUploadControls,
             resolveCookieUploadMinSizeBytes,
             calculateCookieUploadPayloadBytes,
             validateCookieUploadSize,
             getExecutionUploadDeviceId,
             getExecutionUploadConfig,
             uploadRegisteredCookie,
-            startRegistration,
+            startExecution,
             stopExecution,
             handleCustomTestAccountAction,
             updateCustomTestAccountButtons

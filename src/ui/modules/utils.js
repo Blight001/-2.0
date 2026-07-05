@@ -351,7 +351,7 @@ async function autoDetectBrowsers(elements, logger, updateBrowserOptions, update
 function updateBrowserOptions(browsers, elements) {
     const previousValue = elements.browserType ? String(elements.browserType.value || '').trim() : '';
     const storedValue = typeof localStorage !== 'undefined'
-        ? String(localStorage.getItem('registration-browser-type') || '').trim()
+        ? String(localStorage.getItem('execution-browser-type') || '').trim()
         : '';
     const preferredValue = previousValue || storedValue;
     elements.browserType.innerHTML = '';

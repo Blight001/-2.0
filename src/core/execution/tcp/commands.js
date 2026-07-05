@@ -191,28 +191,28 @@ function _applyExecutionRuntimePatch(app, patch = {}) {
         }
     }
 
-    if (Object.prototype.hasOwnProperty.call(input, 'activeRegistrationCardName')) {
-        assign('activeRegistrationCardName', String(input.activeRegistrationCardName || '').trim());
+    if (Object.prototype.hasOwnProperty.call(input, 'activeExecutionCardName')) {
+        assign('activeExecutionCardName', String(input.activeExecutionCardName || '').trim());
     }
 
-    if (Object.prototype.hasOwnProperty.call(input, 'activeRegistrationCardConfig')) {
-        assign('activeRegistrationCardConfig', clonePlainObject(input.activeRegistrationCardConfig));
+    if (Object.prototype.hasOwnProperty.call(input, 'activeExecutionCardConfig')) {
+        assign('activeExecutionCardConfig', clonePlainObject(input.activeExecutionCardConfig));
     }
 
-    if (Object.prototype.hasOwnProperty.call(input, 'lastRegistrationConfig')) {
-        assign('lastRegistrationConfig', clonePlainObject(input.lastRegistrationConfig));
+    if (Object.prototype.hasOwnProperty.call(input, 'lastExecutionConfig')) {
+        assign('lastExecutionConfig', clonePlainObject(input.lastExecutionConfig));
     }
 
-    if (Object.prototype.hasOwnProperty.call(input, 'registrationTcpReconnectEnabled')) {
-        assign('registrationTcpReconnectEnabled', input.registrationTcpReconnectEnabled !== false);
+    if (Object.prototype.hasOwnProperty.call(input, 'executionTcpReconnectEnabled')) {
+        assign('executionTcpReconnectEnabled', input.executionTcpReconnectEnabled !== false);
     }
 
-    if (Object.prototype.hasOwnProperty.call(input, 'registrationTcpControlState')) {
-        assign('registrationTcpControlState', clonePlainObject(input.registrationTcpControlState));
+    if (Object.prototype.hasOwnProperty.call(input, 'executionTcpControlState')) {
+        assign('executionTcpControlState', clonePlainObject(input.executionTcpControlState));
     }
 
-    if (Object.prototype.hasOwnProperty.call(input, 'registrationStopRequested')) {
-        assign('registrationStopRequested', input.registrationStopRequested === true);
+    if (Object.prototype.hasOwnProperty.call(input, 'executionStopRequested')) {
+        assign('executionStopRequested', input.executionStopRequested === true);
     }
 
     if (Object.prototype.hasOwnProperty.call(input, 'isValidated')) {
@@ -238,11 +238,11 @@ function _applyExecutionRuntimePatch(app, patch = {}) {
         assign('maxProxyRecoveryAttempts', attempts);
     }
 
-    if (Object.prototype.hasOwnProperty.call(input, 'registrationTcpEndpoint')) {
-        assign('registrationTcpEndpoint', input.registrationTcpEndpoint && typeof input.registrationTcpEndpoint === 'object'
-            ? input.registrationTcpEndpoint
+    if (Object.prototype.hasOwnProperty.call(input, 'executionTcpEndpoint')) {
+        assign('executionTcpEndpoint', input.executionTcpEndpoint && typeof input.executionTcpEndpoint === 'object'
+            ? input.executionTcpEndpoint
             : null);
-        appliedFields.push('registrationTcpEndpoint');
+        appliedFields.push('executionTcpEndpoint');
     }
 
     return {
@@ -298,7 +298,7 @@ function _resolveExecutionStartTaskPayload(app, commandArgs = {}) {
         input.card_name
         || input.cardName
         || cardData.name
-        || app?.activeRegistrationCardName
+        || app?.activeExecutionCardName
         || app?.currentCardName
         || app?.currentCard
         || ''
@@ -358,14 +358,14 @@ function _emitExecutionControlStateUpdated(app, controlState = {}) {
     }
 
     const normalizedState = clonePlainObject(controlState);
-    app.registrationTcpControlState = normalizedState;
+    app.executionTcpControlState = normalizedState;
     if (typeof app.emitUiEvent === 'function') {
-        app.emitUiEvent('registration-control-state-updated', {
+        app.emitUiEvent('execution-control-state-updated', {
             control_state: normalizedState,
             control_locked: normalizedState.control_locked === true
         });
     } else if (app.mainWindow?.webContents && typeof app.mainWindow.webContents.send === 'function') {
-        app.mainWindow.webContents.send('registration-control-state-updated', {
+        app.mainWindow.webContents.send('execution-control-state-updated', {
             control_state: normalizedState,
             control_locked: normalizedState.control_locked === true
         });
@@ -397,7 +397,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
             };
         }
 
-        if (command === 'get_snapshot' || command === 'get_registration_ui_state') {
+        if (command === 'get_snapshot' || command === 'get_execution_ui_state') {
             try {
                 const runtimeConfig = typeof app?.readExecutionRuntimeConfigFromDisk === 'function'
                     ? await app.readExecutionRuntimeConfigFromDisk()
@@ -409,8 +409,8 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                             ? runtimeConfig.browser_settings
                             : {})
                     : {};
-                app.registrationRuntimeConfig = runtimeConfig && typeof runtimeConfig === 'object' ? { ...runtimeConfig } : {};
-                app.registrationRuntimeBrowserSettings = runtimeBrowserSettings && typeof runtimeBrowserSettings === 'object'
+                app.executionRuntimeConfig = runtimeConfig && typeof runtimeConfig === 'object' ? { ...runtimeConfig } : {};
+                app.executionRuntimeBrowserSettings = runtimeBrowserSettings && typeof runtimeBrowserSettings === 'object'
                     ? { ...runtimeBrowserSettings }
                     : {};
                 snapshot = buildExecutionTcpSnapshot(app, { reason: `command:${command}` });
@@ -430,7 +430,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
             return {
                 ok: true,
                 command,
-                message: 'registration ui state ok',
+                message: 'execution ui state ok',
                 snapshot,
                 runtime_info: runtimeInfo,
                 ui_state: safeUiState,
@@ -551,13 +551,13 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
             };
         }
 
-        if (command === 'start_registration') {
+        if (command === 'start_execution') {
             const startTask = _resolveExecutionStartTaskPayload(app, commandArgs.config && typeof commandArgs.config === 'object'
                 ? commandArgs.config
                 : commandArgs);
             if (startTask.browserSettings && Object.keys(startTask.browserSettings).length > 0) {
                 const mergedSettings = _mergeBrowserSettings(app, startTask.browserSettings);
-                await _persistExecutionBrowserSettings(app, mergedSettings, 'tcp-start-registration');
+                await _persistExecutionBrowserSettings(app, mergedSettings, 'tcp-start-execution');
                 if (app?.clashManager && typeof app.clashManager.applyDnsLeakProtection === 'function') {
                     try {
                         await app.clashManager.applyDnsLeakProtection(mergedSettings);
@@ -567,8 +567,8 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                 }
             }
 
-            if (startTask.cardData && typeof app?.startSingleRegistrationTask === 'function') {
-                const result = await app.startSingleRegistrationTask({
+            if (startTask.cardData && typeof app?.startSingleExecutionTask === 'function') {
+                const result = await app.startSingleExecutionTask({
                     cardConfig: startTask.cardData,
                     cardName: startTask.cardName,
                     browserType: startTask.browserType || app?.currentBrowserType,
@@ -578,7 +578,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                     debugMode: startTask.debugMode,
                     contextVariables: startTask.contextVariables,
                     initialCookies: startTask.initialCookies,
-                    taskType: commandArgs.task_type || commandArgs.taskType || 'registration',
+                    taskType: commandArgs.task_type || commandArgs.taskType || 'execution',
                     taskLabel: commandArgs.task_label || commandArgs.taskLabel || '自动化任务'
                 });
 
@@ -586,8 +586,8 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                     ok: result && result.success !== false,
                     command,
                     message: result && result.success !== false ? '单任务执行已启动' : (result?.error || '启动单任务执行失败'),
-                    entrypoint: 'startSingleRegistrationTask',
-                    task_type: commandArgs.task_type || commandArgs.taskType || 'registration',
+                    entrypoint: 'startSingleExecutionTask',
+                    task_type: commandArgs.task_type || commandArgs.taskType || 'execution',
                     task_id: result?.taskId || null,
                     taskId: result?.taskId || null,
                     card_name: startTask.cardName,
@@ -598,7 +598,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                 };
             }
 
-            if (typeof app?.startRegistration !== 'function') {
+            if (typeof app?.startExecution !== 'function') {
                 return {
                     ok: false,
                     command,
@@ -621,13 +621,13 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                 startConfig.cardName = startTask.cardName;
             }
 
-            const result = await app.startRegistration(startConfig);
+            const result = await app.startExecution(startConfig);
             return {
                 ok: result && result.success !== false,
                 command,
                 message: result && result.success !== false ? '执行已启动' : (result?.error || '启动执行失败'),
-                entrypoint: 'startRegistration',
-                task_type: commandArgs.task_type || commandArgs.taskType || 'registration',
+                entrypoint: 'startExecution',
+                task_type: commandArgs.task_type || commandArgs.taskType || 'execution',
                 task_id: result?.taskId || null,
                 taskId: result?.taskId || null,
                 card_name: startTask.cardName,
@@ -638,7 +638,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
             };
         }
 
-        if (command === 'stop_registration') {
+        if (command === 'stop_execution') {
             const wantsExitApp = commandArgs.exit_app === true
                 || commandArgs.exitApp === true
                 || commandArgs.shutdown_app === true
@@ -706,7 +706,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                 || (locked ? '服务器禁用客户端操作' : '服务器恢复客户端操作')
             ).trim();
             const controlState = {
-                ...(clonePlainObject(app?.registrationTcpControlState) || {}),
+                ...(clonePlainObject(app?.executionTcpControlState) || {}),
                 control_locked: locked,
                 reason,
                 source: 'tcp-command',

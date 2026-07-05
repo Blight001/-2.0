@@ -76,8 +76,8 @@ module.exports = function createRendererConfig(deps) {
             source.tcpServerUrl ||
             source.server_url ||
             source.serverUrl ||
-            source.registration_server_url ||
-            source.registrationServerUrl ||
+            source.execution_server_url ||
+            source.executionServerUrl ||
             source.mqtt_server_url ||
             source.mqttServerUrl ||
             ''
@@ -89,8 +89,8 @@ module.exports = function createRendererConfig(deps) {
         return normalizeBooleanValue(
             source.tcp_auto_reconnect_enabled ??
             source.tcpAutoReconnectEnabled ??
-            source.registration_tcp_auto_reconnect_enabled ??
-            source.registrationTcpAutoReconnectEnabled,
+            source.execution_tcp_auto_reconnect_enabled ??
+            source.executionTcpAutoReconnectEnabled,
             true
         );
     }
@@ -183,7 +183,7 @@ module.exports = function createRendererConfig(deps) {
 
     async function loadTcpServerConfig() {
         try {
-            const result = await ipcRenderer.invoke('get-registration-tcp-config');
+            const result = await ipcRenderer.invoke('get-execution-tcp-config');
             if (!result || result.success !== true) {
                 throw new Error(result?.error || '读取TCP配置失败');
             }
@@ -208,7 +208,7 @@ module.exports = function createRendererConfig(deps) {
                 ? elements.tcpAutoReconnectEnabled.checked === true
                 : true;
 
-            const result = await ipcRenderer.invoke('save-registration-tcp-config', {
+            const result = await ipcRenderer.invoke('save-execution-tcp-config', {
                 tcp_server_url: tcpServerUrl,
                 tcp_auto_reconnect_enabled: tcpAutoReconnectEnabled
             });

@@ -10,9 +10,9 @@ module.exports = function createRendererWiringEvents(deps) {
         logger,
         ipcRenderer,
         loadCookies,
-        saveRegistrationControls,
-        saveRegistrationUploadControls,
-        updateRegistrationUploadStatus,
+        saveExecutionControls,
+        saveExecutionUploadControls,
+        updateExecutionUploadStatus,
         updateBrowserSettings,
         detectBrowserForSelect,
         setRunMode,
@@ -23,7 +23,7 @@ module.exports = function createRendererWiringEvents(deps) {
         updateHaikaBindAccountControls,
         startHaikaBinding,
         stopHaikaBinding,
-        startRegistration,
+        startExecution,
         stopExecution,
         parseCookieAccountInfo,
         hideCookieAccountContextMenu,
@@ -67,7 +67,7 @@ module.exports = function createRendererWiringEvents(deps) {
         applyTcpManagedUiLockdown,
         ensureTcpManagedUiObserver,
         initializeAppRuntimeMode,
-        syncRegistrationCardStateFromServer,
+        syncExecutionCardStateFromServer,
         updateTcpConnectionPanelState,
         refreshClashStatus,
         setupAiAssistantPanel,
@@ -79,8 +79,8 @@ module.exports = function createRendererWiringEvents(deps) {
     const CUSTOM_TEST_ACCOUNT_PASSWORD_KEY = 'custom-test-account-password';
     const persistBrowserSettingsChange = async () => {
         try {
-            const saveResult = typeof saveRegistrationControls === 'function'
-                ? await saveRegistrationControls()
+            const saveResult = typeof saveExecutionControls === 'function'
+                ? await saveExecutionControls()
                 : { success: true };
             const updateResult = typeof updateBrowserSettings === 'function'
                 ? await updateBrowserSettings()
@@ -218,8 +218,8 @@ module.exports = function createRendererWiringEvents(deps) {
 
         if (elements.exitAppBtn) {
             elements.exitAppBtn.addEventListener('click', async () => {
-                const isEmbedded = state.registrationEmbedded === true
-                    || String(document.documentElement?.dataset?.registrationEmbedded || '').trim() === 'true';
+                const isEmbedded = state.executionEmbedded === true
+                    || String(document.documentElement?.dataset?.executionEmbedded || '').trim() === 'true';
 
                 if (isEmbedded) {
                     elements.exitAppBtn.disabled = true;
@@ -507,24 +507,24 @@ module.exports = function createRendererWiringEvents(deps) {
             }, 'haikaBind');
         });
 
-        ipcRenderer.on('registration-tcp-connection-updated', (_event, payload = {}) => {
-            state.registrationTcpEnabled = payload.registrationTcpEnabled === true;
-            state.registrationTcpControlLocked = payload.registrationTcpControlLocked === true;
-            state.registrationTcpControlState = payload.registrationTcpControlState || {};
-            state.registrationTcpEndpoint = payload.registrationTcpEndpoint || null;
-            state.registrationTcpReconnectEnabled = payload.registrationTcpReconnectEnabled !== false;
-            state.registrationTcpConnectionStatus = payload.registrationTcpConnectionStatus || null;
+        ipcRenderer.on('execution-tcp-connection-updated', (_event, payload = {}) => {
+            state.executionTcpEnabled = payload.executionTcpEnabled === true;
+            state.executionTcpControlLocked = payload.executionTcpControlLocked === true;
+            state.executionTcpControlState = payload.executionTcpControlState || {};
+            state.executionTcpEndpoint = payload.executionTcpEndpoint || null;
+            state.executionTcpReconnectEnabled = payload.executionTcpReconnectEnabled !== false;
+            state.executionTcpConnectionStatus = payload.executionTcpConnectionStatus || null;
             updateTcpConnectionPanelState();
         });
 
-        ipcRenderer.on('registration-card-updated', (_event, payload = {}) => {
+        ipcRenderer.on('execution-card-updated', (_event, payload = {}) => {
             const cardMode = payload?.card_type === 'test'
                 ? 'test'
                 : payload?.card_type === 'haikaBind'
                     ? 'haikaBind'
                     : 'register';
 
-            if (!state.registrationTcpEnabled) {
+            if (!state.executionTcpEnabled) {
                 return;
             }
 
@@ -536,7 +536,7 @@ module.exports = function createRendererWiringEvents(deps) {
             const action = String(payload?.action || 'update');
             const cardName = String(payload?.card_name || '').trim();
             logger.info(`收到${label}卡片更新通知: ${action}${cardName ? ` -> ${cardName}` : ''}`);
-            void syncRegistrationCardStateFromServer(cardMode);
+            void syncExecutionCardStateFromServer(cardMode);
         });
 
         ipcRenderer.on(IPC_CHANNELS.cardEditorOpen, (_event, payload = {}) => {
@@ -549,9 +549,9 @@ module.exports = function createRendererWiringEvents(deps) {
             }
         });
 
-        ipcRenderer.on('registration-control-state-updated', (_event, payload = {}) => {
-            state.registrationTcpControlState = payload.control_state || {};
-            state.registrationTcpControlLocked = payload.control_locked === true;
+        ipcRenderer.on('execution-control-state-updated', (_event, payload = {}) => {
+            state.executionTcpControlState = payload.control_state || {};
+            state.executionTcpControlLocked = payload.control_locked === true;
             applyTcpManagedUiLockdown();
             ensureTcpManagedUiObserver();
 
@@ -587,7 +587,7 @@ module.exports = function createRendererWiringEvents(deps) {
                 button.addEventListener('click', () => {
                     const selectedMode = parseInt(button.dataset.runMode, 10);
                     setRunMode(Number.isFinite(selectedMode) ? selectedMode : DEFAULT_REGISTRATION_RUN_MODE);
-                    saveRegistrationControls();
+                    saveExecutionControls();
                 });
             });
         }
@@ -691,7 +691,7 @@ module.exports = function createRendererWiringEvents(deps) {
             });
         });
 
-        elements.startBtn.addEventListener('click', startRegistration);
+        elements.startBtn.addEventListener('click', startExecution);
         elements.stopBtn.addEventListener('click', stopExecution);
         if (elements.customTestAccountBtn && typeof handleCustomTestAccountAction === 'function') {
             elements.customTestAccountBtn.addEventListener('click', () => {
@@ -846,7 +846,7 @@ module.exports = function createRendererWiringEvents(deps) {
         }
         if (elements.httpSettingsSaveBtn) {
             elements.httpSettingsSaveBtn.addEventListener('click', () => {
-                void saveRegistrationUploadControls();
+                void saveExecutionUploadControls();
             });
         }
         if (elements.tcpConnectionConsoleClearBtn) {

@@ -830,7 +830,7 @@ module.exports = {
             step?.card_name
             || step?.cardName
             || this.cardConfig?.name
-            || this.activeRegistrationCardName
+            || this.activeExecutionCardName
             || '自动化步骤Cookie'
         ).trim() || '自动化步骤Cookie';
 

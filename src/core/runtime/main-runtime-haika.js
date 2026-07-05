@@ -445,7 +445,7 @@ module.exports = {
             this.logger.warning(`未找到可注入的Cookie: ${(accountInfo.sourceCardName || accountInfo.card_name)}/${accountInfo.fileName}`);
         }
 
-        const task = new RegistrationThread(taskId, state.cardConfig, {
+        const task = new ExecutionThread(taskId, state.cardConfig, {
             app: this,
             browserManager: this.browserManager,
             cookieManager: this.cookieManager,

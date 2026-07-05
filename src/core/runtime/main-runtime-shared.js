@@ -1,6 +1,6 @@
 const { loadAutomationCardsForMode } = require('../execution/execution-ui-state');
 const {
-    cloneRegistrationCardConfig,
+    cloneExecutionCardConfig,
     toPositiveInteger
 } = require('./main-runtime-utils');
 
@@ -29,19 +29,19 @@ module.exports = {
         return '单次运行';
     },
 
-    _getTimedRegistrationTaskLabel() {
+    _getTimedExecutionTaskLabel() {
         return '定时执行任务';
     },
 
-    _getTimedRegistrationBatchLabel() {
+    _getTimedExecutionBatchLabel() {
         return '定时执行批次';
     },
 
     _resolveExecutionStartConfig(config = {}) {
         const input = config && typeof config === 'object' ? config : {};
-        const runtimePlan = cloneRegistrationCardConfig(this.registrationDefaultExecutionPlan) || {};
-        const planBrowserSettings = cloneRegistrationCardConfig(runtimePlan.browser_settings || runtimePlan.browserSettings) || {};
-        const inputBrowserSettings = cloneRegistrationCardConfig(input.browserSettings || input.browser_settings) || {};
+        const runtimePlan = cloneExecutionCardConfig(this.defaultExecutionPlan) || {};
+        const planBrowserSettings = cloneExecutionCardConfig(runtimePlan.browser_settings || runtimePlan.browserSettings) || {};
+        const inputBrowserSettings = cloneExecutionCardConfig(input.browserSettings || input.browser_settings) || {};
         const browserSettings = {
             ...planBrowserSettings,
             ...inputBrowserSettings
@@ -124,38 +124,38 @@ module.exports = {
             1,
             20
         );
-        const timedRegistrationCount = toPositiveInteger(
-            Number.isFinite(Number(input.timedRegistrationCount))
-                ? input.timedRegistrationCount
-                : Number.isFinite(Number(runtimePlan.timedRegistrationCount))
-                    ? runtimePlan.timedRegistrationCount
-                    : browserSettings.timed_registration_count,
+        const timedExecutionCount = toPositiveInteger(
+            Number.isFinite(Number(input.timedExecutionCount))
+                ? input.timedExecutionCount
+                : Number.isFinite(Number(runtimePlan.timedExecutionCount))
+                    ? runtimePlan.timedExecutionCount
+                    : browserSettings.timed_execution_count,
             1,
             1,
             99999
         );
-        const timedRegistrationCycleCount = toPositiveInteger(
-            Number.isFinite(Number(input.timedRegistrationCycleCount))
-                ? input.timedRegistrationCycleCount
-                : Number.isFinite(Number(runtimePlan.timedRegistrationCycleCount))
-                    ? runtimePlan.timedRegistrationCycleCount
-                    : browserSettings.timed_registration_cycle_count,
+        const timedExecutionCycleCount = toPositiveInteger(
+            Number.isFinite(Number(input.timedExecutionCycleCount))
+                ? input.timedExecutionCycleCount
+                : Number.isFinite(Number(runtimePlan.timedExecutionCycleCount))
+                    ? runtimePlan.timedExecutionCycleCount
+                    : browserSettings.timed_execution_cycle_count,
             1,
             1,
             99999
         );
-        const timedRegistrationStartMode = String(
-            input.timedRegistrationStartMode
-            || runtimePlan.timedRegistrationStartMode
-            || browserSettings.timed_registration_start_mode
+        const timedExecutionStartMode = String(
+            input.timedExecutionStartMode
+            || runtimePlan.timedExecutionStartMode
+            || browserSettings.timed_execution_start_mode
             || 'immediate'
         ).trim() === 'delayed' ? 'delayed' : 'immediate';
-        const timedRegistrationDelayMs = Number.isFinite(Number(input.timedRegistrationDelayMs))
-            ? Number(input.timedRegistrationDelayMs)
-            : Number.isFinite(Number(runtimePlan.timedRegistrationDelayMs))
-                ? Number(runtimePlan.timedRegistrationDelayMs)
-                : Number.isFinite(Number(browserSettings.timed_registration_delay_seconds))
-                    ? Number(browserSettings.timed_registration_delay_seconds) * 1000
+        const timedExecutionDelayMs = Number.isFinite(Number(input.timedExecutionDelayMs))
+            ? Number(input.timedExecutionDelayMs)
+            : Number.isFinite(Number(runtimePlan.timedExecutionDelayMs))
+                ? Number(runtimePlan.timedExecutionDelayMs)
+                : Number.isFinite(Number(browserSettings.timed_execution_delay_seconds))
+                    ? Number(browserSettings.timed_execution_delay_seconds) * 1000
                     : 0;
         const serverCardName = String(
             runtimePlan.server_card_name
@@ -169,10 +169,10 @@ module.exports = {
         browserSettings.concurrent_count = concurrentCount;
         browserSettings.sync_execution = syncEnabled;
         browserSettings.max_proxy_recovery_attempts = maxProxyRecoveryAttempts;
-        browserSettings.timed_registration_count = timedRegistrationCount;
-        browserSettings.timed_registration_cycle_count = timedRegistrationCycleCount;
-        browserSettings.timed_registration_start_mode = timedRegistrationStartMode;
-        browserSettings.timed_registration_delay_seconds = Math.max(0, Math.floor(timedRegistrationDelayMs / 1000));
+        browserSettings.timed_execution_count = timedExecutionCount;
+        browserSettings.timed_execution_cycle_count = timedExecutionCycleCount;
+        browserSettings.timed_execution_start_mode = timedExecutionStartMode;
+        browserSettings.timed_execution_delay_seconds = Math.max(0, Math.floor(timedExecutionDelayMs / 1000));
         browserSettings.save_local_cookie = saveLocalCookie;
         browserSettings.saveLocalCookie = saveLocalCookie;
         browserSettings.skip_cookie_save = !saveLocalCookie;
@@ -188,10 +188,10 @@ module.exports = {
             concurrentCount,
             syncEnabled,
             maxProxyRecoveryAttempts,
-            timedRegistrationCount,
-            timedRegistrationCycleCount,
-            timedRegistrationStartMode,
-            timedRegistrationDelayMs,
+            timedExecutionCount,
+            timedExecutionCycleCount,
+            timedExecutionStartMode,
+            timedExecutionDelayMs,
             saveLocalCookie,
             skipCookieSave: !saveLocalCookie,
             server_card_name: serverCardName,

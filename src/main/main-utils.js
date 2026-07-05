@@ -3,7 +3,7 @@ const {
     normalizeBooleanValue
 } = require('../core/infra/config-utils');
 const {
-    normalizeRegistrationTcpEndpoint: normalizeRegistrationTcpEndpointValue,
+    normalizeExecutionTcpEndpoint: normalizeExecutionTcpEndpointValue,
     hasAutomationTcpConfig
 } = require('../core/execution/tcp-control');
 
@@ -147,14 +147,14 @@ function buildTcpConfigSnapshot(source = {}) {
         return {};
     }
 
-    const endpoint = normalizeRegistrationTcpEndpointValue(config);
+    const endpoint = normalizeExecutionTcpEndpointValue(config);
     return {
         tcp_server_url: `${endpoint.host}:${endpoint.port}`,
         tcp_auto_reconnect_enabled: normalizeBooleanValue(
             config.tcp_auto_reconnect_enabled
             ?? config.tcpAutoReconnectEnabled
-            ?? config.registration_tcp_auto_reconnect_enabled
-            ?? config.registrationTcpAutoReconnectEnabled,
+            ?? config.execution_tcp_auto_reconnect_enabled
+            ?? config.executionTcpAutoReconnectEnabled,
             true
         )
     };

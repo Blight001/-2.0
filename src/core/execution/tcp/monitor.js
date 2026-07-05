@@ -72,28 +72,28 @@ function _isSameExecutionTcpEndpoint(left, right) {
         && leftPort === rightPort;
 }
 
-function _syncExecutionDefaultExecutionPlanFromResponse(app, response = {}) {
+function _syncDefaultExecutionPlanFromResponse(app, response = {}) {
     if (!app || !response || typeof response !== 'object') {
         return null;
     }
 
-    const plan = response.registration_default_execution_plan
-        || response.registrationDefaultExecutionPlan
-        || response.default_execution_plan
+    const plan = response.default_execution_plan
         || response.defaultExecutionPlan
+        || response.registration_default_execution_plan
+        || response.registrationDefaultExecutionPlan
         || (response.snapshot && typeof response.snapshot === 'object'
-            ? response.snapshot.registration_default_execution_plan
-                || response.snapshot.registrationDefaultExecutionPlan
-                || response.snapshot.default_execution_plan
+            ? response.snapshot.default_execution_plan
                 || response.snapshot.defaultExecutionPlan
+                || response.snapshot.registration_default_execution_plan
+                || response.snapshot.registrationDefaultExecutionPlan
             : null);
     if (!plan || typeof plan !== 'object') {
         return null;
     }
 
     const clonedPlan = clonePlainObject(plan);
-    app.registrationDefaultExecutionPlan = clonedPlan;
-    app.registrationDefaultExecutionPlanUpdatedAt = String(
+    app.defaultExecutionPlan = clonedPlan;
+    app.defaultExecutionPlanUpdatedAt = String(
         clonedPlan.updated_at
         || clonedPlan.updatedAt
         || response.server_time
@@ -102,7 +102,7 @@ function _syncExecutionDefaultExecutionPlanFromResponse(app, response = {}) {
     ).trim();
     const logPayload = {
         enabled: clonedPlan.enabled === true,
-        auto_start_registration: clonedPlan.auto_start_registration === true || clonedPlan.autoStartRegistration === true,
+        auto_start_execution: clonedPlan.auto_start_execution === true || clonedPlan.autoStartExecution === true,
         server_card_name: String(clonedPlan.server_card_name || clonedPlan.serverCardName || '').trim(),
         control_locked: clonedPlan.control_locked === true || clonedPlan.controlLocked === true,
         browser_settings: {
@@ -124,19 +124,19 @@ function _syncExecutionDefaultExecutionPlanFromResponse(app, response = {}) {
             block_images_videos: clonedPlan.browser_settings?.block_images_videos !== false,
             sync_execution: clonedPlan.browser_settings?.sync_execution !== false,
             max_proxy_recovery_attempts: Number.parseInt(clonedPlan.browser_settings?.max_proxy_recovery_attempts, 10) || 3,
-            registration_auto_upload: clonedPlan.browser_settings?.registration_auto_upload !== false,
+            execution_auto_upload: clonedPlan.browser_settings?.execution_auto_upload !== false,
             save_local_cookie: clonedPlan.browser_settings?.save_local_cookie === true,
             concurrent_count: Number.parseInt(clonedPlan.browser_settings?.concurrent_count, 10) || 1,
             run_mode: Number.parseInt(clonedPlan.browser_settings?.run_mode, 10) || 0,
-            timed_registration_count: Number.parseInt(clonedPlan.browser_settings?.timed_registration_count, 10) || 1,
-            timed_registration_cycle_count: Number.parseInt(clonedPlan.browser_settings?.timed_registration_cycle_count, 10) || 1,
-            timed_registration_start_mode: String(clonedPlan.browser_settings?.timed_registration_start_mode || '').trim() === 'delayed' ? 'delayed' : 'immediate',
-            timed_registration_delay_seconds: Number.parseInt(clonedPlan.browser_settings?.timed_registration_delay_seconds, 10) || 0
+            timed_execution_count: Number.parseInt(clonedPlan.browser_settings?.timed_execution_count, 10) || 1,
+            timed_execution_cycle_count: Number.parseInt(clonedPlan.browser_settings?.timed_execution_cycle_count, 10) || 1,
+            timed_execution_start_mode: String(clonedPlan.browser_settings?.timed_execution_start_mode || '').trim() === 'delayed' ? 'delayed' : 'immediate',
+            timed_execution_delay_seconds: Number.parseInt(clonedPlan.browser_settings?.timed_execution_delay_seconds, 10) || 0
         }
     };
     const logSignature = JSON.stringify(logPayload);
-    if (app.registrationDefaultExecutionPlanSignature !== logSignature) {
-        app.registrationDefaultExecutionPlanSignature = logSignature;
+    if (app.defaultExecutionPlanSignature !== logSignature) {
+        app.defaultExecutionPlanSignature = logSignature;
         app?.logger?.info?.(`已同步自动化工具默认执行方案: ${logSignature}`);
     }
 
@@ -180,28 +180,28 @@ function _emitExecutionTcpConnectionUpdated(app, connectionStatus) {
         return;
     }
 
-    app.mainWindow.webContents.send('registration-tcp-connection-updated', {
-        registrationTcpEnabled: connectionStatus?.enabled === true,
-        registrationTcpControlLocked: typeof app.isRegistrationControlLocked === 'function'
-            ? app.isRegistrationControlLocked()
+    app.mainWindow.webContents.send('execution-tcp-connection-updated', {
+        executionTcpEnabled: connectionStatus?.enabled === true,
+        executionTcpControlLocked: typeof app.isExecutionControlLocked === 'function'
+            ? app.isExecutionControlLocked()
             : false,
-        registrationTcpControlState: { ...(app.registrationTcpControlState || {}) },
-        registrationTcpEndpoint: connectionStatus?.endpoint || null,
-        registrationTcpEndpointUrl: connectionStatus?.endpoint?.url || '',
-        registrationTcpReconnectEnabled: app.registrationTcpReconnectEnabled !== false,
-        registrationTcpConnectionStatus: connectionStatus || null
+        executionTcpControlState: { ...(app.executionTcpControlState || {}) },
+        executionTcpEndpoint: connectionStatus?.endpoint || null,
+        executionTcpEndpointUrl: connectionStatus?.endpoint?.url || '',
+        executionTcpReconnectEnabled: app.executionTcpReconnectEnabled !== false,
+        executionTcpConnectionStatus: connectionStatus || null
     });
 }
 
-function _updateRegistrationTcpConnectionStatus(app, endpoint, connected = false, lastConnectError = '', statusCode = 0) {
+function _updateExecutionTcpConnectionStatus(app, endpoint, connected = false, lastConnectError = '', statusCode = 0) {
     const resolvedEndpoint = endpoint && typeof endpoint === 'object'
         ? endpoint
         : endpoint === null
             ? null
-            : app?.registrationTcpEndpoint || null;
+            : app?.executionTcpEndpoint || null;
 
     const connectionStatus = buildExecutionTcpConnectionStatus({
-        configured: app?.registrationTcpConfigured === true || !!resolvedEndpoint,
+        configured: app?.executionTcpConfigured === true || !!resolvedEndpoint,
         connected: connected === true,
         endpoint: resolvedEndpoint,
         lastConnectError,
@@ -209,11 +209,11 @@ function _updateRegistrationTcpConnectionStatus(app, endpoint, connected = false
     });
 
     if (app) {
-        app.registrationTcpConnectionStatus = connectionStatus;
+        app.executionTcpConnectionStatus = connectionStatus;
         if (resolvedEndpoint) {
-            app.registrationTcpEndpoint = resolvedEndpoint;
+            app.executionTcpEndpoint = resolvedEndpoint;
         } else if (endpoint === null) {
-            app.registrationTcpEndpoint = null;
+            app.executionTcpEndpoint = null;
         }
     }
 
@@ -221,7 +221,7 @@ function _updateRegistrationTcpConnectionStatus(app, endpoint, connected = false
     return connectionStatus;
 }
 
-async function _sendRegistrationTcpRequest(app, socket, requestType, payload, expectedResponseType, options = {}) {
+async function _sendExecutionTcpRequest(app, socket, requestType, payload, expectedResponseType, options = {}) {
     const state = _getExecutionTcpMonitorState(app);
     if (!state || !socket || socket.destroyed) {
         throw new Error('连接已关闭');
@@ -271,7 +271,7 @@ async function _sendRegistrationTcpRequest(app, socket, requestType, payload, ex
     });
 }
 
-async function _sendRegistrationTcpHello(app, socket, endpoint) {
+async function _sendExecutionTcpHello(app, socket, endpoint) {
     const snapshot = buildExecutionTcpSnapshot(app, { reason: 'hello' });
     const payload = {
         ...buildExecutionTcpClientMetadata(app, snapshot),
@@ -280,7 +280,7 @@ async function _sendRegistrationTcpHello(app, socket, endpoint) {
         snapshot
     };
 
-    const response = await _sendRegistrationTcpRequest(
+    const response = await _sendExecutionTcpRequest(
         app,
         socket,
         MSG_TYPE_REGISTRATION_HELLO_REQ,
@@ -293,14 +293,14 @@ async function _sendRegistrationTcpHello(app, socket, endpoint) {
     );
 
     if (response && response.instance_id) {
-        app.registrationTcpInstanceId = String(response.instance_id).trim();
+        app.executionTcpInstanceId = String(response.instance_id).trim();
     }
-    await _syncExecutionDefaultExecutionPlanFromResponse(app, response);
+    await _syncDefaultExecutionPlanFromResponse(app, response);
 
     return response;
 }
 
-async function _sendRegistrationTcpStateReport(app, socket, reason = 'periodic') {
+async function _sendExecutionTcpStateReport(app, socket, reason = 'periodic') {
     const snapshot = buildExecutionTcpSnapshot(app, { reason });
     const payload = {
         ...buildExecutionTcpClientMetadata(app, snapshot),
@@ -308,7 +308,7 @@ async function _sendRegistrationTcpStateReport(app, socket, reason = 'periodic')
         snapshot
     };
 
-    const response = await _sendRegistrationTcpRequest(
+    const response = await _sendExecutionTcpRequest(
         app,
         socket,
         MSG_TYPE_REGISTRATION_STATE_REPORT_REQ,
@@ -320,11 +320,11 @@ async function _sendRegistrationTcpStateReport(app, socket, reason = 'periodic')
         }
     );
 
-    await _syncExecutionDefaultExecutionPlanFromResponse(app, response);
+    await _syncDefaultExecutionPlanFromResponse(app, response);
     return response;
 }
 
-async function _sendRegistrationTcpHeartbeatRequest(app, socket, reason = 'heartbeat') {
+async function _sendExecutionTcpHeartbeatRequest(app, socket, reason = 'heartbeat') {
     const snapshot = buildExecutionTcpSnapshot(app, { reason });
     const payload = {
         ...buildExecutionTcpClientMetadata(app, snapshot),
@@ -333,7 +333,7 @@ async function _sendRegistrationTcpHeartbeatRequest(app, socket, reason = 'heart
         snapshot
     };
 
-    const response = await _sendRegistrationTcpRequest(
+    const response = await _sendExecutionTcpRequest(
         app,
         socket,
         MSG_TYPE_REGISTRATION_HEARTBEAT_REQ,
@@ -350,7 +350,7 @@ async function _sendRegistrationTcpHeartbeatRequest(app, socket, reason = 'heart
         state.lastHealthyAt = Date.now();
     }
 
-    await _syncExecutionDefaultExecutionPlanFromResponse(app, response);
+    await _syncDefaultExecutionPlanFromResponse(app, response);
     return response;
 }
 
@@ -373,7 +373,7 @@ async function notifyExecutionTcpSuccess(app, payload = {}) {
         snapshot
     };
 
-    const response = await _sendRegistrationTcpRequest(
+    const response = await _sendExecutionTcpRequest(
         app,
         state.socket,
         MSG_TYPE_REGISTRATION_SUCCESS_REQ,
@@ -385,11 +385,11 @@ async function notifyExecutionTcpSuccess(app, payload = {}) {
         }
     );
 
-    await _syncExecutionDefaultExecutionPlanFromResponse(app, response);
+    await _syncDefaultExecutionPlanFromResponse(app, response);
     return response;
 }
 
-function _destroyRegistrationTcpMonitorSocket(app, reason = '') {
+function _destroyExecutionTcpMonitorSocket(app, reason = '') {
     const state = _getExecutionTcpMonitorState(app);
     if (!state) {
         return;
@@ -420,41 +420,41 @@ function _destroyRegistrationTcpMonitorSocket(app, reason = '') {
     }
 
     if (reason) {
-        const endpoint = app?.registrationTcpEndpoint || null;
-        _updateRegistrationTcpConnectionStatus(app, endpoint, false, reason, 0);
+        const endpoint = app?.executionTcpEndpoint || null;
+        _updateExecutionTcpConnectionStatus(app, endpoint, false, reason, 0);
     }
 }
 
-function _scheduleRegistrationTcpReconnect(app, endpoint, delayMs = DEFAULT_TCP_RECONNECT_INTERVAL_MS) {
+function _scheduleExecutionTcpReconnect(app, endpoint, delayMs = DEFAULT_TCP_RECONNECT_INTERVAL_MS) {
     const state = _getExecutionTcpMonitorState(app);
-    if (!state || app?.registrationTcpReconnectEnabled === false || app?.registrationTcpConnectionMonitorActive !== true) {
+    if (!state || app?.executionTcpReconnectEnabled === false || app?.executionTcpConnectionMonitorActive !== true) {
         return;
     }
 
     _clearExecutionTcpTimer(state.retryTimer);
     state.retryTimer = setTimeout(() => {
         state.retryTimer = null;
-        _openRegistrationTcpMonitorConnection(app, endpoint).catch((error) => {
+        _openExecutionTcpMonitorConnection(app, endpoint).catch((error) => {
             app?.logger?.warning?.(`TCP重连失败: ${error.message}`);
         });
     }, Math.max(1000, Number.isFinite(delayMs) ? delayMs : DEFAULT_TCP_RECONNECT_INTERVAL_MS));
 }
 
-function _sendRegistrationTcpHeartbeat(app) {
+function _sendExecutionTcpHeartbeat(app) {
     const state = _getExecutionTcpMonitorState(app);
     if (!state || !state.socket || state.socket.destroyed) {
         return false;
     }
 
-    void _sendRegistrationTcpHeartbeatRequest(app, state.socket, 'heartbeat').catch((error) => {
+    void _sendExecutionTcpHeartbeatRequest(app, state.socket, 'heartbeat').catch((error) => {
         app?.logger?.warning?.(`自动化工具心跳失败: ${error.message}`);
-        _destroyRegistrationTcpMonitorSocket(app, error?.message || '自动化工具心跳失败');
-        _scheduleRegistrationTcpReconnect(app, app?.registrationTcpEndpoint || state.currentEndpoint);
+        _destroyExecutionTcpMonitorSocket(app, error?.message || '自动化工具心跳失败');
+        _scheduleExecutionTcpReconnect(app, app?.executionTcpEndpoint || state.currentEndpoint);
     });
     return true;
 }
 
-async function _openRegistrationTcpMonitorConnection(app, endpoint) {
+async function _openExecutionTcpMonitorConnection(app, endpoint) {
     const state = _getExecutionTcpMonitorState(app);
     if (!state) {
         return null;
@@ -464,7 +464,7 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
         ? normalizeExecutionTcpEndpoint(endpoint)
         : null;
     if (!resolvedEndpoint) {
-        resolvedEndpoint = await resolveRegistrationTcpEndpointFromConfig(app);
+        resolvedEndpoint = await resolveExecutionTcpEndpointFromConfig(app);
     }
     if (!resolvedEndpoint) {
         return null;
@@ -475,7 +475,7 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
     }
 
     if (state.socket && !state.socket.destroyed) {
-        return app?.registrationTcpConnectionStatus || null;
+        return app?.executionTcpConnectionStatus || null;
     }
 
     state.currentEndpoint = resolvedEndpoint;
@@ -511,12 +511,12 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
                     _clearExecutionTcpInterval(state.heartbeatTimer);
                     state.heartbeatTimer = null;
                     if (state.helloAcked === true) {
-                        _scheduleRegistrationTcpReconnect(app, resolvedEndpoint);
+                        _scheduleExecutionTcpReconnect(app, resolvedEndpoint);
                     }
                     return;
                 }
 
-                _sendRegistrationTcpHeartbeat(app);
+                _sendExecutionTcpHeartbeat(app);
             }, DEFAULT_REGISTRATION_HEARTBEAT_INTERVAL_MS);
         };
 
@@ -530,15 +530,15 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
                     _clearExecutionTcpInterval(state.stateReportTimer);
                     state.stateReportTimer = null;
                     if (state.helloAcked === true) {
-                        _scheduleRegistrationTcpReconnect(app, resolvedEndpoint);
+                        _scheduleExecutionTcpReconnect(app, resolvedEndpoint);
                     }
                     return;
                 }
 
-                void _sendRegistrationTcpStateReport(app, state.socket, 'periodic').catch((error) => {
+                void _sendExecutionTcpStateReport(app, state.socket, 'periodic').catch((error) => {
                     app?.logger?.warning?.(`自动化工具状态上报失败: ${error.message}`);
-                    _destroyRegistrationTcpMonitorSocket(app, error?.message || '自动化工具状态上报失败');
-                    _scheduleRegistrationTcpReconnect(app, resolvedEndpoint);
+                    _destroyExecutionTcpMonitorSocket(app, error?.message || '自动化工具状态上报失败');
+                    _scheduleExecutionTcpReconnect(app, resolvedEndpoint);
                 });
             }, DEFAULT_REGISTRATION_STATE_REPORT_INTERVAL_MS);
         };
@@ -546,11 +546,11 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
         socket.once('connect', () => {
             void (async () => {
                 try {
-                    _updateRegistrationTcpConnectionStatus(app, resolvedEndpoint, false, '正在握手', 0);
-                    const helloResponse = await _sendRegistrationTcpHello(app, socket, resolvedEndpoint);
+                    _updateExecutionTcpConnectionStatus(app, resolvedEndpoint, false, '正在握手', 0);
+                    const helloResponse = await _sendExecutionTcpHello(app, socket, resolvedEndpoint);
                     const instanceId = String(helloResponse?.instance_id || getExecutionTcpInstanceId(app)).trim();
                     if (instanceId) {
-                        app.registrationTcpInstanceId = instanceId;
+                        app.executionTcpInstanceId = instanceId;
                     }
 
                     state.helloAcked = true;
@@ -558,18 +558,18 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
                     ensureHeartbeatLoop();
                     ensureStateReportLoop();
 
-                    const status = _updateRegistrationTcpConnectionStatus(app, resolvedEndpoint, true, '', 200);
+                    const status = _updateExecutionTcpConnectionStatus(app, resolvedEndpoint, true, '', 200);
                     if (state.connectPromise) {
                         finalizeInitialConnection(status);
                     }
 
-                    void _sendRegistrationTcpStateReport(app, socket, 'hello').catch((error) => {
+                    void _sendExecutionTcpStateReport(app, socket, 'hello').catch((error) => {
                         app?.logger?.warning?.(`自动化工具初始状态上报失败: ${error.message}`);
                     });
                 } catch (error) {
-                    const status = _updateRegistrationTcpConnectionStatus(app, resolvedEndpoint, false, error?.message || '自动化握手失败', 0);
-                    _destroyRegistrationTcpMonitorSocket(app, error?.message || '自动化握手失败');
-                    _scheduleRegistrationTcpReconnect(app, resolvedEndpoint);
+                    const status = _updateExecutionTcpConnectionStatus(app, resolvedEndpoint, false, error?.message || '自动化握手失败', 0);
+                    _destroyExecutionTcpMonitorSocket(app, error?.message || '自动化握手失败');
+                    _scheduleExecutionTcpReconnect(app, resolvedEndpoint);
                     finalizeInitialConnection(status);
                 }
             })();
@@ -595,19 +595,19 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
         });
 
         socket.once('error', (error) => {
-            const status = _updateRegistrationTcpConnectionStatus(app, resolvedEndpoint, false, error?.message || '连接失败', 0);
-            _destroyRegistrationTcpMonitorSocket(app, error?.message || '连接失败');
-            _scheduleRegistrationTcpReconnect(app, resolvedEndpoint);
+            const status = _updateExecutionTcpConnectionStatus(app, resolvedEndpoint, false, error?.message || '连接失败', 0);
+            _destroyExecutionTcpMonitorSocket(app, error?.message || '连接失败');
+            _scheduleExecutionTcpReconnect(app, resolvedEndpoint);
             finalizeInitialConnection(status);
         });
 
         socket.once('close', () => {
             if (state.socket === socket) {
-                const shouldReconnect = app?.registrationTcpConnectionMonitorActive === true;
-                const status = _updateRegistrationTcpConnectionStatus(app, resolvedEndpoint, false, '连接已关闭', 0);
-                _destroyRegistrationTcpMonitorSocket(app, '连接已关闭');
+                const shouldReconnect = app?.executionTcpConnectionMonitorActive === true;
+                const status = _updateExecutionTcpConnectionStatus(app, resolvedEndpoint, false, '连接已关闭', 0);
+                _destroyExecutionTcpMonitorSocket(app, '连接已关闭');
                 if (shouldReconnect) {
-                    _scheduleRegistrationTcpReconnect(app, resolvedEndpoint);
+                    _scheduleExecutionTcpReconnect(app, resolvedEndpoint);
                 }
                 finalizeInitialConnection(status);
             }
@@ -729,12 +729,12 @@ async function probeExecutionTcpEndpoint(endpoint, timeoutMs = 2000) {
     });
 }
 
-async function resolveRegistrationTcpEndpointFromConfig(app) {
-    let sourceConfig = app?.registrationTcpConfigSource && typeof app.registrationTcpConfigSource === 'object'
-        ? app.registrationTcpConfigSource
+async function resolveExecutionTcpEndpointFromConfig(app) {
+    let sourceConfig = app?.executionTcpConfigSource && typeof app.executionTcpConfigSource === 'object'
+        ? app.executionTcpConfigSource
         : null;
-    const liveEndpoint = typeof app?.registrationTcpEndpoint === 'object' && app.registrationTcpEndpoint
-        ? app.registrationTcpEndpoint
+    const liveEndpoint = typeof app?.executionTcpEndpoint === 'object' && app.executionTcpEndpoint
+        ? app.executionTcpEndpoint
         : null;
 
     if ((!sourceConfig || !hasExecutionTcpConfig(sourceConfig)) && typeof app?.readExecutionTcpConfigFromDisk === 'function') {
@@ -760,10 +760,10 @@ async function resolveRegistrationTcpEndpointFromConfig(app) {
 }
 
 async function getExecutionTcpRuntimeInfo(app) {
-    const endpoint = await resolveRegistrationTcpEndpointFromConfig(app);
-    const configured = app?.registrationTcpConfigured === true || !!endpoint;
+    const endpoint = await resolveExecutionTcpEndpointFromConfig(app);
+    const configured = app?.executionTcpConfigured === true || !!endpoint;
     const monitorState = _getExecutionTcpMonitorState(app);
-    const cachedStatus = app?.registrationTcpConnectionStatus || null;
+    const cachedStatus = app?.executionTcpConnectionStatus || null;
     const cachedEndpoint = cachedStatus?.endpoint || null;
     const cachedMatchesConfig = !!endpoint && _isSameExecutionTcpEndpoint(cachedEndpoint, endpoint);
     const effectiveCachedStatus = cachedStatus && (!endpoint || cachedMatchesConfig)
@@ -780,33 +780,33 @@ async function getExecutionTcpRuntimeInfo(app) {
         });
 
         return {
-            registrationTcpEnabled: false,
-            registrationTcpControlLocked: typeof app?.isRegistrationControlLocked === 'function'
-                ? app.isRegistrationControlLocked()
+            executionTcpEnabled: false,
+            executionTcpControlLocked: typeof app?.isExecutionControlLocked === 'function'
+                ? app.isExecutionControlLocked()
                 : false,
-            registrationTcpControlState: { ...(app?.registrationTcpControlState || {}) },
-            registrationDefaultExecutionPlan: clonePlainObject(app?.registrationDefaultExecutionPlan),
-            registrationDefaultExecutionPlanUpdatedAt: String(app?.registrationDefaultExecutionPlanUpdatedAt || '').trim(),
-            registrationTcpEndpoint: null,
-            registrationTcpEndpointUrl: '',
-            registrationTcpReconnectEnabled: app?.registrationTcpReconnectEnabled !== false,
-            registrationTcpConnectionStatus: disabledStatus
+            executionTcpControlState: { ...(app?.executionTcpControlState || {}) },
+            defaultExecutionPlan: clonePlainObject(app?.defaultExecutionPlan),
+            defaultExecutionPlanUpdatedAt: String(app?.defaultExecutionPlanUpdatedAt || '').trim(),
+            executionTcpEndpoint: null,
+            executionTcpEndpointUrl: '',
+            executionTcpReconnectEnabled: app?.executionTcpReconnectEnabled !== false,
+            executionTcpConnectionStatus: disabledStatus
         };
     }
 
     if (monitorState && ((monitorState.socket && !monitorState.socket.destroyed) || monitorState.connectPromise)) {
         return {
-            registrationTcpEnabled: true,
-            registrationTcpControlLocked: typeof app?.isRegistrationControlLocked === 'function'
-                ? app.isRegistrationControlLocked()
+            executionTcpEnabled: true,
+            executionTcpControlLocked: typeof app?.isExecutionControlLocked === 'function'
+                ? app.isExecutionControlLocked()
                 : false,
-            registrationTcpControlState: { ...(app?.registrationTcpControlState || {}) },
-            registrationDefaultExecutionPlan: clonePlainObject(app?.registrationDefaultExecutionPlan),
-            registrationDefaultExecutionPlanUpdatedAt: String(app?.registrationDefaultExecutionPlanUpdatedAt || '').trim(),
-            registrationTcpEndpoint: endpoint || null,
-            registrationTcpEndpointUrl: endpoint?.url || '',
-            registrationTcpReconnectEnabled: app?.registrationTcpReconnectEnabled !== false,
-            registrationTcpConnectionStatus: effectiveCachedStatus || buildExecutionTcpConnectionStatus({
+            executionTcpControlState: { ...(app?.executionTcpControlState || {}) },
+            defaultExecutionPlan: clonePlainObject(app?.defaultExecutionPlan),
+            defaultExecutionPlanUpdatedAt: String(app?.defaultExecutionPlanUpdatedAt || '').trim(),
+            executionTcpEndpoint: endpoint || null,
+            executionTcpEndpointUrl: endpoint?.url || '',
+            executionTcpReconnectEnabled: app?.executionTcpReconnectEnabled !== false,
+            executionTcpConnectionStatus: effectiveCachedStatus || buildExecutionTcpConnectionStatus({
                 configured: true,
                 connected: false,
                 endpoint: endpoint || cachedEndpoint || null,
@@ -837,28 +837,28 @@ async function getExecutionTcpRuntimeInfo(app) {
             });
         }
         if (app) {
-            app.registrationTcpConnectionStatus = connectionStatus;
+            app.executionTcpConnectionStatus = connectionStatus;
         }
     }
 
     return {
-        registrationTcpEnabled: configured,
-        registrationTcpControlLocked: typeof app?.isRegistrationControlLocked === 'function'
-            ? app.isRegistrationControlLocked()
+        executionTcpEnabled: configured,
+        executionTcpControlLocked: typeof app?.isExecutionControlLocked === 'function'
+            ? app.isExecutionControlLocked()
             : false,
-        registrationTcpControlState: { ...(app?.registrationTcpControlState || {}) },
-        registrationDefaultExecutionPlan: clonePlainObject(app?.registrationDefaultExecutionPlan),
-        registrationDefaultExecutionPlanUpdatedAt: String(app?.registrationDefaultExecutionPlanUpdatedAt || '').trim(),
-        registrationTcpEndpoint: endpoint || null,
-        registrationTcpEndpointUrl: endpoint?.url || '',
-        registrationTcpReconnectEnabled: app?.registrationTcpReconnectEnabled !== false,
-        registrationTcpConnectionStatus: connectionStatus
+        executionTcpControlState: { ...(app?.executionTcpControlState || {}) },
+        defaultExecutionPlan: clonePlainObject(app?.defaultExecutionPlan),
+        defaultExecutionPlanUpdatedAt: String(app?.defaultExecutionPlanUpdatedAt || '').trim(),
+        executionTcpEndpoint: endpoint || null,
+        executionTcpEndpointUrl: endpoint?.url || '',
+        executionTcpReconnectEnabled: app?.executionTcpReconnectEnabled !== false,
+        executionTcpConnectionStatus: connectionStatus
     };
 }
 
 async function refreshExecutionTcpConnection(app) {
-    const endpoint = await resolveRegistrationTcpEndpointFromConfig(app);
-    const configured = app?.registrationTcpConfigured === true || !!endpoint;
+    const endpoint = await resolveExecutionTcpEndpointFromConfig(app);
+    const configured = app?.executionTcpConfigured === true || !!endpoint;
     const monitorState = _getExecutionTcpMonitorState(app);
 
     if (!configured) {
@@ -870,30 +870,30 @@ async function refreshExecutionTcpConnection(app) {
             statusCode: 0
         });
         if (app) {
-            app.registrationTcpConnectionStatus = disabledStatus;
+            app.executionTcpConnectionStatus = disabledStatus;
         }
         return disabledStatus;
     }
 
     if (monitorState && ((monitorState.socket && !monitorState.socket.destroyed) || monitorState.connectPromise)) {
-        const activeStatus = app?.registrationTcpConnectionStatus || buildExecutionTcpConnectionStatus({
+        const activeStatus = app?.executionTcpConnectionStatus || buildExecutionTcpConnectionStatus({
             configured: true,
             connected: true,
-            endpoint: endpoint || app?.registrationTcpConnectionStatus?.endpoint || null,
+            endpoint: endpoint || app?.executionTcpConnectionStatus?.endpoint || null,
             lastConnectError: '',
             statusCode: 200
         });
         if (app?.mainWindow && app.mainWindow.webContents && typeof app.mainWindow.webContents.send === 'function') {
-            app.mainWindow.webContents.send('registration-tcp-connection-updated', {
-                registrationTcpEnabled: true,
-                registrationTcpControlLocked: typeof app.isRegistrationControlLocked === 'function'
-                    ? app.isRegistrationControlLocked()
+            app.mainWindow.webContents.send('execution-tcp-connection-updated', {
+                executionTcpEnabled: true,
+                executionTcpControlLocked: typeof app.isExecutionControlLocked === 'function'
+                    ? app.isExecutionControlLocked()
                     : false,
-                registrationTcpControlState: { ...(app.registrationTcpControlState || {}) },
-                registrationTcpEndpoint: activeStatus.endpoint,
-                registrationTcpEndpointUrl: activeStatus.endpoint?.url || '',
-                registrationTcpReconnectEnabled: app.registrationTcpReconnectEnabled !== false,
-                registrationTcpConnectionStatus: activeStatus
+                executionTcpControlState: { ...(app.executionTcpControlState || {}) },
+                executionTcpEndpoint: activeStatus.endpoint,
+                executionTcpEndpointUrl: activeStatus.endpoint?.url || '',
+                executionTcpReconnectEnabled: app.executionTcpReconnectEnabled !== false,
+                executionTcpConnectionStatus: activeStatus
             });
         }
         return activeStatus;
@@ -910,9 +910,9 @@ async function refreshExecutionTcpConnection(app) {
         : buildExecutionTcpConnectionStatus({
             configured: true,
             connected: false,
-            endpoint: app?.registrationTcpConnectionStatus?.endpoint || null,
-            lastConnectError: app?.registrationTcpConnectionStatus?.lastConnectError || '未配置',
-            statusCode: app?.registrationTcpConnectionStatus?.statusCode || 0
+            endpoint: app?.executionTcpConnectionStatus?.endpoint || null,
+            lastConnectError: app?.executionTcpConnectionStatus?.lastConnectError || '未配置',
+            statusCode: app?.executionTcpConnectionStatus?.statusCode || 0
         });
 
     if (endpoint) {
@@ -924,20 +924,20 @@ async function refreshExecutionTcpConnection(app) {
     }
 
     if (app) {
-        app.registrationTcpConnectionStatus = connectionStatus;
+        app.executionTcpConnectionStatus = connectionStatus;
     }
 
     if (app?.mainWindow && app.mainWindow.webContents && typeof app.mainWindow.webContents.send === 'function') {
-        app.mainWindow.webContents.send('registration-tcp-connection-updated', {
-            registrationTcpEnabled: true,
-            registrationTcpControlLocked: typeof app.isRegistrationControlLocked === 'function'
-                ? app.isRegistrationControlLocked()
+        app.mainWindow.webContents.send('execution-tcp-connection-updated', {
+            executionTcpEnabled: true,
+            executionTcpControlLocked: typeof app.isExecutionControlLocked === 'function'
+                ? app.isExecutionControlLocked()
                 : false,
-            registrationTcpControlState: { ...(app.registrationTcpControlState || {}) },
-            registrationTcpEndpoint: connectionStatus.endpoint,
-            registrationTcpEndpointUrl: connectionStatus.endpoint?.url || '',
-            registrationTcpReconnectEnabled: app.registrationTcpReconnectEnabled !== false,
-            registrationTcpConnectionStatus: connectionStatus
+            executionTcpControlState: { ...(app.executionTcpControlState || {}) },
+            executionTcpEndpoint: connectionStatus.endpoint,
+            executionTcpEndpointUrl: connectionStatus.endpoint?.url || '',
+            executionTcpReconnectEnabled: app.executionTcpReconnectEnabled !== false,
+            executionTcpConnectionStatus: connectionStatus
         });
     }
 
@@ -952,16 +952,16 @@ async function startExecutionTcpConnectionMonitor(app, options = {}) {
         return null;
     }
 
-    if (app?.registrationTcpConfigured !== true) {
-        app.registrationTcpConnectionMonitorActive = false;
-        return app.registrationTcpConnectionStatus || null;
+    if (app?.executionTcpConfigured !== true) {
+        app.executionTcpConnectionMonitorActive = false;
+        return app.executionTcpConnectionStatus || null;
     }
 
-    app.registrationTcpConnectionMonitorActive = true;
+    app.executionTcpConnectionMonitorActive = true;
 
-    let latestStatus = app.registrationTcpConnectionStatus || null;
+    let latestStatus = app.executionTcpConnectionStatus || null;
     if (immediate) {
-        latestStatus = await _openRegistrationTcpMonitorConnection(app, null);
+        latestStatus = await _openExecutionTcpMonitorConnection(app, null);
     }
 
     return latestStatus;
@@ -972,8 +972,8 @@ function stopExecutionTcpConnectionMonitor(app) {
         return;
     }
 
-    app.registrationTcpConnectionMonitorActive = false;
-    _destroyRegistrationTcpMonitorSocket(app, '连接已停止');
+    app.executionTcpConnectionMonitorActive = false;
+    _destroyExecutionTcpMonitorSocket(app, '连接已停止');
 }
 
 async function applyExecutionTcpUserConfig(app, config = {}, options = {}) {
@@ -984,10 +984,10 @@ async function applyExecutionTcpUserConfig(app, config = {}, options = {}) {
         tcpReconnectApplied: false,
         tcpRestarted: false,
         tcpRestartError: '',
-        registrationTcpEndpoint: typeof app?.getExecutionTcpEndpoint === 'function'
+        executionTcpEndpoint: typeof app?.getExecutionTcpEndpoint === 'function'
             ? app.getExecutionTcpEndpoint()
             : normalizeExecutionTcpEndpoint(),
-        registrationTcpReconnectEnabled: app?.registrationTcpReconnectEnabled !== false
+        executionTcpReconnectEnabled: app?.executionTcpReconnectEnabled !== false
     };
 
     if (Object.prototype.hasOwnProperty.call(source, 'browserSettings') || Object.prototype.hasOwnProperty.call(source, 'browser_settings')) {
@@ -1041,59 +1041,59 @@ async function applyExecutionTcpUserConfig(app, config = {}, options = {}) {
     if (hasExecutionTcpConfig(source)) {
         const endpoint = normalizeExecutionTcpEndpoint(source);
         if (app) {
-            app.registrationTcpEndpoint = endpoint;
-            app.registrationTcpConfigured = true;
-            app.registrationTcpConfigSource = { ...source };
-            app.registrationTcpConnectionStatus = buildExecutionTcpConnectionStatus({
+            app.executionTcpEndpoint = endpoint;
+            app.executionTcpConfigured = true;
+            app.executionTcpConfigSource = { ...source };
+            app.executionTcpConnectionStatus = buildExecutionTcpConnectionStatus({
                 configured: true,
                 connected: false,
                 endpoint,
-                lastConnectError: app.registrationTcpConnectionStatus?.lastConnectError || '连接中',
+                lastConnectError: app.executionTcpConnectionStatus?.lastConnectError || '连接中',
                 statusCode: 0
             });
         }
         summary.tcpConfigApplied = true;
-        summary.registrationTcpEndpoint = endpoint;
+        summary.executionTcpEndpoint = endpoint;
     } else if (app) {
-        if (app.registrationTcpConnectionMonitorActive === true) {
+        if (app.executionTcpConnectionMonitorActive === true) {
             stopExecutionTcpConnectionMonitor(app);
         }
-        app.registrationTcpEndpoint = null;
-        app.registrationTcpConfigured = false;
-        app.registrationTcpConfigSource = null;
-        app.registrationTcpConnectionStatus = buildExecutionTcpConnectionStatus({
+        app.executionTcpEndpoint = null;
+        app.executionTcpConfigured = false;
+        app.executionTcpConfigSource = null;
+        app.executionTcpConnectionStatus = buildExecutionTcpConnectionStatus({
             configured: false,
             connected: false,
             endpoint: null,
             lastConnectError: '未配置',
             statusCode: 0
         });
-        summary.registrationTcpEndpoint = null;
+        summary.executionTcpEndpoint = null;
     }
 
     if (
         Object.prototype.hasOwnProperty.call(source, 'tcp_auto_reconnect_enabled')
         || Object.prototype.hasOwnProperty.call(source, 'tcpAutoReconnectEnabled')
-        || Object.prototype.hasOwnProperty.call(source, 'registration_tcp_auto_reconnect_enabled')
-        || Object.prototype.hasOwnProperty.call(source, 'registrationTcpAutoReconnectEnabled')
+        || Object.prototype.hasOwnProperty.call(source, 'execution_tcp_auto_reconnect_enabled')
+        || Object.prototype.hasOwnProperty.call(source, 'executionTcpAutoReconnectEnabled')
     ) {
         const rawReconnectEnabled = source.tcp_auto_reconnect_enabled
             ?? source.tcpAutoReconnectEnabled
-            ?? source.registration_tcp_auto_reconnect_enabled
-            ?? source.registrationTcpAutoReconnectEnabled;
+            ?? source.execution_tcp_auto_reconnect_enabled
+            ?? source.executionTcpAutoReconnectEnabled;
         const reconnectEnabled = !(String(rawReconnectEnabled).trim().toLowerCase() === 'false'
             || String(rawReconnectEnabled).trim() === '0'
             || rawReconnectEnabled === false);
         if (app) {
-            app.registrationTcpReconnectEnabled = reconnectEnabled;
+            app.executionTcpReconnectEnabled = reconnectEnabled;
         }
         summary.tcpReconnectApplied = true;
-        summary.registrationTcpReconnectEnabled = reconnectEnabled;
+        summary.executionTcpReconnectEnabled = reconnectEnabled;
     }
 
     if (options.restartTcpBridge === true && app) {
         try {
-            if (app.registrationTcpConnectionMonitorActive === true) {
+            if (app.executionTcpConnectionMonitorActive === true) {
                 stopExecutionTcpConnectionMonitor(app);
             }
             await startExecutionTcpConnectionMonitor(app, { immediate: true });

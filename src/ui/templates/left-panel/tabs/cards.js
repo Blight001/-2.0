@@ -21,29 +21,29 @@ module.exports = function renderRegisterCardsTab() {
                                     <button type="button" class="run-mode-btn" data-run-mode="2" aria-pressed="false">定时执行</button>
                                     <button type="button" class="run-mode-btn" data-run-mode="1" aria-pressed="false">循环运行</button>
                                 </div>
-                                <div class="setting-item timed-registration-settings" id="registration-timed-settings" hidden>
+                                <div class="setting-item timed-execution-settings" id="execution-timed-settings" hidden>
                                     <div class="setting-title-row">
                                         <label>定时执行</label>
                                     </div>
-                                    <div class="timed-registration-fields">
-                                        <div class="timed-registration-field">
-                                            <label for="registration-timed-count">单次执行数量</label>
-                                            <input type="number" id="registration-timed-count" min="1" max="9999" value="1">
+                                    <div class="timed-execution-fields">
+                                        <div class="timed-execution-field">
+                                            <label for="execution-timed-count">单次执行数量</label>
+                                            <input type="number" id="execution-timed-count" min="1" max="9999" value="1">
                                         </div>
-                                        <div class="timed-registration-field">
-                                            <label for="registration-timed-cycle-count">最大循环次数</label>
-                                            <input type="number" id="registration-timed-cycle-count" min="1" max="9999" value="1">
+                                        <div class="timed-execution-field">
+                                            <label for="execution-timed-cycle-count">最大循环次数</label>
+                                            <input type="number" id="execution-timed-cycle-count" min="1" max="9999" value="1">
                                         </div>
-                                        <div class="timed-registration-field">
-                                            <label for="registration-timed-start-mode">开始方式</label>
-                                            <select id="registration-timed-start-mode">
+                                        <div class="timed-execution-field">
+                                            <label for="execution-timed-start-mode">开始方式</label>
+                                            <select id="execution-timed-start-mode">
                                                 <option value="immediate">立即执行</option>
                                                 <option value="delayed">延时开始</option>
                                             </select>
                                         </div>
-                                        <div class="timed-registration-field">
-                                            <label for="registration-timed-delay-seconds">循环间隔(秒)</label>
-                                            <input type="number" id="registration-timed-delay-seconds" min="0" max="3600" value="0" step="1">
+                                        <div class="timed-execution-field">
+                                            <label for="execution-timed-delay-seconds">循环间隔(秒)</label>
+                                            <input type="number" id="execution-timed-delay-seconds" min="0" max="3600" value="0" step="1">
                                         </div>
                                     </div>
                                 </div>

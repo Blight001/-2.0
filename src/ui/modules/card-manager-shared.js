@@ -330,9 +330,9 @@ function buildCardDataFromForm(elements, options = {}) {
     };
 
     if (cardMode === 'automation') {
-        const uploadServerUrl = elements.registrationUploadServerUrl ? elements.registrationUploadServerUrl.value.trim() : '';
-        const uploadCardKey = elements.registrationUploadCardKey ? elements.registrationUploadCardKey.value.trim() : '';
-        const registrationAutoUpload = elements.registrationAutoUpload ? elements.registrationAutoUpload.checked === true : true;
+        const uploadServerUrl = elements.executionUploadServerUrl ? elements.executionUploadServerUrl.value.trim() : '';
+        const uploadCardKey = elements.executionUploadCardKey ? elements.executionUploadCardKey.value.trim() : '';
+        const executionAutoUpload = elements.executionAutoUpload ? elements.executionAutoUpload.checked === true : true;
         const minCookieSizeBytes = elements.cardMinCookieSize
             ? normalizeMinCookieSizeInput(elements.cardMinCookieSize.value)
             : DEFAULT_MIN_COOKIE_SIZE_BYTES;
@@ -345,7 +345,7 @@ function buildCardDataFromForm(elements, options = {}) {
         const resolvedUploadTargetScoreTypes = uploadTargetScoreScope === 'custom' ? uploadTargetScoreTypes : [];
         cardData.upload_server_url = uploadServerUrl;
         cardData.upload_card_key = uploadCardKey;
-        cardData.registration_auto_upload = registrationAutoUpload;
+        cardData.execution_auto_upload = executionAutoUpload;
         cardData.min_cookie_size_bytes = minCookieSizeBytes;
         cardData.upload_target_score_scope = uploadTargetScoreScope;
         cardData.upload_target_score_types = resolvedUploadTargetScoreTypes;
@@ -359,7 +359,7 @@ function buildCardDataFromForm(elements, options = {}) {
         cardData.upload = {
             server_url: uploadServerUrl,
             card_key: uploadCardKey,
-            registration_auto_upload: registrationAutoUpload,
+            execution_auto_upload: executionAutoUpload,
             target_score_scope: uploadTargetScoreScope,
             target_score_types: resolvedUploadTargetScoreTypes,
             target_score_type: resolvedUploadTargetScoreTypes[0] || ''

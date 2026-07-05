@@ -105,8 +105,8 @@ function getTcpConfigSnapshot(config = {}) {
         source.tcpServerUrl ||
         source.server_url ||
         source.serverUrl ||
-        source.registration_server_url ||
-        source.registrationServerUrl ||
+        source.execution_server_url ||
+        source.executionServerUrl ||
         source.mqtt_server_url ||
         source.mqttServerUrl ||
         ''
@@ -117,8 +117,8 @@ function getTcpConfigSnapshot(config = {}) {
         tcpAutoReconnectEnabled: normalizeBooleanValue(
             source.tcp_auto_reconnect_enabled ??
             source.tcpAutoReconnectEnabled ??
-            source.registration_tcp_auto_reconnect_enabled ??
-            source.registrationTcpAutoReconnectEnabled,
+            source.execution_tcp_auto_reconnect_enabled ??
+            source.executionTcpAutoReconnectEnabled,
             true
         )
     };
@@ -839,7 +839,7 @@ module.exports = function registerCookieHandlers({ app, ipcMain, fs, path }) {
         }
     });
 
-    ipcMain.handle('get-registration-tcp-config', async () => {
+    ipcMain.handle('get-execution-tcp-config', async () => {
         try {
             const tcpConfig = typeof app.readExecutionTcpConfigFromDisk === 'function'
                 ? await app.readExecutionTcpConfigFromDisk()
@@ -855,7 +855,7 @@ module.exports = function registerCookieHandlers({ app, ipcMain, fs, path }) {
                 tcp_server_url: tcpServerUrl,
                 tcpAutoReconnectEnabled,
                 tcp_auto_reconnect_enabled: tcpAutoReconnectEnabled,
-                registrationTcpEndpoint: typeof app.getExecutionTcpEndpoint === 'function'
+                executionTcpEndpoint: typeof app.getExecutionTcpEndpoint === 'function'
                     ? app.getExecutionTcpEndpoint()
                     : null
             };
@@ -865,7 +865,7 @@ module.exports = function registerCookieHandlers({ app, ipcMain, fs, path }) {
         }
     });
 
-    ipcMain.handle('save-registration-tcp-config', async (_event, payload = {}) => {
+    ipcMain.handle('save-execution-tcp-config', async (_event, payload = {}) => {
         try {
             const incoming = payload && typeof payload === 'object' ? payload : {};
             const config = {
@@ -879,8 +879,8 @@ module.exports = function registerCookieHandlers({ app, ipcMain, fs, path }) {
                 tcp_auto_reconnect_enabled: normalizeBooleanValue(
                     incoming.tcp_auto_reconnect_enabled
                     ?? incoming.tcpAutoReconnectEnabled
-                    ?? incoming.registration_tcp_auto_reconnect_enabled
-                    ?? incoming.registrationTcpAutoReconnectEnabled,
+                    ?? incoming.execution_tcp_auto_reconnect_enabled
+                    ?? incoming.executionTcpAutoReconnectEnabled,
                     true
                 )
             };
@@ -894,7 +894,7 @@ module.exports = function registerCookieHandlers({ app, ipcMain, fs, path }) {
 
             const applyResult = typeof app.applyUserConfig === 'function'
                 ? await app.applyUserConfig(saveResult.config || config, {
-                    source: 'saved-registration-tcp-config',
+                    source: 'saved-execution-tcp-config',
                     restartTcpBridge: true
                 })
                 : null;
@@ -910,10 +910,10 @@ module.exports = function registerCookieHandlers({ app, ipcMain, fs, path }) {
                     ? saveResult.config.tcp_auto_reconnect_enabled
                     : config.tcp_auto_reconnect_enabled,
                 tcpRestartError: applyResult?.tcpRestartError || '',
-                registrationTcpEndpoint: applyResult?.registrationTcpEndpoint || app.getExecutionTcpEndpoint?.() || null,
-                registrationTcpReconnectEnabled: applyResult?.registrationTcpReconnectEnabled !== undefined
-                    ? applyResult.registrationTcpReconnectEnabled
-                    : app.registrationTcpReconnectEnabled !== false
+                executionTcpEndpoint: applyResult?.executionTcpEndpoint || app.getExecutionTcpEndpoint?.() || null,
+                executionTcpReconnectEnabled: applyResult?.executionTcpReconnectEnabled !== undefined
+                    ? applyResult.executionTcpReconnectEnabled
+                    : app.executionTcpReconnectEnabled !== false
             };
         } catch (error) {
             app.logger.error(`保存TCP配置失败: ${error.message}`);
@@ -958,10 +958,10 @@ module.exports = function registerCookieHandlers({ app, ipcMain, fs, path }) {
                 tcpReconnectApplied: applyResult?.tcpReconnectApplied === true,
                 tcpRestarted: applyResult?.tcpRestarted === true,
                 tcpRestartError: applyResult?.tcpRestartError || '',
-                registrationTcpEndpoint: applyResult?.registrationTcpEndpoint || app.getExecutionTcpEndpoint?.() || null,
-                registrationTcpReconnectEnabled: applyResult?.registrationTcpReconnectEnabled !== undefined
-                    ? applyResult.registrationTcpReconnectEnabled
-                    : app.registrationTcpReconnectEnabled !== false
+                executionTcpEndpoint: applyResult?.executionTcpEndpoint || app.getExecutionTcpEndpoint?.() || null,
+                executionTcpReconnectEnabled: applyResult?.executionTcpReconnectEnabled !== undefined
+                    ? applyResult.executionTcpReconnectEnabled
+                    : app.executionTcpReconnectEnabled !== false
             };
         } catch (error) {
             app.logger.error(`保存后端配置失败: ${error.message}`);

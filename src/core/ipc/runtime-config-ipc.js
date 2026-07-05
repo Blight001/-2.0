@@ -22,15 +22,20 @@ function mergeRuntimeConfig(baseConfig = {}, runtimeConfig = {}) {
     delete merged.browserSettings.blockImagesVideos;
     delete merged.browserSettings.syncExecution;
     delete merged.browserSettings.maxProxyRecoveryAttempts;
+    delete merged.browserSettings.executionAutoUpload;
     delete merged.browserSettings.registrationAutoUpload;
     delete merged.browserSettings.saveLocalCookie;
     delete merged.browserSettings.skipCookieSave;
     delete merged.browserSettings.skip_cookie_save;
     delete merged.browserSettings.concurrentCount;
     delete merged.browserSettings.runMode;
+    delete merged.browserSettings.timedExecutionCount;
     delete merged.browserSettings.timedRegistrationCount;
+    delete merged.browserSettings.timedExecutionCycleCount;
     delete merged.browserSettings.timedRegistrationCycleCount;
+    delete merged.browserSettings.timedExecutionStartMode;
     delete merged.browserSettings.timedRegistrationStartMode;
+    delete merged.browserSettings.timedExecutionDelaySeconds;
     delete merged.browserSettings.timedRegistrationDelaySeconds;
     delete merged.browser_settings;
 
@@ -38,7 +43,7 @@ function mergeRuntimeConfig(baseConfig = {}, runtimeConfig = {}) {
 }
 
 module.exports = function registerRuntimeConfigHandlers({ app, ipcMain }) {
-    ipcMain.handle('get-registration-runtime-config', async () => {
+    ipcMain.handle('get-execution-runtime-config', async () => {
         try {
             const cookieConfig = typeof app.readCookieUserConfigFromDisk === 'function'
                 ? await app.readCookieUserConfigFromDisk()
@@ -57,7 +62,7 @@ module.exports = function registerRuntimeConfigHandlers({ app, ipcMain }) {
         }
     });
 
-    ipcMain.handle('save-registration-runtime-config', async (_event, config) => {
+    ipcMain.handle('save-execution-runtime-config', async (_event, config) => {
         try {
             const normalizedConfig = config && typeof config === 'object' ? { ...config } : {};
             const saveResult = typeof app.saveAutomationRuntimeConfigToDisk === 'function'

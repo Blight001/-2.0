@@ -13,7 +13,7 @@ function resolveBooleanEnv(value) {
     return value === '1' || value === 'true' || value === 'TRUE';
 }
 
-function resolveRegistrationMode(argv = process.argv, env = process.env) {
+function resolveExecutionMode(argv = process.argv, env = process.env) {
     const rawMode = readFlagValue('--mode', argv)
         || env.REGISTRATION_MODE
         || '';
@@ -36,11 +36,11 @@ function resolveRegistrationMode(argv = process.argv, env = process.env) {
     return 'standalone';
 }
 
-function resolveRegistrationHostApp(argv = process.argv, env = process.env) {
+function resolveExecutionHostApp(argv = process.argv, env = process.env) {
     return String(
         readFlagValue('--embed-host', argv)
         || readFlagValue('--host-app', argv)
-        || readFlagValue('--registration-host-app', argv)
+        || readFlagValue('--execution-host-app', argv)
         || env.REGISTRATION_HOST_APP
         || env.REGISTRATION_EMBED_HOST
         || ''
@@ -65,13 +65,13 @@ function resolveWebControlConfig(argv = process.argv, env = process.env) {
     const rawHost = readFlagValue('--web-ui-host', argv) || env.WEB_UI_HOST || '127.0.0.1';
     const rawPort = readFlagValue('--web-ui-port', argv) || env.WEB_UI_PORT || '18765';
     const parsedPort = Number.parseInt(rawPort, 10);
-    const registrationMode = resolveRegistrationMode(argv, env);
-    const hostApp = resolveRegistrationHostApp(argv, env);
+    const executionMode = resolveExecutionMode(argv, env);
+    const hostApp = resolveExecutionHostApp(argv, env);
     const browserSource = String(
         readFlagValue('--browser-source', argv)
-        || readFlagValue('--registration-browser-source', argv)
+        || readFlagValue('--execution-browser-source', argv)
         || readFlagValue('--browser-type', argv)
-        || readFlagValue('--registration-browser-type', argv)
+        || readFlagValue('--execution-browser-type', argv)
         || env.REGISTRATION_BROWSER_SOURCE
         || env.BROWSER_SOURCE
         || env.REGISTRATION_BROWSER_TYPE
@@ -88,11 +88,11 @@ function resolveWebControlConfig(argv = process.argv, env = process.env) {
         host: rawHost.trim() || '127.0.0.1',
         port: Number.isFinite(parsedPort) && parsedPort > 0 && parsedPort <= 65535 ? parsedPort : 18765,
         autoOpenExternal: !suppressAutoOpen,
-        registrationMode,
-        embedded: registrationMode === 'embedded',
+        executionMode,
+        embedded: executionMode === 'embedded',
         hostApp,
-        registrationHostApp: hostApp,
-        requestedRegistrationMode: registrationMode,
+        executionHostApp: hostApp,
+        requestedExecutionMode: executionMode,
         browserSource: normalizedBrowserSource === 'client-browser'
             ? 'client-browser'
             : 'local-browser'

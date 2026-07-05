@@ -9,7 +9,7 @@ const {
 } = require('./commands');
 
 async function _processExecutionTcpIncomingPacket(app, socket, packet) {
-    const state = app?.registrationTcpMonitorState || null;
+    const state = app?.executionTcpMonitorState || null;
     if (!state || !packet) {
         return;
     }

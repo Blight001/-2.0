@@ -83,12 +83,12 @@ module.exports = function createTaskProgressHandlers(deps) {
         }
     }
 
-    function handleTimedRegistrationCompleted(payload = {}) {
+    function handleTimedExecutionCompleted(payload = {}) {
         if (!payload.completed) {
             return;
         }
 
-        state.currentTimedRegistrationTaskId = null;
+        state.currentTimedExecutionTaskId = null;
         if (typeof logger?.info === 'function') {
             logger.info(payload.message || payload.text || '定时执行完成');
         }
@@ -131,6 +131,6 @@ module.exports = function createTaskProgressHandlers(deps) {
         handleTaskFinished,
         handleTaskProgress,
         handleTaskStarted,
-        handleTimedRegistrationCompleted
+        handleTimedExecutionCompleted
     };
 };

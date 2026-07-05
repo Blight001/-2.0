@@ -102,12 +102,12 @@ function getExecutionTcpInstanceId(app) {
         return '';
     }
 
-    if (typeof app.registrationTcpInstanceId === 'string' && app.registrationTcpInstanceId.trim()) {
-        return app.registrationTcpInstanceId.trim();
+    if (typeof app.executionTcpInstanceId === 'string' && app.executionTcpInstanceId.trim()) {
+        return app.executionTcpInstanceId.trim();
     }
 
-    const generated = `registration-${process.pid || 'pid'}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-    app.registrationTcpInstanceId = generated;
+    const generated = `execution-${process.pid || 'pid'}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    app.executionTcpInstanceId = generated;
     return generated;
 }
 
@@ -120,9 +120,9 @@ function buildExecutionTcpSnapshot(app, extra = {}) {
     // 磁盘/启动时的 runtime 配置只作为兜底，避免把旧预设回填到网页端。
     const liveBrowserSettings = clonePlainObject(app?.browserSettings);
     const runtimeBrowserSettings = clonePlainObject(
-        app?.registrationRuntimeBrowserSettings
-        || app?.registrationRuntimeConfig?.browserSettings
-        || app?.registrationRuntimeConfig?.browser_settings
+        app?.executionRuntimeBrowserSettings
+        || app?.executionRuntimeConfig?.browserSettings
+        || app?.executionRuntimeConfig?.browser_settings
     );
     const browserSettings = Object.keys(liveBrowserSettings).length > 0
         ? {
@@ -130,13 +130,28 @@ function buildExecutionTcpSnapshot(app, extra = {}) {
             ...liveBrowserSettings
         }
         : runtimeBrowserSettings;
-    const registrationDefaultExecutionPlan = clonePlainObject(app?.registrationDefaultExecutionPlan);
-    const registrationRuntimeConfig = clonePlainObject(app?.registrationRuntimeConfig);
+    const defaultExecutionPlan = clonePlainObject(app?.defaultExecutionPlan);
+    const executionRuntimeConfig = clonePlainObject(app?.executionRuntimeConfig);
     const hardwareInfo = buildExecutionHardwareInfo(app);
-    const timedState = app?.timedRegistrationState && typeof app.timedRegistrationState === 'object'
-        ? app.timedRegistrationState
+    const timedState = app?.timedExecutionState && typeof app.timedExecutionState === 'object'
+        ? app.timedExecutionState
         : null;
-    const hasRegistrationDefaultExecutionPlan = Object.keys(registrationDefaultExecutionPlan).length > 0;
+    const hasDefaultExecutionPlan = Object.keys(defaultExecutionPlan).length > 0;
+    const timedExecutionPayload = timedState ? {
+        active: timedState.active === true,
+        stopRequested: timedState.stopRequested === true,
+        sessionId: timedState.sessionId || '',
+        totalCount: Number.isFinite(Number(timedState.totalCount)) ? Number(timedState.totalCount) : 0,
+        cycleLimit: Number.isFinite(Number(timedState.cycleLimit)) ? Number(timedState.cycleLimit) : 0,
+        delayMs: Number.isFinite(Number(timedState.delayMs)) ? Number(timedState.delayMs) : 0,
+        startMode: timedState.startMode || 'immediate',
+        currentCycleIndex: Number.isFinite(Number(timedState.currentCycleIndex)) ? Number(timedState.currentCycleIndex) : 1,
+        completedCycleCount: Number.isFinite(Number(timedState.completedCycleCount)) ? Number(timedState.completedCycleCount) : 0,
+        startedCount: Number.isFinite(Number(timedState.startedCount)) ? Number(timedState.startedCount) : 0,
+        completedCount: Number.isFinite(Number(timedState.completedCount)) ? Number(timedState.completedCount) : 0,
+        cycleStartedCount: Number.isFinite(Number(timedState.cycleStartedCount)) ? Number(timedState.cycleStartedCount) : 0,
+        cycleCompletedCount: Number.isFinite(Number(timedState.cycleCompletedCount)) ? Number(timedState.cycleCompletedCount) : 0
+    } : null;
 
     return {
         instanceId: getExecutionTcpInstanceId(app),
@@ -150,7 +165,8 @@ function buildExecutionTcpSnapshot(app, extra = {}) {
         runningTaskCount,
         isLoopRunning: app?.isLoopRunning === true,
         isTimedRunning: app?.isTimedRunning === true,
-        registrationStopRequested: app?.registrationStopRequested === true,
+        executionStopRequested: app?.executionStopRequested === true,
+        registrationStopRequested: app?.executionStopRequested === true,
         concurrentCount: Number.isFinite(Number(app?.concurrentCount)) ? Number(app.concurrentCount) : 1,
         currentCardName,
         currentCard: currentCardName,
@@ -161,8 +177,10 @@ function buildExecutionTcpSnapshot(app, extra = {}) {
         currentBrowserType: app?.currentBrowserType || '',
         deviceId: app?.deviceId || '',
         browserSettings,
-        registrationRuntimeConfig,
-        registration_runtime_config: registrationRuntimeConfig,
+        executionRuntimeConfig,
+        execution_runtime_config: executionRuntimeConfig,
+        registrationRuntimeConfig: executionRuntimeConfig,
+        registration_runtime_config: executionRuntimeConfig,
         hardwareInfo,
         hardware_info: hardwareInfo,
         cpuModel: hardwareInfo.cpu_model,
@@ -181,12 +199,19 @@ function buildExecutionTcpSnapshot(app, extra = {}) {
         memory_total_mb: hardwareInfo.memory_total_mb,
         memoryTotalGb: hardwareInfo.memory_total_gb,
         memory_total_gb: hardwareInfo.memory_total_gb,
-        ...(hasRegistrationDefaultExecutionPlan ? {
-            registrationDefaultExecutionPlan,
-            registration_default_execution_plan: registrationDefaultExecutionPlan,
+        ...(hasDefaultExecutionPlan ? {
+            defaultExecutionPlan,
+            default_execution_plan: defaultExecutionPlan,
+            registrationDefaultExecutionPlan: defaultExecutionPlan,
+            registration_default_execution_plan: defaultExecutionPlan,
+            defaultExecutionPlanUpdatedAt: String(
+                app?.defaultExecutionPlan?.updated_at
+                || app?.defaultExecutionPlan?.updatedAt
+                || ''
+            ).trim(),
             registrationDefaultExecutionPlanUpdatedAt: String(
-                app?.registrationDefaultExecutionPlan?.updated_at
-                || app?.registrationDefaultExecutionPlan?.updatedAt
+                app?.defaultExecutionPlan?.updated_at
+                || app?.defaultExecutionPlan?.updatedAt
                 || ''
             ).trim()
         } : {}),
@@ -194,28 +219,18 @@ function buildExecutionTcpSnapshot(app, extra = {}) {
         webControlHeadless: app?.webControlConfig?.headless === true,
         webControlHost: app?.webControlConfig?.host || '',
         webControlPort: app?.webControlConfig?.port ?? null,
-        controlLocked: typeof app?.isRegistrationControlLocked === 'function'
-            ? app.isRegistrationControlLocked()
+        controlLocked: typeof app?.isExecutionControlLocked === 'function'
+            ? app.isExecutionControlLocked()
             : false,
         cardKeyPrefix: typeof app?.getCardKeyPrefix === 'function' ? app.getCardKeyPrefix() : '',
-        activeRegistrationCardName: String(app?.activeRegistrationCardName || '').trim(),
-        activeRegistrationCardConfig: clonePlainObject(app?.activeRegistrationCardConfig),
-        lastRegistrationConfig: clonePlainObject(app?.lastRegistrationConfig),
-        timedRegistration: timedState ? {
-            active: timedState.active === true,
-            stopRequested: timedState.stopRequested === true,
-            sessionId: timedState.sessionId || '',
-            totalCount: Number.isFinite(Number(timedState.totalCount)) ? Number(timedState.totalCount) : 0,
-            cycleLimit: Number.isFinite(Number(timedState.cycleLimit)) ? Number(timedState.cycleLimit) : 0,
-            delayMs: Number.isFinite(Number(timedState.delayMs)) ? Number(timedState.delayMs) : 0,
-            startMode: timedState.startMode || 'immediate',
-            currentCycleIndex: Number.isFinite(Number(timedState.currentCycleIndex)) ? Number(timedState.currentCycleIndex) : 1,
-            completedCycleCount: Number.isFinite(Number(timedState.completedCycleCount)) ? Number(timedState.completedCycleCount) : 0,
-            startedCount: Number.isFinite(Number(timedState.startedCount)) ? Number(timedState.startedCount) : 0,
-            completedCount: Number.isFinite(Number(timedState.completedCount)) ? Number(timedState.completedCount) : 0,
-            cycleStartedCount: Number.isFinite(Number(timedState.cycleStartedCount)) ? Number(timedState.cycleStartedCount) : 0,
-            cycleCompletedCount: Number.isFinite(Number(timedState.cycleCompletedCount)) ? Number(timedState.cycleCompletedCount) : 0
-        } : null,
+        activeExecutionCardName: String(app?.activeExecutionCardName || '').trim(),
+        activeRegistrationCardName: String(app?.activeExecutionCardName || '').trim(),
+        activeExecutionCardConfig: clonePlainObject(app?.activeExecutionCardConfig),
+        activeRegistrationCardConfig: clonePlainObject(app?.activeExecutionCardConfig),
+        lastExecutionConfig: clonePlainObject(app?.lastExecutionConfig),
+        lastRegistrationConfig: clonePlainObject(app?.lastExecutionConfig),
+        timedExecution: timedExecutionPayload,
+        timedRegistration: timedExecutionPayload,
         reason: extra.reason || '',
         connected: extra.connected === true
     };
@@ -261,6 +276,8 @@ function normalizeExecutionTcpEndpoint(input = {}) {
         source.tcpServerUrl ||
         source.server_url ||
         source.serverUrl ||
+        source.execution_server_url ||
+        source.executionServerUrl ||
         source.registration_server_url ||
         source.registrationServerUrl ||
         source.mqtt_server_url ||
@@ -272,6 +289,8 @@ function normalizeExecutionTcpEndpoint(input = {}) {
         source.tcpHost ||
         source.server_host ||
         source.serverHost ||
+        source.execution_server_host ||
+        source.executionServerHost ||
         source.registration_server_host ||
         source.registrationServerHost ||
         source.mqtt_host ||
@@ -283,6 +302,8 @@ function normalizeExecutionTcpEndpoint(input = {}) {
         source.tcpPort ??
         source.server_port ??
         source.serverPort ??
+        source.execution_server_port ??
+        source.executionServerPort ??
         source.registration_server_port ??
         source.registrationServerPort ??
         source.mqtt_port ??
@@ -321,6 +342,8 @@ function hasExecutionTcpConfig(config = {}) {
         'tcpServerUrl',
         'server_url',
         'serverUrl',
+        'execution_server_url',
+        'executionServerUrl',
         'registration_server_url',
         'registrationServerUrl',
         'mqtt_server_url',
@@ -329,6 +352,8 @@ function hasExecutionTcpConfig(config = {}) {
         'tcpHost',
         'server_host',
         'serverHost',
+        'execution_server_host',
+        'executionServerHost',
         'registration_server_host',
         'registrationServerHost',
         'mqtt_host',
@@ -337,6 +362,8 @@ function hasExecutionTcpConfig(config = {}) {
         'tcpPort',
         'server_port',
         'serverPort',
+        'execution_server_port',
+        'executionServerPort',
         'registration_server_port',
         'registrationServerPort',
         'mqtt_port',

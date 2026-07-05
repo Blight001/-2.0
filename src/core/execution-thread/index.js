@@ -3,7 +3,7 @@ const randomHelpers = require('./random');
 const runnerHelpers = require('./runner');
 const stepHelpers = require('./steps');
 
-class RegistrationThread extends EventEmitter {
+class ExecutionThread extends EventEmitter {
     constructor(taskId, cardConfig, managers) {
         super();
         this.taskId = taskId;
@@ -377,5 +377,5 @@ class RegistrationThread extends EventEmitter {
     }
 }
 
-module.exports = RegistrationThread;
+module.exports = ExecutionThread;
 

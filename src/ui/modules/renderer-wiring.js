@@ -26,11 +26,11 @@ module.exports = function createRendererWiring(deps) {
         saveTcpServerConfig,
         loadApiServerConfig,
         loadAiAssistantConfig,
-        saveRegistrationControls,
-        loadRegistrationControls,
-        saveRegistrationUploadControls,
-        loadRegistrationUploadControls,
-        updateRegistrationUploadStatus,
+        saveExecutionControls,
+        loadExecutionControls,
+        saveExecutionUploadControls,
+        loadExecutionUploadControls,
+        updateExecutionUploadStatus,
         updateBrowserSettings,
         detectBrowserForSelect,
         setRunMode,
@@ -40,7 +40,7 @@ module.exports = function createRendererWiring(deps) {
         updateHaikaBindAccountControls,
         startHaikaBinding,
         stopHaikaBinding,
-        startRegistration,
+        startExecution,
         stopExecution,
         parseCookieAccountInfo,
         hideCookieAccountContextMenu,
@@ -131,17 +131,17 @@ module.exports = function createRendererWiring(deps) {
     }
 
     function buildTcpConnectionConsoleSignature() {
-        const connectionStatus = state.registrationTcpConnectionStatus || {};
-        const endpointLabel = formatTcpEndpointLabel(state.registrationTcpEndpoint);
+        const connectionStatus = state.executionTcpConnectionStatus || {};
+        const endpointLabel = formatTcpEndpointLabel(state.executionTcpEndpoint);
         const failedTopics = Array.isArray(connectionStatus?.subscribeResult?.failedTopics)
             ? connectionStatus.subscribeResult.failedTopics
             : [];
 
         return [
-            state.registrationTcpEnabled === true ? 'enabled' : 'disabled',
+            state.executionTcpEnabled === true ? 'enabled' : 'disabled',
             connectionStatus.connected === true ? 'connected' : 'disconnected',
-            state.registrationTcpControlLocked === true ? 'locked' : 'unlocked',
-            state.registrationTcpReconnectEnabled !== false ? 'reconnect-on' : 'reconnect-off',
+            state.executionTcpControlLocked === true ? 'locked' : 'unlocked',
+            state.executionTcpReconnectEnabled !== false ? 'reconnect-on' : 'reconnect-off',
             endpointLabel || '',
             connectionStatus.lastConnectError || '',
             connectionStatus.statusCode || 0,
@@ -157,11 +157,11 @@ module.exports = function createRendererWiring(deps) {
 
         state.lastTcpConnectionConsoleSignature = signature;
 
-        const connectionStatus = state.registrationTcpConnectionStatus || {};
-        const endpointLabel = formatTcpEndpointLabel(state.registrationTcpEndpoint) || '未配置';
-        const reconnectText = state.registrationTcpReconnectEnabled !== false ? '开启' : '关闭';
-        const lockText = state.registrationTcpControlLocked === true ? '服务器锁定' : '本地可编辑';
-        const statusText = state.registrationTcpEnabled === true
+        const connectionStatus = state.executionTcpConnectionStatus || {};
+        const endpointLabel = formatTcpEndpointLabel(state.executionTcpEndpoint) || '未配置';
+        const reconnectText = state.executionTcpReconnectEnabled !== false ? '开启' : '关闭';
+        const lockText = state.executionTcpControlLocked === true ? '服务器锁定' : '本地可编辑';
+        const statusText = state.executionTcpEnabled === true
             ? (connectionStatus.connected === true
                 ? '已连接'
                 : `未连接${connectionStatus.lastConnectError ? `（${connectionStatus.lastConnectError}）` : ''}`)
@@ -241,18 +241,18 @@ module.exports = function createRendererWiring(deps) {
                 return false;
             }
 
-            state.registrationTcpEnabled = result.registrationTcpEnabled === true;
-            state.registrationTcpControlLocked = result.registrationTcpControlLocked === true;
-            state.registrationTcpControlState = result.registrationTcpControlState || {};
-            state.registrationTcpEndpoint = result.registrationTcpEndpoint || null;
-            state.registrationTcpReconnectEnabled = result.registrationTcpReconnectEnabled !== false;
-            state.registrationTcpConnectionStatus = result.registrationTcpConnectionStatus || null;
+            state.executionTcpEnabled = result.executionTcpEnabled === true;
+            state.executionTcpControlLocked = result.executionTcpControlLocked === true;
+            state.executionTcpControlState = result.executionTcpControlState || {};
+            state.executionTcpEndpoint = result.executionTcpEndpoint || null;
+            state.executionTcpReconnectEnabled = result.executionTcpReconnectEnabled !== false;
+            state.executionTcpConnectionStatus = result.executionTcpConnectionStatus || null;
             state.licenseUsageLocked = result.licenseUsageSnapshot?.unlimited === true
                 ? false
                 : result.licenseUsageLocked === true;
             state.licenseUsageSnapshot = result.licenseUsageSnapshot || null;
-            if (cardManager && typeof cardManager.setRegistrationCardAccessMode === 'function') {
-                cardManager.setRegistrationCardAccessMode(result.licenseUsageSnapshot?.unlimited === true ? 'all' : 'restricted');
+            if (cardManager && typeof cardManager.setExecutionCardAccessMode === 'function') {
+                cardManager.setExecutionCardAccessMode(result.licenseUsageSnapshot?.unlimited === true ? 'all' : 'restricted');
             }
             updateTcpConnectionPanelState();
             updateLicenseUsageStatusText();
@@ -269,14 +269,14 @@ module.exports = function createRendererWiring(deps) {
     }
 
     function updateTcpConnectionPanelState() {
-        const endpointLabel = formatTcpEndpointLabel(state.registrationTcpEndpoint);
-        const connectionStatus = state.registrationTcpConnectionStatus || {};
+        const endpointLabel = formatTcpEndpointLabel(state.executionTcpEndpoint);
+        const connectionStatus = state.executionTcpConnectionStatus || {};
         const subscribeResult = connectionStatus.subscribeResult || {};
-        const enabled = state.registrationTcpEnabled === true;
+        const enabled = state.executionTcpEnabled === true;
         const connected = connectionStatus.connected === true;
         const subscribedOk = enabled && connected && subscribeResult.success !== false && (Array.isArray(subscribeResult.failedTopics) ? subscribeResult.failedTopics.length === 0 : true);
-        const reconnectEnabled = state.registrationTcpReconnectEnabled !== false;
-        const locked = state.registrationTcpControlLocked === true;
+        const reconnectEnabled = state.executionTcpReconnectEnabled !== false;
+        const locked = state.executionTcpControlLocked === true;
 
         setStatusText(
             elements.mqttConnectionEnabled,
@@ -322,9 +322,9 @@ module.exports = function createRendererWiring(deps) {
             return;
         }
 
-        const locked = state.registrationTcpControlLocked === true || state.licenseUsageLocked === true;
+        const locked = state.executionTcpControlLocked === true || state.licenseUsageLocked === true;
         if (document.body) {
-            document.body.classList.toggle('tcp-managed-mode', state.registrationTcpControlLocked === true);
+            document.body.classList.toggle('tcp-managed-mode', state.executionTcpControlLocked === true);
             document.body.classList.toggle('license-usage-locked', state.licenseUsageLocked === true);
         }
 
@@ -350,7 +350,7 @@ module.exports = function createRendererWiring(deps) {
                 return;
             }
 
-            if (element.closest && element.closest('#registration-browser-settings-section')) {
+            if (element.closest && element.closest('#execution-browser-settings-section')) {
                 return;
             }
 
@@ -385,7 +385,7 @@ module.exports = function createRendererWiring(deps) {
 
         if (state.licenseUsageLocked === true) {
             elements.statusLabel.textContent = '次数锁定';
-            updateRegistrationStartButtonText(buttonUsageText);
+            updateExecutionStartButtonText(buttonUsageText);
             return;
         }
 
@@ -394,7 +394,7 @@ module.exports = function createRendererWiring(deps) {
             elements.statusLabel.textContent = '就绪';
         }
 
-        updateRegistrationStartButtonText(buttonUsageText);
+        updateExecutionStartButtonText(buttonUsageText);
     }
 
     if (typeof window !== 'undefined') {
@@ -407,7 +407,7 @@ module.exports = function createRendererWiring(deps) {
         });
     }
 
-    function updateRegistrationStartButtonText(usageText = '') {
+    function updateExecutionStartButtonText(usageText = '') {
         if (!elements.startBtn) {
             return;
         }
@@ -432,7 +432,7 @@ module.exports = function createRendererWiring(deps) {
             return;
         }
 
-        if (state.registrationTcpControlLocked !== true) {
+        if (state.executionTcpControlLocked !== true) {
             if (state.tcpManagedUiObserver) {
                 try {
                     state.tcpManagedUiObserver.disconnect();
@@ -469,9 +469,9 @@ module.exports = function createRendererWiring(deps) {
 
             const runtime = {
                 startupMode: String(result.startupMode || '').trim() || 'local',
-                registrationMode: String(result.registrationMode || '').trim() || 'standalone',
-                registrationEmbedded: result.registrationEmbedded === true || result.webControlEmbedded === true,
-                registrationHostApp: String(result.registrationHostApp || result.webControlHostApp || '').trim(),
+                executionMode: String(result.executionMode || '').trim() || 'standalone',
+                executionEmbedded: result.executionEmbedded === true || result.webControlEmbedded === true,
+                executionHostApp: String(result.executionHostApp || result.webControlHostApp || '').trim(),
                 webControlEnabled: result.webControlEnabled === true,
                 webControlHeadless: result.webControlHeadless === true,
                 webControlEmbedded: result.webControlEmbedded === true,
@@ -479,41 +479,41 @@ module.exports = function createRendererWiring(deps) {
                 webControlUrl: String(result.webControlUrl || '').trim()
             };
 
-            state.registrationRuntime = runtime;
-            state.registrationMode = runtime.registrationMode;
-            state.registrationEmbedded = runtime.registrationEmbedded === true;
-            state.registrationHostApp = runtime.registrationHostApp;
+            state.executionRuntime = runtime;
+            state.executionMode = runtime.executionMode;
+            state.executionEmbedded = runtime.executionEmbedded === true;
+            state.executionHostApp = runtime.executionHostApp;
             state.webControlUrl = runtime.webControlUrl;
             state.tcpManagedMode = false;
-            state.registrationTcpEnabled = result.registrationTcpEnabled === true;
-            state.registrationTcpControlLocked = result.registrationTcpControlLocked === true;
-            state.registrationTcpControlState = result.registrationTcpControlState || {};
-            state.registrationTcpEndpoint = result.registrationTcpEndpoint || null;
-            state.registrationTcpReconnectEnabled = result.registrationTcpReconnectEnabled !== false;
-            state.registrationTcpConnectionStatus = result.registrationTcpConnectionStatus || null;
+            state.executionTcpEnabled = result.executionTcpEnabled === true;
+            state.executionTcpControlLocked = result.executionTcpControlLocked === true;
+            state.executionTcpControlState = result.executionTcpControlState || {};
+            state.executionTcpEndpoint = result.executionTcpEndpoint || null;
+            state.executionTcpReconnectEnabled = result.executionTcpReconnectEnabled !== false;
+            state.executionTcpConnectionStatus = result.executionTcpConnectionStatus || null;
             state.licenseUsageLocked = result.licenseUsageSnapshot?.unlimited === true
                 ? false
                 : result.licenseUsageLocked === true;
             state.licenseUsageSnapshot = result.licenseUsageSnapshot || null;
-            if (cardManager && typeof cardManager.setRegistrationCardAccessMode === 'function') {
-                cardManager.setRegistrationCardAccessMode(result.licenseUsageSnapshot?.unlimited === true ? 'all' : 'restricted');
+            if (cardManager && typeof cardManager.setExecutionCardAccessMode === 'function') {
+                cardManager.setExecutionCardAccessMode(result.licenseUsageSnapshot?.unlimited === true ? 'all' : 'restricted');
             }
             cardManager.setCardControlMode('local');
 
             if (document.documentElement) {
-                document.documentElement.dataset.registrationMode = runtime.registrationMode;
-                document.documentElement.dataset.registrationEmbedded = runtime.registrationEmbedded ? 'true' : 'false';
-                document.documentElement.dataset.registrationHostApp = runtime.registrationHostApp || '';
+                document.documentElement.dataset.executionMode = runtime.executionMode;
+                document.documentElement.dataset.executionEmbedded = runtime.executionEmbedded ? 'true' : 'false';
+                document.documentElement.dataset.executionHostApp = runtime.executionHostApp || '';
             }
             if (document.body) {
-                document.body.dataset.registrationMode = runtime.registrationMode;
-                document.body.dataset.registrationEmbedded = runtime.registrationEmbedded ? 'true' : 'false';
-                document.body.classList.toggle('registration-embedded', runtime.registrationEmbedded === true);
-                document.body.classList.toggle('registration-standalone', runtime.registrationEmbedded !== true);
+                document.body.dataset.executionMode = runtime.executionMode;
+                document.body.dataset.executionEmbedded = runtime.executionEmbedded ? 'true' : 'false';
+                document.body.classList.toggle('execution-embedded', runtime.executionEmbedded === true);
+                document.body.classList.toggle('execution-standalone', runtime.executionEmbedded !== true);
             }
 
             if (elements.exitAppBtn) {
-                if (runtime.registrationEmbedded) {
+                if (runtime.executionEmbedded) {
                     elements.exitAppBtn.textContent = '关闭标签';
                     elements.exitAppBtn.title = '嵌入模式下由宿主接管关闭';
                     elements.exitAppBtn.setAttribute('aria-label', '关闭当前标签页');
@@ -525,14 +525,14 @@ module.exports = function createRendererWiring(deps) {
             }
 
             if (elements.themeToggleBtn) {
-                elements.themeToggleBtn.title = runtime.registrationEmbedded
+                elements.themeToggleBtn.title = runtime.executionEmbedded
                     ? '切换深色浅色模式'
                     : '切换到深色模式';
             }
 
-            if (result.registrationTcpControlLocked) {
+            if (result.executionTcpControlLocked) {
                 logger.info('TCP 连接已启用，当前由服务器控制状态锁定');
-            } else if (result.registrationTcpEnabled) {
+            } else if (result.executionTcpEnabled) {
                 logger.info('TCP 连接已启用，本地功能保持可用');
             }
 
@@ -554,15 +554,15 @@ module.exports = function createRendererWiring(deps) {
         }
     }
 
-    async function syncRegistrationCardStateFromServer(cardMode = 'automation') {
+    async function syncExecutionCardStateFromServer(cardMode = 'automation') {
         const mode = cardMode === 'test' || cardMode === 'haikaBind' ? cardMode : 'automation';
 
-        if (!state.registrationTcpEnabled) {
+        if (!state.executionTcpEnabled) {
             return false;
         }
 
         try {
-            const result = await ipcRenderer.invoke('get-registration-ui-state', {
+            const result = await ipcRenderer.invoke('get-execution-ui-state', {
                 card_type: mode,
                 log_limit: 200
             });
@@ -838,7 +838,7 @@ module.exports = function createRendererWiring(deps) {
         activateMiddleTab,
         openProxyQuickSite,
         initializeAppRuntimeMode,
-        syncRegistrationCardStateFromServer,
+        syncExecutionCardStateFromServer,
         updateTcpConnectionPanelState,
         refreshClashStatus: (elementsArg, showError, updateProfileSelect, loadNodes, log) =>
             clashManager.refreshClashStatus(elementsArg, showError, updateProfileSelect, loadNodes, log)
@@ -979,8 +979,8 @@ window.selectClashNodeGlobal = function(nodeName) {
         applyTcpManagedUiLockdown();
         ensureTcpManagedUiObserver();
 
-        if (state.registrationTcpEnabled) {
-            void syncRegistrationCardStateFromServer('automation');
+        if (state.executionTcpEnabled) {
+            void syncExecutionCardStateFromServer('automation');
         }
         
         if (elements.emailHost) {
@@ -1001,42 +1001,42 @@ window.selectClashNodeGlobal = function(nodeName) {
         }
 
         if (elements.proxyRecoveryAttempts) {
-            elements.proxyRecoveryAttempts.addEventListener('change', saveRegistrationControls);
-            elements.proxyRecoveryAttempts.addEventListener('blur', saveRegistrationControls);
+            elements.proxyRecoveryAttempts.addEventListener('change', saveExecutionControls);
+            elements.proxyRecoveryAttempts.addEventListener('blur', saveExecutionControls);
         }
-        if (elements.registrationTimedCount) {
-            elements.registrationTimedCount.addEventListener('change', saveRegistrationControls);
-            elements.registrationTimedCount.addEventListener('blur', saveRegistrationControls);
+        if (elements.executionTimedCount) {
+            elements.executionTimedCount.addEventListener('change', saveExecutionControls);
+            elements.executionTimedCount.addEventListener('blur', saveExecutionControls);
         }
-        if (elements.registrationTimedCycleCount) {
-            elements.registrationTimedCycleCount.addEventListener('change', saveRegistrationControls);
-            elements.registrationTimedCycleCount.addEventListener('blur', saveRegistrationControls);
+        if (elements.executionTimedCycleCount) {
+            elements.executionTimedCycleCount.addEventListener('change', saveExecutionControls);
+            elements.executionTimedCycleCount.addEventListener('blur', saveExecutionControls);
         }
-        if (elements.registrationTimedStartMode) {
-            elements.registrationTimedStartMode.addEventListener('change', saveRegistrationControls);
+        if (elements.executionTimedStartMode) {
+            elements.executionTimedStartMode.addEventListener('change', saveExecutionControls);
         }
-        if (elements.registrationTimedDelaySeconds) {
-            elements.registrationTimedDelaySeconds.addEventListener('change', saveRegistrationControls);
-            elements.registrationTimedDelaySeconds.addEventListener('blur', saveRegistrationControls);
+        if (elements.executionTimedDelaySeconds) {
+            elements.executionTimedDelaySeconds.addEventListener('change', saveExecutionControls);
+            elements.executionTimedDelaySeconds.addEventListener('blur', saveExecutionControls);
         }
         if (elements.concurrentCount) {
-            elements.concurrentCount.addEventListener('change', saveRegistrationControls);
-            elements.concurrentCount.addEventListener('blur', saveRegistrationControls);
+            elements.concurrentCount.addEventListener('change', saveExecutionControls);
+            elements.concurrentCount.addEventListener('blur', saveExecutionControls);
         }
         if (elements.syncExecution) {
-            elements.syncExecution.addEventListener('change', saveRegistrationControls);
+            elements.syncExecution.addEventListener('change', saveExecutionControls);
         }
-        if (elements.registrationAutoUpload) {
-            elements.registrationAutoUpload.addEventListener('change', () => {
-                saveRegistrationUploadControls();
-                updateRegistrationUploadStatus(
-                    elements.registrationAutoUpload.checked ? '自动上传已开启' : '自动上传已关闭',
-                    elements.registrationAutoUpload.checked ? 'info' : 'warning'
+        if (elements.executionAutoUpload) {
+            elements.executionAutoUpload.addEventListener('change', () => {
+                saveExecutionUploadControls();
+                updateExecutionUploadStatus(
+                    elements.executionAutoUpload.checked ? '自动上传已开启' : '自动上传已关闭',
+                    elements.executionAutoUpload.checked ? 'info' : 'warning'
                 );
             });
         }
-        if (elements.registrationSaveLocalCookie) {
-            elements.registrationSaveLocalCookie.addEventListener('change', saveRegistrationControls);
+        if (elements.executionSaveLocalCookie) {
+            elements.executionSaveLocalCookie.addEventListener('change', saveExecutionControls);
         }
 
         // 加载Cookie测试配置
@@ -1072,10 +1072,10 @@ window.selectClashNodeGlobal = function(nodeName) {
                 { name: 'TCP配置', run: () => loadTcpServerConfig() },
                 { name: 'API服务配置', run: () => loadApiServerConfig() },
                 { name: 'AI助手配置', run: () => loadAiAssistantConfig() },
-                { name: '执行控制', run: () => loadRegistrationControls() },
+                { name: '执行控制', run: () => loadExecutionControls() },
                 {
                     name: '执行上传配置',
-                    run: () => loadRegistrationUploadControls()
+                    run: () => loadExecutionUploadControls()
                 },
                 { name: '海卡绑定账号', run: () => loadHaikaBindAccountControls() },
                 { name: '海卡分类', run: () => loadHaikaCategories() },

@@ -69,9 +69,9 @@ module.exports = function renderTcpTab() {
                                     <div class="upload-settings-section">
                                         <div class="setting-item upload-auto-control">
                                             <div class="setting-title-row">
-                                                <label for="registration-auto-upload" class="setting-switch-label">执行后自动上传</label>
+                                                <label for="execution-auto-upload" class="setting-switch-label">执行后自动上传</label>
                                                 <label class="setting-switch-label">
-                                                    <input type="checkbox" id="registration-auto-upload" checked>
+                                                    <input type="checkbox" id="execution-auto-upload" checked>
                                                     <span>启用</span>
                                                 </label>
                                             </div>
@@ -83,12 +83,12 @@ module.exports = function renderTcpTab() {
                                                 <label>上传账号配置</label>
                                             </div>
                                             <div class="form-group">
-                                                <label for="registration-upload-server-url">服务器地址</label>
-                                                <input type="text" id="registration-upload-server-url" placeholder="http://127.0.0.1:58158">
+                                                <label for="execution-upload-server-url">服务器地址</label>
+                                                <input type="text" id="execution-upload-server-url" placeholder="http://127.0.0.1:58158">
                                             </div>
                                             <div class="form-group">
-                                                <label for="registration-upload-card-key">卡密</label>
-                                                <input type="text" id="registration-upload-card-key" placeholder="请输入用于上传的卡密" autocomplete="off" spellcheck="false">
+                                                <label for="execution-upload-card-key">卡密</label>
+                                                <input type="text" id="execution-upload-card-key" placeholder="请输入用于上传的卡密" autocomplete="off" spellcheck="false">
                                                 <div class="setting-help">保存到当前卡片，上传时自动读取。</div>
                                             </div>
                                             <div class="form-group">

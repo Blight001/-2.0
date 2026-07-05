@@ -2,45 +2,45 @@ const ExecutionThread = require('../execution-thread');
 const StepSynchronizer = require('../infra/step-synchronizer');
 const { IPC_CHANNELS } = require('../ipc/channels');
 const {
-    cloneRegistrationCardConfig,
-    summarizeRegistrationDefaultExecutionPlan,
+    cloneExecutionCardConfig,
+    summarizeDefaultExecutionPlan,
     toPositiveInteger
 } = require('./main-runtime-utils');
 
 module.exports = {
-    async startRegistration(config) {
+    async startExecution(config) {
         try {
             config = this._resolveExecutionStartConfig(config);
-            this.logger.info?.(`自动化默认执行方案已参与启动: ${JSON.stringify(summarizeRegistrationDefaultExecutionPlan(this.automationDefaultExecutionPlan || {}))}`);
+            this.logger.info?.(`自动化默认执行方案已参与启动: ${JSON.stringify(summarizeDefaultExecutionPlan(this.automationDefaultExecutionPlan || {}))}`);
             this.logger.info?.(`自动化启动最终配置: ${JSON.stringify({
                 runMode: config.runMode,
                 concurrentCount: config.concurrentCount,
                 syncEnabled: config.syncEnabled,
                 maxProxyRecoveryAttempts: config.maxProxyRecoveryAttempts,
-                timedRegistrationCount: config.timedRegistrationCount,
-                timedRegistrationCycleCount: config.timedRegistrationCycleCount,
-                timedRegistrationStartMode: config.timedRegistrationStartMode,
-                timedRegistrationDelayMs: config.timedRegistrationDelayMs,
+                timedExecutionCount: config.timedExecutionCount,
+                timedExecutionCycleCount: config.timedExecutionCycleCount,
+                timedExecutionStartMode: config.timedExecutionStartMode,
+                timedExecutionDelayMs: config.timedExecutionDelayMs,
                 server_card_name: String(config?.server_card_name || config?.serverCardName || '').trim(),
-                browserSettings: summarizeRegistrationDefaultExecutionPlan({
+                browserSettings: summarizeDefaultExecutionPlan({
                     browser_settings: config.browserSettings || config.browser_settings || {}
                 }).browser_settings
             })}`);
             const runtimeDefaultCardName = String(config?.server_card_name || config?.serverCardName || '').trim();
-            let directCardConfig = cloneRegistrationCardConfig(config?.cardData);
+            let directCardConfig = cloneExecutionCardConfig(config?.cardData);
             if (!directCardConfig && !this.currentCard && runtimeDefaultCardName) {
-                directCardConfig = cloneRegistrationCardConfig(await this.cardManager.getCard(runtimeDefaultCardName));
+                directCardConfig = cloneExecutionCardConfig(await this.cardManager.getCard(runtimeDefaultCardName));
             }
             if (!directCardConfig && !this.currentCard) {
                 return { success: false, error: '请先选择一个自动化卡片' };
             }
 
-            this.activeRegistrationCardConfig = directCardConfig;
-            if (this.activeRegistrationCardConfig && !this.activeRegistrationCardConfig.name && config?.cardName) {
-                this.activeRegistrationCardConfig.name = String(config.cardName || '').trim();
+            this.activeExecutionCardConfig = directCardConfig;
+            if (this.activeExecutionCardConfig && !this.activeExecutionCardConfig.name && config?.cardName) {
+                this.activeExecutionCardConfig.name = String(config.cardName || '').trim();
             }
-            this.activeRegistrationCardName = String(
-                this.activeRegistrationCardConfig?.name
+            this.activeExecutionCardName = String(
+                this.activeExecutionCardConfig?.name
                 || config?.cardName
                 || this.currentCard?.name
                 || this.currentCardName
@@ -48,7 +48,7 @@ module.exports = {
                 || ''
             ).trim();
 
-            this.browserSettings = cloneRegistrationCardConfig(config.browserSettings || config.browser_settings) || {};
+            this.browserSettings = cloneExecutionCardConfig(config.browserSettings || config.browser_settings) || {};
             if (this.browserSettings && typeof this.browserSettings === 'object') {
                 this.currentBrowserType = String(
                     this.browserSettings.browser_type
@@ -58,10 +58,10 @@ module.exports = {
                 ).trim() || this.currentBrowserType;
             }
 
-            this.lastRegistrationConfig = {
+            this.lastExecutionConfig = {
                 ...(config || {}),
-                cardData: this.activeRegistrationCardConfig ? cloneRegistrationCardConfig(this.activeRegistrationCardConfig) : undefined,
-                cardName: this.activeRegistrationCardName
+                cardData: this.activeExecutionCardConfig ? cloneExecutionCardConfig(this.activeExecutionCardConfig) : undefined,
+                cardName: this.activeExecutionCardName
             };
             this.automationStopRequested = false;
             this.runMode = Number.isFinite(Number(config.runMode)) ? Number(config.runMode) : 0;
@@ -74,17 +74,17 @@ module.exports = {
                 active: false,
                 attempts: 0
             };
-            this._clearTimedRegistrationTimers();
-            this.timedRegistrationState = null;
-            this.timedRegistrationSessionId = null;
+            this._clearTimedExecutionTimers();
+            this.timedExecutionState = null;
+            this.timedExecutionSessionId = null;
 
             if (this.isTimedRunning) {
-                this._createTimedRegistrationState(config);
+                this._createTimedExecutionState(config);
             }
 
             const modeLabel = this._getExecutionModeLabel(this.runMode);
-            const timedSummary = this.isTimedRunning && this.timedRegistrationState
-                ? `, 单次数量: ${this.timedRegistrationState.totalCount}, 最大循环: ${this.timedRegistrationState.cycleLimit}, 间隔: ${this._formatTimedRegistrationDuration(this.timedRegistrationState.delayMs)}, 开始方式: ${this.timedRegistrationState.startMode === 'delayed' ? '延时开始' : '立即执行'}`
+            const timedSummary = this.isTimedRunning && this.timedExecutionState
+                ? `, 单次数量: ${this.timedExecutionState.totalCount}, 最大循环: ${this.timedExecutionState.cycleLimit}, 间隔: ${this._formatTimedExecutionDuration(this.timedExecutionState.delayMs)}, 开始方式: ${this.timedExecutionState.startMode === 'delayed' ? '延时开始' : '立即执行'}`
                 : '';
             this.logger.info(`开始执行 - 模式: ${modeLabel}, 并发数: ${this.concurrentCount}, 同步: ${this.syncEnabled}, 自动恢复上限: ${this.maxProxyRecoveryAttempts}${timedSummary}`);
 
@@ -94,16 +94,16 @@ module.exports = {
                 this.stepSynchronizer = null;
             }
 
-            if (this.isTimedRunning && this.timedRegistrationState) {
-                const timedState = this.timedRegistrationState;
+            if (this.isTimedRunning && this.timedExecutionState) {
+                const timedState = this.timedExecutionState;
                 const initialDelayMs = timedState.startMode === 'delayed' ? timedState.delayMs : 0;
                 if (timedState.startMode === 'delayed' && initialDelayMs > 0) {
-                    this._scheduleTimedRegistrationCycleStart(timedState, 1, initialDelayMs, {
+                    this._scheduleTimedExecutionCycleStart(timedState, 1, initialDelayMs, {
                         displayCycleIndex: 0,
                         statusText: '等待开始'
                     });
                 } else {
-                    await this._launchTimedRegistrationCycle(timedState, {
+                    await this._launchTimedExecutionCycle(timedState, {
                         cycleIndex: 1,
                         trigger: 'timed-start',
                         statusText: '执行中'
@@ -118,7 +118,7 @@ module.exports = {
                         break;
                     }
 
-                    const startResult = await this.startSingleRegistrationTask({
+                    const startResult = await this.startSingleExecutionTask({
                         trigger: 'manual-start',
                         taskType: 'automation'
                     });
@@ -131,12 +131,12 @@ module.exports = {
 
             return { success: true };
         } catch (error) {
-            if (this.timedRegistrationState) {
-                this._clearTimedRegistrationTimers();
-                this.timedRegistrationState.active = false;
-                this.timedRegistrationState.stopRequested = true;
-                this.timedRegistrationState = null;
-                this.timedRegistrationSessionId = null;
+            if (this.timedExecutionState) {
+                this._clearTimedExecutionTimers();
+                this.timedExecutionState.active = false;
+                this.timedExecutionState.stopRequested = true;
+                this.timedExecutionState = null;
+                this.timedExecutionSessionId = null;
                 this.isTimedRunning = false;
             }
             this.logger.error(`开始执行失败: ${error.message}`);
@@ -144,24 +144,24 @@ module.exports = {
         }
     },
 
-    async startSingleRegistrationTask(overrides = {}) {
+    async startSingleExecutionTask(overrides = {}) {
         const taskType = overrides.taskType || 'automation';
-        if (taskType === 'automation' && (this.automationStopRequested || (this.timedRegistrationState && this.timedRegistrationState.stopRequested))) {
+        if (taskType === 'automation' && (this.automationStopRequested || (this.timedExecutionState && this.timedExecutionState.stopRequested))) {
             return { success: false, error: '自动化已停止' };
         }
 
         const taskId = overrides.taskId || `${taskType}_${Date.now()}_${this.runningTasks.size}`;
-        const cardConfig = cloneRegistrationCardConfig(overrides.cardConfig)
-            || cloneRegistrationCardConfig(this.activeRegistrationCardConfig)
+        const cardConfig = cloneExecutionCardConfig(overrides.cardConfig)
+            || cloneExecutionCardConfig(this.activeExecutionCardConfig)
             || await this.cardManager.getCard(this.currentCard);
         if (!cardConfig) {
-            throw new Error(`无法获取卡片配置: ${this.activeRegistrationCardName || this.currentCard || '未命名卡片'}`);
+            throw new Error(`无法获取卡片配置: ${this.activeExecutionCardName || this.currentCard || '未命名卡片'}`);
         }
 
         const effectiveCardName = String(
             overrides.cardName
             || cardConfig?.name
-            || this.activeRegistrationCardName
+            || this.activeExecutionCardName
             || this.currentCard
             || ''
         ).trim();
@@ -169,7 +169,7 @@ module.exports = {
             cardConfig.name = effectiveCardName;
         }
 
-        if (taskType === 'automation' && (this.automationStopRequested || (this.timedRegistrationState && this.timedRegistrationState.stopRequested))) {
+        if (taskType === 'automation' && (this.automationStopRequested || (this.timedExecutionState && this.timedExecutionState.stopRequested))) {
             return { success: false, error: '自动化已停止' };
         }
 
@@ -224,7 +224,7 @@ module.exports = {
 
         const normalizedBrowserType = String(browserType || '').trim().toLowerCase();
         let browserId = String(overrides.browserId || '').trim();
-        const task = new RegistrationThread(taskId, cardConfig, {
+        const task = new ExecutionThread(taskId, cardConfig, {
             app: this,
             browserManager: this.browserManager,
             cookieManager: this.cookieManager,
@@ -304,7 +304,7 @@ module.exports = {
                 await overrides.onFinished(taskId, enrichedResult);
                 return;
             }
-            await this.onRegistrationFinished(taskId, enrichedResult);
+            await this.onExecutionFinished(taskId, enrichedResult);
         });
 
         task.on('error', (error) => {
@@ -312,7 +312,7 @@ module.exports = {
                 overrides.onError(taskId, error);
                 return;
             }
-            this.onRegistrationError(taskId, error);
+            this.onExecutionError(taskId, error);
         });
 
         task.on('browser-created', (browserId) => {
@@ -422,7 +422,7 @@ module.exports = {
             this.logger.info?.(`卡片调试使用浏览器设置: ${browserType}`);
             const pauseEachStep = config.pauseEachStep !== false;
 
-            const startResult = await this.startSingleRegistrationTask({
+            const startResult = await this.startSingleExecutionTask({
                 taskType: 'debug',
                 taskLabel: '卡片调试',
                 cardConfig: cardData,
@@ -596,7 +596,7 @@ module.exports = {
         return task._resumeDebug('manual');
     },
 
-    async onRegistrationFinished(taskId, result) {
+    async onExecutionFinished(taskId, result) {
         const browserClosed = result?.browserClosed === true
             || /浏览器.*任务已终止|浏览器实例已(?:关闭|断开)|浏览器页面已关闭/i.test(this.getErrorText(result?.error || ''));
         if (this.runningTasks.has(taskId)) {
@@ -613,7 +613,7 @@ module.exports = {
             if (this.mainWindow) {
                 this.mainWindow.webContents.send('task-finished', {
                     taskId,
-                    taskLabel: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || '自动化任务',
+                    taskLabel: result.cardName || this.activeExecutionCardName || this.currentCardName || this.currentCard || '自动化任务',
                     taskType: 'automation'
                 });
                 this.mainWindow.webContents.send('app-toast', {
@@ -628,7 +628,7 @@ module.exports = {
                         taskId,
                         email: result.email,
                         points: result.points,
-                        cardName: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || '',
+                        cardName: result.cardName || this.activeExecutionCardName || this.currentCardName || this.currentCard || '',
                         cookiesSaved: result.cookiesSaved === true
                     });
                     if (tcpResult && tcpResult.ok === false) {
@@ -654,7 +654,7 @@ module.exports = {
                 try {
                     const usageResult = await this.consumeSavedCardUsage(automationCardKey, 1, {
                         source: 'automation-success',
-                        cardName: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || ''
+                        cardName: result.cardName || this.activeExecutionCardName || this.currentCardName || this.currentCard || ''
                     });
                     if (usageResult?.cache?.usageInfo) {
                         this.currentCardUsageSnapshot = usageResult.cache.usageInfo;
@@ -689,7 +689,7 @@ module.exports = {
                 this.mainWindow.webContents.send('task-error', {
                     taskId,
                     error: result.error || result.message || '自动化任务失败',
-                    taskLabel: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || '自动化任务',
+                    taskLabel: result.cardName || this.activeExecutionCardName || this.currentCardName || this.currentCard || '自动化任务',
                     taskType: 'automation',
                     statusKey: 'error'
                 });
@@ -698,11 +698,11 @@ module.exports = {
             let proxyRecovered = false;
             if (browserClosed) {
                 this.logger.warning(`任务 ${taskId} 因浏览器关闭而结束，不再继续当前流程`);
-                if (this.isLoopRunning || this._isTimedRegistrationSessionActive()) {
+                if (this.isLoopRunning || this._isTimedExecutionSessionActive()) {
                     proxyRecovered = await this.recoverFromProxyError(taskId, result.error || result.message || '浏览器关闭');
                 }
 
-                if (!this._isTimedRegistrationSessionActive()) {
+                if (!this._isTimedExecutionSessionActive()) {
                 if (!proxyRecovered) {
                     this.isLoopRunning = false;
                     if (this.mainWindow && !this.isLoopRunning) {
@@ -752,8 +752,8 @@ module.exports = {
             return;
         }
 
-        if (this._isTimedRegistrationSessionActive()) {
-            await this._handleTimedRegistrationTaskCompletion(taskId, result, {
+        if (this._isTimedExecutionSessionActive()) {
+            await this._handleTimedExecutionTaskCompletion(taskId, result, {
                 trigger: 'timed-complete'
             });
             await this.updateStats();
@@ -767,12 +767,12 @@ module.exports = {
                     this.stepSynchronizer = new StepSynchronizer(this.concurrentCount, this.logger);
 
                     for (let i = 0; i < this.concurrentCount; i++) {
-                        await this.startSingleRegistrationTask();
+                        await this.startSingleExecutionTask();
                     }
                 }
             } else {
                 if (this.runningTasks.size < this.concurrentCount) {
-                    await this.startSingleRegistrationTask();
+                    await this.startSingleExecutionTask();
                 }
             }
         } else if (this.runningTasks.size === 0) {
@@ -785,7 +785,7 @@ module.exports = {
         await this.updateStats();
     },
 
-    async onRegistrationError(taskId, error) {
+    async onExecutionError(taskId, error) {
         this.logger.error(`任务 ${taskId} 错误: ${error}`);
         const errorText = this.getErrorText(error);
         const browserClosed = /浏览器.*任务已终止|浏览器实例已(?:关闭|断开)|浏览器页面已关闭/i.test(errorText);
@@ -810,7 +810,7 @@ module.exports = {
 
         if (browserClosed) {
             this.logger.warning(`任务 ${taskId} 因浏览器关闭而终止，不再继续当前流程`);
-            if (!this._isTimedRegistrationSessionActive()) {
+            if (!this._isTimedExecutionSessionActive()) {
                 this.isLoopRunning = false;
                 if (this.mainWindow) {
                     const failureToastMessage = `执行失败: ${errorText}`;
@@ -840,8 +840,8 @@ module.exports = {
                 });
             }
 
-            if (this._isTimedRegistrationSessionActive()) {
-                await this._handleTimedRegistrationTaskCompletion(taskId, { success: false, error: errorText }, {
+            if (this._isTimedExecutionSessionActive()) {
+                await this._handleTimedExecutionTaskCompletion(taskId, { success: false, error: errorText }, {
                     trigger: 'timed-error'
                 });
                 await this.updateStats();
@@ -859,8 +859,8 @@ module.exports = {
                 });
             }
 
-            if (this._isTimedRegistrationSessionActive()) {
-                await this._handleTimedRegistrationTaskCompletion(taskId, { success: false, error: errorText }, {
+            if (this._isTimedExecutionSessionActive()) {
+                await this._handleTimedExecutionTaskCompletion(taskId, { success: false, error: errorText }, {
                     trigger: 'timed-error'
                 });
                 await this.updateStats();
@@ -880,15 +880,15 @@ module.exports = {
         this.isTimedRunning = false;
         this.proxyRecoveryState.active = false;
         this.proxyRecoveryState.attempts = 0;
-        if (this.timedRegistrationState) {
-            this.timedRegistrationState.active = false;
-            this.timedRegistrationState.stopRequested = true;
+        if (this.timedExecutionState) {
+            this.timedExecutionState.active = false;
+            this.timedExecutionState.stopRequested = true;
         }
-        this._clearTimedRegistrationTimers();
-        this.timedRegistrationState = null;
-        this.timedRegistrationSessionId = null;
-        this.activeRegistrationCardConfig = null;
-        this.activeRegistrationCardName = '';
+        this._clearTimedExecutionTimers();
+        this.timedExecutionState = null;
+        this.timedExecutionSessionId = null;
+        this.activeExecutionCardConfig = null;
+        this.activeExecutionCardName = '';
         if (this.haikaBindingState) {
             this.haikaBindingState.active = false;
             this.haikaBindingState.stopRequested = true;

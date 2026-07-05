@@ -92,7 +92,7 @@ class UiChannelManager {
             events.push(logEvent);
         }
 
-        for (const channel of ['stats-updated', 'registration-cycle-status', 'email-connected', 'email-disconnected', 'email-reconnect', 'temp-email-log', 'temp-email-state', 'temp-email-selection']) {
+        for (const channel of ['stats-updated', 'execution-cycle-status', 'email-connected', 'email-disconnected', 'email-reconnect', 'temp-email-log', 'temp-email-state', 'temp-email-selection']) {
             const event = this.latestEvents.get(channel);
             if (event) {
                 events.push(event);
@@ -258,7 +258,7 @@ class UiChannelManager {
             return;
         }
 
-        if (['stats-updated', 'registration-cycle-status', 'email-connected', 'email-disconnected', 'email-reconnect', 'temp-email-log', 'temp-email-state', 'temp-email-selection'].includes(channel)) {
+        if (['stats-updated', 'execution-cycle-status', 'email-connected', 'email-disconnected', 'email-reconnect', 'temp-email-log', 'temp-email-state', 'temp-email-selection'].includes(channel)) {
             this.latestEvents.set(channel, event);
         }
     }

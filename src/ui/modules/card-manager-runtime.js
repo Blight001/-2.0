@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 卡片管理模块
  * 处理卡片的加载、渲染、编辑、删除等功能
  */
@@ -89,7 +89,7 @@ let currentHaikaBindCard = null;
 let currentApiCard = null;
 let currentModelCard = null;
 let cardControlMode = 'local';
-let registrationCardAccessMode = 'restricted';
+let executionCardAccessMode = 'restricted';
 const loadedCardModes = new Set();
 const loadingCardModes = new Map();
 
@@ -112,11 +112,11 @@ function isRemoteCardControlMode() {
 
 function setAutomationCardAccessMode(mode = 'restricted') {
     const normalized = String(mode || '').trim().toLowerCase();
-    registrationCardAccessMode = normalized === 'all' || normalized === 'unrestricted' ? 'all' : 'restricted';
+    executionCardAccessMode = normalized === 'all' || normalized === 'unrestricted' ? 'all' : 'restricted';
 }
 
 function canUseAnyAutomationCard() {
-    return registrationCardAccessMode === 'all';
+    return executionCardAccessMode === 'all';
 }
 
 function getRemoteCardControlMessage(cardMode = 'automation') {
@@ -814,7 +814,7 @@ async function saveCard(elements, showMessage, loadCardsFn, loadTestCardsFn = lo
                 await loadHaikaBindCardsFn({ forceReload: true });
             } else {
                 await loadCardsFn({ forceReload: true });
-                await ipcRenderer.invoke('refresh-registration-tab').catch(error => {
+                await ipcRenderer.invoke('refresh-execution-tab').catch(error => {
                     logger.warning(`刷新自动化卡片列表失败: ${error.message}`);
                 });
             }
@@ -919,7 +919,7 @@ async function importCard(showMessage, loadCardsFn, cardMode = 'automation', loa
                 await loadHaikaBindCardsFn({ forceReload: true });
             } else {
                 await loadCardsFn({ forceReload: true });
-                await ipcRenderer.invoke('refresh-registration-tab').catch(error => {
+                await ipcRenderer.invoke('refresh-execution-tab').catch(error => {
                     logger.warning(`刷新自动化卡片列表失败: ${error.message}`);
                 });
             }

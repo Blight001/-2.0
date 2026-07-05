@@ -33,7 +33,7 @@ function readQueryValue(query = {}, keys = []) {
     return '';
 }
 
-function normalizeRegistrationMode(value, fallback = 'standalone') {
+function normalizeExecutionMode(value, fallback = 'standalone') {
     const normalized = String(value || '').trim().toLowerCase();
     if (normalized === 'embedded' || normalized === 'embed') {
         return 'embedded';
@@ -49,8 +49,8 @@ function buildExecutionRouteUrl(baseUrl, context = {}, routePath = '/') {
     url.pathname = routePath.startsWith('/') ? routePath : `/${routePath}`;
     url.search = '';
 
-    const registrationMode = normalizeRegistrationMode(context.registrationMode, 'standalone');
-    const embedded = context.embedded === true || registrationMode === 'embedded';
+    const executionMode = normalizeExecutionMode(context.executionMode, 'standalone');
+    const embedded = context.embedded === true || executionMode === 'embedded';
     if (embedded) {
         url.searchParams.set('mode', 'embedded');
     }
@@ -73,8 +73,8 @@ class WebControlServer {
         this.uiChannelManager = options.uiChannelManager;
         this.host = options.host || '127.0.0.1';
         this.port = Number.isFinite(Number(options.port)) ? Number(options.port) : 18765;
-        this.registrationMode = normalizeRegistrationMode(options.registrationMode || options.mode || 'standalone');
-        this.hostApp = String(options.hostApp || options.registrationHostApp || '').trim();
+        this.executionMode = normalizeExecutionMode(options.executionMode || options.mode || 'standalone');
+        this.hostApp = String(options.hostApp || options.executionHostApp || '').trim();
         this.server = null;
         this.sockets = new Set();
     }
@@ -238,8 +238,8 @@ class WebControlServer {
         return {
             success: true,
             url: this.getUrl(),
-            registrationMode: this.registrationMode,
-            embedded: this.registrationMode === 'embedded',
+            executionMode: this.executionMode,
+            embedded: this.executionMode === 'embedded',
             hostApp: this.hostApp
         };
     }
@@ -286,19 +286,19 @@ class WebControlServer {
         const query = request && request.query && typeof request.query === 'object'
             ? request.query
             : {};
-        const queryMode = normalizeRegistrationMode(
-            readQueryValue(query, ['mode', 'registration_mode', 'registrationMode']),
-            this.registrationMode
+        const queryMode = normalizeExecutionMode(
+            readQueryValue(query, ['mode', 'execution_mode', 'executionMode']),
+            this.executionMode
         );
         const embeddedByQuery = queryMode === 'embedded'
-            || readQueryValue(query, ['embed', 'embedded', 'registration_embedded']) === '1'
-            || /^true$/i.test(readQueryValue(query, ['embed', 'embedded', 'registration_embedded']));
-        const hostApp = readQueryValue(query, ['host', 'host_app', 'registration_host_app'])
-            || readQueryValue(query, ['embed-host', 'embed_host', 'registration_embed_host'])
+            || readQueryValue(query, ['embed', 'embedded', 'execution_embedded']) === '1'
+            || /^true$/i.test(readQueryValue(query, ['embed', 'embedded', 'execution_embedded']));
+        const hostApp = readQueryValue(query, ['host', 'host_app', 'execution_host_app'])
+            || readQueryValue(query, ['embed-host', 'embed_host', 'execution_embed_host'])
             || this.hostApp
             || '';
-        const browserSource = readQueryValue(query, ['browserSource', 'browser_source', 'registration_browser_source'])
-            || readQueryValue(query, ['browserType', 'browser_type', 'registration_browser_type'])
+        const browserSource = readQueryValue(query, ['browserSource', 'browser_source', 'execution_browser_source'])
+            || readQueryValue(query, ['browserType', 'browser_type', 'execution_browser_type'])
             || this.browserSource
             || 'local-browser';
         const normalizedBrowserSource = (() => {
@@ -311,22 +311,22 @@ class WebControlServer {
             }
             return 'local-browser';
         })();
-        const registrationMode = embeddedByQuery ? 'embedded' : queryMode;
+        const executionMode = embeddedByQuery ? 'embedded' : queryMode;
 
         return {
             url: this.getUrl(),
-            registrationMode,
-            embedded: registrationMode === 'embedded',
+            executionMode,
+            embedded: executionMode === 'embedded',
             hostApp,
             browserSource: normalizedBrowserSource,
-            source: registrationMode === 'embedded' ? 'embedded' : 'standalone'
+            source: executionMode === 'embedded' ? 'embedded' : 'standalone'
         };
     }
 
     _buildRuntimeBootstrapScript(context = {}) {
         const runtime = {
-            registrationMode: normalizeRegistrationMode(context.registrationMode, this.registrationMode),
-            embedded: context.embedded === true || normalizeRegistrationMode(context.registrationMode, this.registrationMode) === 'embedded',
+            executionMode: normalizeExecutionMode(context.executionMode, this.executionMode),
+            embedded: context.embedded === true || normalizeExecutionMode(context.executionMode, this.executionMode) === 'embedded',
             hostApp: String(context.hostApp || this.hostApp || '').trim(),
                 browserSource: (() => {
                     const normalized = String(context.browserSource || context.browserType || this.browserSource || 'local-browser').trim().toLowerCase();
@@ -354,10 +354,10 @@ class WebControlServer {
   window.__REGISTRATION_HOME_URL__ = runtime.executionHomeUrl || runtime.webUiUrl || '/';
   window.__REGISTRATION_LOGIN_URL__ = runtime.executionLoginUrl || '/login';
   try {
-    document.documentElement.dataset.registrationMode = runtime.registrationMode || 'standalone';
-    document.documentElement.dataset.registrationEmbedded = runtime.embedded ? 'true' : 'false';
-    document.documentElement.dataset.registrationHostApp = runtime.hostApp || '';
-    document.documentElement.dataset.registrationBrowserSource = runtime.browserSource || 'local-browser';
+    document.documentElement.dataset.executionMode = runtime.executionMode || 'standalone';
+    document.documentElement.dataset.executionEmbedded = runtime.embedded ? 'true' : 'false';
+    document.documentElement.dataset.executionHostApp = runtime.hostApp || '';
+    document.documentElement.dataset.executionBrowserSource = runtime.browserSource || 'local-browser';
   } catch (_error) {}
 })();
 </script>`;
