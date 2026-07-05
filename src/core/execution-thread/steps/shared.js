@@ -422,7 +422,7 @@ function fetchHaikaSmsCodeFromUrl(smsApiUrl, timeoutMs = 10000) {
             method: 'GET',
             timeout: timeoutMs,
             headers: {
-                'User-Agent': 'AI-Account-Register-2.0'
+                'User-Agent': 'AI-Automation-Tool-2.0'
             }
         };
 

@@ -265,7 +265,7 @@ module.exports = {
                 method: 'GET',
                 timeout: 10000,
                 headers: {
-                    'User-Agent': 'AI-Account-Register-2.0'
+                    'User-Agent': 'AI-Automation-Tool-2.0'
                 }
             };
 
@@ -502,7 +502,11 @@ module.exports = {
         }
     },
 
-    async saveRegistrationRuntimeConfigToDisk(config = {}) {
+    async readAutomationRuntimeConfigFromDisk() {
+        return await this.readExecutionRuntimeConfigFromDisk();
+    },
+
+    async saveAutomationRuntimeConfigToDisk(config = {}) {
         const paths = await this.ensureRuntimeConfigPathReady();
         const targetPath = paths.installed || paths.dev;
         if (!targetPath) {

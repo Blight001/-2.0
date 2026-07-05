@@ -138,11 +138,11 @@ async function saveConfig(app, settings = {}) {
         ...(existing && typeof existing === 'object' ? existing : {}),
         apiServerSettings: normalized
     };
-    if (typeof app.saveRegistrationRuntimeConfigToDisk !== 'function') {
+    if (typeof app.saveAutomationRuntimeConfigToDisk !== 'function') {
         return { success: false, error: '运行配置保存接口不可用' };
     }
 
-    const result = await app.saveRegistrationRuntimeConfigToDisk(nextConfig);
+    const result = await app.saveAutomationRuntimeConfigToDisk(nextConfig);
     if (result && result.success === false) {
         return result;
     }

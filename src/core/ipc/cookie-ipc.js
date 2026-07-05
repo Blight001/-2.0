@@ -885,8 +885,8 @@ module.exports = function registerCookieHandlers({ app, ipcMain, fs, path }) {
                 )
             };
 
-            const saveResult = typeof app.saveRegistrationTcpConfigToDisk === 'function'
-                ? await app.saveRegistrationTcpConfigToDisk(config)
+            const saveResult = typeof app.saveAutomationTcpConfigToDisk === 'function'
+                ? await app.saveAutomationTcpConfigToDisk(config)
                 : { success: false, error: 'TCP配置保存接口不可用' };
             if (!saveResult || saveResult.success !== true) {
                 return saveResult || { success: false, error: 'TCP配置保存失败' };

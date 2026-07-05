@@ -734,7 +734,7 @@ class AutomationApp {
             return {};
         }
     }
-    async saveRegistrationTcpConfigToDisk(config = {}) {
+    async saveAutomationTcpConfigToDisk(config = {}) {
         try {
             const paths = await this.ensureRegistrationTcpConfigPathReady();
             const targetPath = paths.installed || paths.dev;
@@ -761,7 +761,7 @@ class AutomationApp {
         }
     }
     async readAutomationRuntimeConfigFromDisk() { return appBootstrap.readAutomationRuntimeConfigFromDisk.call(this); }
-    async saveRegistrationRuntimeConfigToDisk(config) { return appBootstrap.saveRegistrationRuntimeConfigToDisk.call(this, config); }
+    async saveAutomationRuntimeConfigToDisk(config) { return appBootstrap.saveAutomationRuntimeConfigToDisk.call(this, config); }
     getCardKeyPrefix() {
         if (typeof this.currentCardKeyPrefix === 'string' && this.currentCardKeyPrefix) {
             return this.currentCardKeyPrefix;

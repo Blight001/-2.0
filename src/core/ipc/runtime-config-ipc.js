@@ -60,8 +60,8 @@ module.exports = function registerRuntimeConfigHandlers({ app, ipcMain }) {
     ipcMain.handle('save-registration-runtime-config', async (_event, config) => {
         try {
             const normalizedConfig = config && typeof config === 'object' ? { ...config } : {};
-            const saveResult = typeof app.saveRegistrationRuntimeConfigToDisk === 'function'
-                ? await app.saveRegistrationRuntimeConfigToDisk(normalizedConfig)
+            const saveResult = typeof app.saveAutomationRuntimeConfigToDisk === 'function'
+                ? await app.saveAutomationRuntimeConfigToDisk(normalizedConfig)
                 : { success: false, error: '运行配置保存接口不可用' };
 
             if (saveResult.success === false) {
