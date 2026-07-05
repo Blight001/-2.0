@@ -195,7 +195,7 @@ module.exports = {
             await new Promise(resolve => setTimeout(resolve, this.proxyRecoveryCooldownMs));
 
             if (this.isLoopRunning) {
-                this.logger.info('代理恢复完成，重新启动注册循环');
+                this.logger.info('代理恢复完成，重新启动自动化循环');
 
                 if (this.syncEnabled && this.concurrentCount > 1) {
                     this.stepSynchronizer = new StepSynchronizer(this.concurrentCount, this.logger);

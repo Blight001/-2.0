@@ -12,7 +12,7 @@ module.exports = {
         try {
             config = this._resolveExecutionStartConfig(config);
             this.logger.info?.(`自动化默认执行方案已参与启动: ${JSON.stringify(summarizeRegistrationDefaultExecutionPlan(this.automationDefaultExecutionPlan || {}))}`);
-            this.logger.info?.(`注册启动最终配置: ${JSON.stringify({
+            this.logger.info?.(`自动化启动最终配置: ${JSON.stringify({
                 runMode: config.runMode,
                 concurrentCount: config.concurrentCount,
                 syncEnabled: config.syncEnabled,
@@ -111,7 +111,7 @@ module.exports = {
                 }
             } else {
                 const initialLaunchCount = Math.max(1, this.concurrentCount);
-                this.logger.info(`启动初始注册任务: ${initialLaunchCount} 个`);
+                this.logger.info(`启动初始自动化任务: ${initialLaunchCount} 个`);
 
                 for (let i = 0; i < initialLaunchCount; i++) {
                     if (this.automationStopRequested) {
@@ -124,7 +124,7 @@ module.exports = {
                     });
 
                     if (!startResult || startResult.success === false) {
-                        throw new Error(startResult?.error || '启动注册任务失败');
+                        throw new Error(startResult?.error || '启动自动化任务失败');
                     }
                 }
             }
@@ -147,7 +147,7 @@ module.exports = {
     async startSingleRegistrationTask(overrides = {}) {
         const taskType = overrides.taskType || 'automation';
         if (taskType === 'automation' && (this.automationStopRequested || (this.timedRegistrationState && this.timedRegistrationState.stopRequested))) {
-            return { success: false, error: '注册已停止' };
+            return { success: false, error: '自动化已停止' };
         }
 
         const taskId = overrides.taskId || `${taskType}_${Date.now()}_${this.runningTasks.size}`;
@@ -170,7 +170,7 @@ module.exports = {
         }
 
         if (taskType === 'automation' && (this.automationStopRequested || (this.timedRegistrationState && this.timedRegistrationState.stopRequested))) {
-            return { success: false, error: '注册已停止' };
+            return { success: false, error: '自动化已停止' };
         }
 
         let browserType = overrides.browserType || this.currentBrowserType;
@@ -183,7 +183,7 @@ module.exports = {
                 browserSettings.browser_source = 'local-browser';
                 browserSettings.browserSource = 'local-browser';
             }
-            this.logger.info?.('注册任务检测到 Electron 浏览器，已切换到系统 Edge 以提高验证码兼容性');
+            this.logger.info?.('自动化任务检测到 Electron 浏览器，已切换到系统 Edge 以提高验证码兼容性');
         }
         if (taskType === 'automation' && browserSettings && typeof browserSettings === 'object' && browserSettings.headless === undefined) {
             browserSettings.headless = String(browserType || '').trim().toLowerCase() === 'electron' ? false : true;
@@ -329,11 +329,11 @@ module.exports = {
                 taskId,
                 taskNumber: this.runningTasks.size,
                 taskType,
-                taskLabel: overrides.taskLabel || (effectiveCardName || (taskType === 'debug' ? '调试任务' : '注册任务'))
+                taskLabel: overrides.taskLabel || (effectiveCardName || (taskType === 'debug' ? '调试任务' : '自动化任务'))
             });
         }
 
-        this.logger.info(`开始${taskType === 'debug' ? '调试' : '注册'}任务: ${taskId}`);
+        this.logger.info(`开始${taskType === 'debug' ? '调试' : '自动化'}任务: ${taskId}`);
         await this.updateStats();
         return { success: true, taskId };
     },
@@ -613,7 +613,7 @@ module.exports = {
             if (this.mainWindow) {
                 this.mainWindow.webContents.send('task-finished', {
                     taskId,
-                    taskLabel: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || '注册任务',
+                    taskLabel: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || '自动化任务',
                     taskType: 'automation'
                 });
                 this.mainWindow.webContents.send('app-toast', {
@@ -688,8 +688,8 @@ module.exports = {
             if (this.mainWindow) {
                 this.mainWindow.webContents.send('task-error', {
                     taskId,
-                    error: result.error || result.message || '注册任务失败',
-                    taskLabel: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || '注册任务',
+                    error: result.error || result.message || '自动化任务失败',
+                    taskLabel: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || '自动化任务',
                     taskType: 'automation',
                     statusKey: 'error'
                 });
@@ -706,7 +706,7 @@ module.exports = {
                 if (!proxyRecovered) {
                     this.isLoopRunning = false;
                     if (this.mainWindow && !this.isLoopRunning) {
-                        const failureToastMessage = `执行失败: ${this.getErrorText(result.error || '注册任务失败')}`;
+                        const failureToastMessage = `执行失败: ${this.getErrorText(result.error || '自动化任务失败')}`;
                         this.mainWindow.webContents.send('automation-error', { error: result.error });
                         this.mainWindow.webContents.send('app-toast', {
                             message: failureToastMessage,
@@ -722,7 +722,7 @@ module.exports = {
                 }
 
                 if (!proxyRecovered && this.mainWindow && !this.isLoopRunning) {
-                    const failureToastMessage = `执行失败: ${this.getErrorText(result.error || '注册任务失败')}`;
+                    const failureToastMessage = `执行失败: ${this.getErrorText(result.error || '自动化任务失败')}`;
                     this.mainWindow.webContents.send('automation-error', { error: result.error });
                     this.mainWindow.webContents.send('app-toast', {
                         message: failureToastMessage,
@@ -737,7 +737,7 @@ module.exports = {
                         return;
                     }
                 } else if (this.mainWindow && !this.isLoopRunning) {
-                    const failureToastMessage = `执行失败: ${this.getErrorText(result.error || '注册任务失败')}`;
+                    const failureToastMessage = `执行失败: ${this.getErrorText(result.error || '自动化任务失败')}`;
                     this.mainWindow.webContents.send('automation-error', { error: result.error });
                     this.mainWindow.webContents.send('app-toast', {
                         message: failureToastMessage,
@@ -896,7 +896,7 @@ module.exports = {
         }
 
         for (const [taskId, task] of this.runningTasks) {
-            task.stop('注册任务已停止');
+            task.stop('自动化任务已停止');
             this.logger.info(`停止执行任务: ${taskId}`);
         }
 

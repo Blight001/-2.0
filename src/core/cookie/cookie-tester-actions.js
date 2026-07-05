@@ -431,9 +431,9 @@ module.exports = {
                                             }
                                         }
                                     }, { noWaitAfter: true });
-                                    this.logger.debug(`已注册弹窗处理器: ${popup.name} - ${sel}`);
+                                    this.logger.debug(`已初始化弹窗处理器: ${popup.name} - ${sel}`);
                                 } catch (regErr) {
-                                    this.logger.warning(`注册单个选择器处理器失败: ${sel} - ${regErr.message}`);
+                                    this.logger.warning(`初始化单个选择器处理器失败: ${sel} - ${regErr.message}`);
                                 }
                             }
                         }
@@ -461,7 +461,7 @@ module.exports = {
                                     }
                                 }, { noWaitAfter: true });
                             } catch (e) {
-                                this.logger.warning(`注册弹窗处理器失败 (${popup.name}, ${s}): ${e.message}`);
+                                this.logger.warning(`初始化弹窗处理器失败 (${popup.name}, ${s}): ${e.message}`);
                             }
                         }
                     }

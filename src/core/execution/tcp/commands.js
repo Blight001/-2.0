@@ -415,7 +415,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                     : {};
                 snapshot = buildExecutionTcpSnapshot(app, { reason: `command:${command}` });
             } catch (error) {
-                app?.logger?.warning?.(`刷新注册运行配置失败: ${error.message}`);
+                app?.logger?.warning?.(`刷新自动化运行配置失败: ${error.message}`);
             }
             const runtimeInfo = typeof app?.getAppRuntimeInfo === 'function'
                 ? await app.getAppRuntimeInfo()
@@ -579,7 +579,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                     contextVariables: startTask.contextVariables,
                     initialCookies: startTask.initialCookies,
                     taskType: commandArgs.task_type || commandArgs.taskType || 'registration',
-                    taskLabel: commandArgs.task_label || commandArgs.taskLabel || '注册任务'
+                    taskLabel: commandArgs.task_label || commandArgs.taskLabel || '自动化任务'
                 });
 
                 return {
@@ -602,7 +602,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                 return {
                     ok: false,
                     command,
-                    message: '注册启动能力不可用',
+                    message: '自动化启动能力不可用',
                     snapshot
                 };
             }
@@ -679,7 +679,7 @@ async function executeExecutionTcpCommand(app, commandPayload = {}) {
                 return {
                     ok: false,
                     command,
-                    message: '注册停止能力不可用',
+                    message: '自动化停止能力不可用',
                     snapshot
                 };
             }

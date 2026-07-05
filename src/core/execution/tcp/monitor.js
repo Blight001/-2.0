@@ -288,7 +288,7 @@ async function _sendRegistrationTcpHello(app, socket, endpoint) {
         MSG_TYPE_REGISTRATION_HELLO_RESP,
         {
             timeoutMs: Math.max(TCP_HEARTBEAT_RESPONSE_TIMEOUT_MS, 5000),
-            purpose: '注册握手'
+            purpose: '自动化握手'
         }
     );
 
@@ -341,7 +341,7 @@ async function _sendRegistrationTcpHeartbeatRequest(app, socket, reason = 'heart
         MSG_TYPE_REGISTRATION_HEARTBEAT_RESP,
         {
             timeoutMs: TCP_HEARTBEAT_RESPONSE_TIMEOUT_MS,
-            purpose: '注册心跳'
+            purpose: '自动化心跳'
         }
     );
 
@@ -567,8 +567,8 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
                         app?.logger?.warning?.(`自动化工具初始状态上报失败: ${error.message}`);
                     });
                 } catch (error) {
-                    const status = _updateRegistrationTcpConnectionStatus(app, resolvedEndpoint, false, error?.message || '注册握手失败', 0);
-                    _destroyRegistrationTcpMonitorSocket(app, error?.message || '注册握手失败');
+                    const status = _updateRegistrationTcpConnectionStatus(app, resolvedEndpoint, false, error?.message || '自动化握手失败', 0);
+                    _destroyRegistrationTcpMonitorSocket(app, error?.message || '自动化握手失败');
                     _scheduleRegistrationTcpReconnect(app, resolvedEndpoint);
                     finalizeInitialConnection(status);
                 }

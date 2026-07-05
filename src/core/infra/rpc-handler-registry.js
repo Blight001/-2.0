@@ -19,7 +19,7 @@ class RpcHandlerRegistry {
         const resolvedChannel = String(channel);
         const handler = this.handlers.get(resolvedChannel);
         if (typeof handler !== 'function') {
-            throw new Error(`未注册调用通道: ${resolvedChannel}`);
+            throw new Error(`未初始化调用通道: ${resolvedChannel}`);
         }
 
         return await handler(null, ...args);

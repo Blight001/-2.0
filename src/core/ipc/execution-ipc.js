@@ -16,7 +16,7 @@ module.exports = function registerExecutionHandlers({ app, ipcMain }) {
                 ? await app.readExecutionRuntimeConfigFromDisk()
                 : {};
         } catch (error) {
-            app.logger.warning(`读取注册运行配置失败，继续使用当前参数: ${error.message}`);
+            app.logger.warning(`读取自动化运行配置失败，继续使用当前参数: ${error.message}`);
         }
 
         const mergedConfig = {

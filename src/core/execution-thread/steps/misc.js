@@ -1168,7 +1168,7 @@ module.exports = {
                 try {
                     this.emailClient.connect().catch(() => {});
                 } catch (_e) {}
-                this.logger.info('邮箱客户端已进入自动重连流程，等待期间不会中断当前注册任务');
+                this.logger.info('邮箱客户端已进入自动重连流程，等待期间不会中断当前自动化任务');
             }
 
             const emailRegex = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(\d{1,3}\.){3}\d{1,3})$/;

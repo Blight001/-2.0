@@ -647,7 +647,7 @@ module.exports = {
 
         if (!this.running) {
             result.error = this.stopReason || '任务被用户停止';
-            this.logger.info(`任务 ${this.taskId} 已停止，未完成注册: ${result.error}`);
+            this.logger.info(`任务 ${this.taskId} 已停止，未完成自动化: ${result.error}`);
             if (debugMode && typeof this._emitDebugState === 'function') {
                 this._emitDebugState({
                     active: false,
@@ -663,7 +663,7 @@ module.exports = {
             return result;
         }
 
-        this.currentStep = '获取注册结果';
+        this.currentStep = '获取自动化结果';
         result.success = true;
 
         this.logger.info('执行完成 - 凭据状态:');
@@ -693,11 +693,11 @@ module.exports = {
 
         result.points = this._credits ?? this.cardConfig.points ?? 0;
 
-        this.logger.info(`最终注册结果 - 邮箱: ${result.email}, 密码: ${result.password}, 积分: ${result.points}`);
+        this.logger.info(`最终自动化结果 - 邮箱: ${result.email}, 密码: ${result.password}, 积分: ${result.points}`);
         if (debugMode && result.warnings.length > 0) {
             this.logger.info(`调试模式完成，累计 ${result.warnings.length} 个告警`);
         }
-        this.emit('progress', 90, '获取注册结果');
+        this.emit('progress', 90, '获取自动化结果');
         if (debugMode && typeof this._emitDebugState === 'function') {
             this._emitDebugState({
                 active: false,

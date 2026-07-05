@@ -149,7 +149,7 @@ module.exports = {
                 }
                 messageParts.push(`累计已完成 ${sessionCompletedCount}/${totalPlannedCount}`);
                 if (sessionRemainingCount > 0) {
-                    messageParts.push(`还剩 ${sessionRemainingCount} 个注册计划`);
+                    messageParts.push(`还剩 ${sessionRemainingCount} 个自动化计划`);
                 }
             }
             message = messageParts.join('，');
