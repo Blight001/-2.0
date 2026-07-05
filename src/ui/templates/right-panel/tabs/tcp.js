@@ -69,13 +69,13 @@ module.exports = function renderTcpTab() {
                                     <div class="upload-settings-section">
                                         <div class="setting-item upload-auto-control">
                                             <div class="setting-title-row">
-                                                <label for="registration-auto-upload" class="setting-switch-label">注册后自动上传</label>
+                                                <label for="registration-auto-upload" class="setting-switch-label">执行后自动上传</label>
                                                 <label class="setting-switch-label">
                                                     <input type="checkbox" id="registration-auto-upload" checked>
                                                     <span>启用</span>
                                                 </label>
                                             </div>
-                                            <div class="setting-help">开启后，注册完成会自动按当前卡片的上传配置执行上传。</div>
+                                            <div class="setting-help">开启后，执行完成会自动按当前卡片的上传配置执行上传。</div>
                                         </div>
 
                                         <div class="setting-item" id="card-upload-config-group">

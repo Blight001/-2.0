@@ -1,4 +1,4 @@
-const RegistrationThread = require('../registration-thread');
+const ExecutionThread = require('../execution-thread');
 const { normalizeHaikaExpiryDateValue } = require('./main-runtime-utils');
 
 module.exports = {

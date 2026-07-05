@@ -137,7 +137,7 @@ function _syncRegistrationDefaultExecutionPlanFromResponse(app, response = {}) {
     const logSignature = JSON.stringify(logPayload);
     if (app.registrationDefaultExecutionPlanSignature !== logSignature) {
         app.registrationDefaultExecutionPlanSignature = logSignature;
-        app?.logger?.info?.(`已同步注册器默认执行方案: ${logSignature}`);
+        app?.logger?.info?.(`已同步自动化工具默认执行方案: ${logSignature}`);
     }
 
     return clonedPlan;
@@ -381,7 +381,7 @@ async function notifyRegistrationTcpSuccess(app, payload = {}) {
         MSG_TYPE_REGISTRATION_SUCCESS_RESP,
         {
             timeoutMs: Math.max(TCP_HEARTBEAT_RESPONSE_TIMEOUT_MS, 5000),
-            purpose: '注册成功通知'
+            purpose: '执行成功通知'
         }
     );
 
@@ -447,8 +447,8 @@ function _sendRegistrationTcpHeartbeat(app) {
     }
 
     void _sendRegistrationTcpHeartbeatRequest(app, state.socket, 'heartbeat').catch((error) => {
-        app?.logger?.warning?.(`注册器心跳失败: ${error.message}`);
-        _destroyRegistrationTcpMonitorSocket(app, error?.message || '注册器心跳失败');
+        app?.logger?.warning?.(`自动化工具心跳失败: ${error.message}`);
+        _destroyRegistrationTcpMonitorSocket(app, error?.message || '自动化工具心跳失败');
         _scheduleRegistrationTcpReconnect(app, app?.registrationTcpEndpoint || state.currentEndpoint);
     });
     return true;
@@ -536,8 +536,8 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
                 }
 
                 void _sendRegistrationTcpStateReport(app, state.socket, 'periodic').catch((error) => {
-                    app?.logger?.warning?.(`注册器状态上报失败: ${error.message}`);
-                    _destroyRegistrationTcpMonitorSocket(app, error?.message || '注册器状态上报失败');
+                    app?.logger?.warning?.(`自动化工具状态上报失败: ${error.message}`);
+                    _destroyRegistrationTcpMonitorSocket(app, error?.message || '自动化工具状态上报失败');
                     _scheduleRegistrationTcpReconnect(app, resolvedEndpoint);
                 });
             }, DEFAULT_REGISTRATION_STATE_REPORT_INTERVAL_MS);
@@ -564,7 +564,7 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
                     }
 
                     void _sendRegistrationTcpStateReport(app, socket, 'hello').catch((error) => {
-                        app?.logger?.warning?.(`注册器初始状态上报失败: ${error.message}`);
+                        app?.logger?.warning?.(`自动化工具初始状态上报失败: ${error.message}`);
                     });
                 } catch (error) {
                     const status = _updateRegistrationTcpConnectionStatus(app, resolvedEndpoint, false, error?.message || '注册握手失败', 0);
@@ -589,7 +589,7 @@ async function _openRegistrationTcpMonitorConnection(app, endpoint) {
                 state.buffer = packet.remaining;
 
                 void _processRegistrationTcpIncomingPacket(app, socket, packet).catch((error) => {
-                    app?.logger?.warning?.(`注册器TCP消息处理失败: ${error.message}`);
+                    app?.logger?.warning?.(`自动化工具TCP消息处理失败: ${error.message}`);
                 });
             }
         });

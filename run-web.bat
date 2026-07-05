@@ -16,7 +16,7 @@ if not defined WEB_PORT set "WEB_PORT=18765"
 set "WEB_URL=http://%WEB_HOST%:%WEB_PORT%"
 
 echo ========================================
-echo   AI Account Register 2.0 - Local Web
+echo   AI Automation 2.0 - Local Web
 echo ========================================
 echo Mode: local web UI
 echo MQTT: enabled

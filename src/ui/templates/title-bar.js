@@ -2,7 +2,7 @@ module.exports = function renderTitleBar() {
   return `<!-- 标题栏 -->
         <div class="title-bar">
             <div class="title-bar-left">
-                <h1>AI 账号工作台</h1>
+                <h1>AI 自动化工作台</h1>
             </div>
             <div class="title-bar-right">
                 <div class="status-info">

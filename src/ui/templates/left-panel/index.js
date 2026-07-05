@@ -9,7 +9,7 @@ module.exports = function renderLeftPanel() {
                 <div class="left-tabs">
                     <div class="tab-chooser-row">
                         <div class="tab-headers" role="tablist">
-                            <button class="tab-header active" data-tab="tab-cards" role="tab">账号注册</button>
+                            <button class="tab-header active" data-tab="tab-cards" role="tab">自动化</button>
                             <button class="tab-header" data-tab="tab-account-test" role="tab">账号测试</button>
                             <button class="tab-header" data-tab="tab-trial-bind" role="tab">账号订阅</button>
                             <button class="tab-header" data-tab="tab-automation" role="tab">账号API</button>

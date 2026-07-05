@@ -147,7 +147,7 @@ async function loadCookieTestConfig(elements) {
 async function updateCookieTestConfig(elements, logger) {
     const concurrentCount = elements.concurrentCount ? parseInt(elements.concurrentCount.value, 10) || 1 : 1;
     const headless = elements.headlessMode ? elements.headlessMode.checked : true;
-    logger.info(`Cookie测试配置已统一跟随注册设置: 并发数=${concurrentCount}, 无头模式=${headless}`);
+    logger.info(`Cookie测试配置已统一跟随自动化设置: 并发数=${concurrentCount}, 无头模式=${headless}`);
 }
 
 // 导出模块

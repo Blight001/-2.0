@@ -4,8 +4,8 @@ const {
 } = require('../core/infra/config-utils');
 const {
     normalizeRegistrationTcpEndpoint: normalizeRegistrationTcpEndpointValue,
-    hasRegistrationTcpConfig
-} = require('../core/registration/tcp-control');
+    hasAutomationTcpConfig
+} = require('../core/execution/tcp-control');
 
 function readFlagValue(flagName, argv = process.argv) {
     const matched = Array.isArray(argv)
@@ -31,7 +31,7 @@ function resolveStartupMode(argv = process.argv, env = process.env, packageJson 
     return 'local';
 }
 
-function normalizeRegistrationMode(value, fallback = 'standalone') {
+function normalizeAutomationMode(value, fallback = 'standalone') {
     const normalized = String(value || '').trim().toLowerCase();
     if (normalized === 'embedded' || normalized === 'embed') {
         return 'embedded';
@@ -143,7 +143,7 @@ function buildHardwareInfoFallback(gpuInfo = null) {
 
 function buildTcpConfigSnapshot(source = {}) {
     const config = source && typeof source === 'object' ? source : {};
-    if (!hasRegistrationTcpConfig(config)) {
+    if (!hasAutomationTcpConfig(config)) {
         return {};
     }
 
@@ -203,8 +203,8 @@ module.exports = {
     buildHardwareInfoFallback,
     buildTcpConfigSnapshot,
     extractEmailRandomConfig,
-    hasRegistrationTcpConfig,
+    hasAutomationTcpConfig,
     normalizeBrowserSource,
-    normalizeRegistrationMode,
+    normalizeAutomationMode,
     resolveStartupMode
 };

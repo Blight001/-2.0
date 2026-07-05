@@ -1,4 +1,4 @@
-const { loadRegistrationCardsForMode } = require('../registration/registration-ui-state');
+const { loadAutomationCardsForMode } = require('../execution/execution-ui-state');
 const {
     cloneRegistrationCardConfig,
     toPositiveInteger
@@ -7,11 +7,11 @@ const {
 module.exports = {
     async loadCards() {
         try {
-            const cards = await loadRegistrationCardsForMode(this, 'register');
+            const cards = await loadAutomationCardsForMode(this, 'automation');
             if (this.mainWindow) {
                 this.mainWindow.webContents.send('cards-loaded', cards);
             }
-            this.logger.debug?.(`注册卡片已同步: ${cards.length} 个`);
+            this.logger.debug?.(`自动化卡片已同步: ${cards.length} 个`);
             return cards;
         } catch (error) {
             this.logger.error(`加载卡片失败: ${error.message}`);
@@ -21,7 +21,7 @@ module.exports = {
 
     _getRegistrationModeLabel(runMode = this.runMode) {
         if (runMode === 2) {
-            return '定时注册';
+            return '定时执行';
         }
         if (runMode === 1) {
             return '循环运行';
@@ -30,11 +30,11 @@ module.exports = {
     },
 
     _getTimedRegistrationTaskLabel() {
-        return '定时注册任务';
+        return '定时执行任务';
     },
 
     _getTimedRegistrationBatchLabel() {
-        return '定时注册批次';
+        return '定时执行批次';
     },
 
     _resolveRegistrationStartConfig(config = {}) {

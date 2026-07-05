@@ -666,7 +666,7 @@ module.exports = {
         this.currentStep = '获取注册结果';
         result.success = true;
 
-        this.logger.info('注册完成 - 凭据状态:');
+        this.logger.info('执行完成 - 凭据状态:');
         this.logger.info(`  credentials.email: "${this.credentials.email}"`);
         this.logger.info(`  credentials.password: "${this.credentials.password}"`);
         this.logger.info(`  generatedEmail: "${this.generatedEmail}"`);

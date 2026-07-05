@@ -458,17 +458,17 @@ module.exports = function registerCookieHandlers({ app, ipcMain, fs, path }) {
 
             const selectedCardName = String(payload.cardName || app.currentCard || app.currentCardName || '').trim();
             if (!selectedCardName) {
-                return { success: false, error: '请先选择一个注册卡片' };
+                return { success: false, error: '请先选择一个自动化卡片' };
             }
 
             const cardData = await app.cardManager.getCard(selectedCardName);
             if (!cardData) {
-                return { success: false, error: `注册卡片不存在: ${selectedCardName}` };
+                return { success: false, error: `自动化卡片不存在: ${selectedCardName}` };
             }
 
             const targetUrl = normalizeManualLoginUrl(cardData.website || cardData.url || '');
             if (!targetUrl) {
-                return { success: false, error: `注册卡片 ${selectedCardName} 未配置网站地址` };
+                return { success: false, error: `自动化卡片 ${selectedCardName} 未配置网站地址` };
             }
 
             const browserSettings = payload.browserSettings && typeof payload.browserSettings === 'object'

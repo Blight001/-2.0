@@ -18,7 +18,7 @@ const MSG_TYPE_REGISTRATION_HEARTBEAT_RESP = 0x0208;
 const MSG_TYPE_REGISTRATION_SUCCESS_REQ = 0x0209;
 const MSG_TYPE_REGISTRATION_SUCCESS_RESP = 0x020A;
 const REGISTRATION_CLIENT_ROLE = 'registration';
-const REGISTRATION_APP_NAME = packageJson?.productName || 'AI账号注册器 2.0';
+const REGISTRATION_APP_NAME = packageJson?.productName || 'AI 自动化工具 2.0';
 const REGISTRATION_APP_VERSION = packageJson?.version || '';
 
 function packTcpMessage(msgId, msgType, payload = {}) {

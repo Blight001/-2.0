@@ -1,8 +1,8 @@
 const DEFAULT_MIN_COOKIE_SIZE_BYTES = 8192;
 const DEFAULT_UPLOAD_TARGET_SCORE_SCOPE = 'all';
 
-function normalizeCardMode(cardMode = 'register') {
-    return cardMode === 'test' || cardMode === 'haikaBind' || cardMode === 'api' || cardMode === 'model' ? cardMode : 'register';
+function normalizeCardMode(cardMode = 'automation') {
+    return cardMode === 'test' || cardMode === 'haikaBind' || cardMode === 'api' || cardMode === 'model' ? cardMode : 'automation';
 }
 
 function normalizeCardControlMode(mode = 'local') {
@@ -21,18 +21,18 @@ function isRemoteCardControlMode() {
     return false;
 }
 
-function setRegistrationCardAccessMode(mode = 'restricted') {
+function setAutomationCardAccessMode(mode = 'restricted') {
     return String(mode || '').trim().toLowerCase() === 'any' ? 'any' : 'restricted';
 }
 
-function canUseAnyRegistrationCard() {
+function canUseAnyAutomationCard() {
     return false;
 }
 
-function getRemoteCardControlMessage(cardMode = 'register') {
+function getRemoteCardControlMessage(cardMode = 'automation') {
     const mode = normalizeCardMode(cardMode);
-    return mode === 'register'
-        ? '当前注册卡片处于远程控制模式，无法在本地编辑'
+    return mode === 'automation'
+        ? '当前自动化卡片处于远程控制模式，无法在本地编辑'
         : '当前卡片处于远程控制模式，无法在本地编辑';
 }
 
@@ -187,12 +187,12 @@ function setUploadTargetScoreControlsVisibility(elements) {
     }
 }
 
-function getCardModeConfig(cardMode = 'register') {
+function getCardModeConfig(cardMode = 'automation') {
     const mode = normalizeCardMode(cardMode);
     const modeConfig = {
-        register: {
-            mode: 'register',
-            label: '注册',
+        automation: {
+            mode: 'automation',
+            label: '自动化',
             listSelector: '#card-list .card-item',
             itemSelector: name => `#card-list [data-card-name="${name}"]`,
             listElementKey: 'cardList',
@@ -265,7 +265,7 @@ function getCardModeConfig(cardMode = 'register') {
     return modeConfig[mode];
 }
 
-function getBrowserConfigForMode(elements, cardMode = 'register', browserSettingsPatch = {}) {
+function getBrowserConfigForMode(elements, cardMode = 'automation', browserSettingsPatch = {}) {
     const isStandaloneCardEditorWindow = typeof document !== 'undefined'
         && String(document.body?.dataset.view || document.documentElement?.dataset.view || '').trim() === 'card-editor';
     const hasBrowserTypeControl = Boolean(elements.browserType) && !isStandaloneCardEditorWindow;
@@ -302,7 +302,7 @@ function getBrowserConfigForMode(elements, cardMode = 'register', browserSetting
 }
 
 function buildCardDataFromForm(elements, options = {}) {
-    const cardMode = elements.cardDialog.dataset.cardMode || 'register';
+    const cardMode = elements.cardDialog.dataset.cardMode || 'automation';
     const originalCardName = String(elements.cardDialog.dataset.originalCardName || '').trim();
     const relatedApiCardName = String(elements.cardDialog.dataset.apiCardName || '').trim();
     const collectSteps = typeof options.collectSteps === 'function'
@@ -315,7 +315,7 @@ function buildCardDataFromForm(elements, options = {}) {
         ? parseUploadTargetScoreTypes(elements.cardUploadTargetScoreTypes ? elements.cardUploadTargetScoreTypes.value : '')
         : [];
 
-    if (cardMode === 'register' && uploadTargetScoreScope === 'custom' && uploadTargetScoreTypes.length === 0) {
+    if (cardMode === 'automation' && uploadTargetScoreScope === 'custom' && uploadTargetScoreTypes.length === 0) {
         return { success: false, error: '请填写目标积分账号/类型，或将目标积分类型改为“默认所有积分账号”' };
     }
 
@@ -329,7 +329,7 @@ function buildCardDataFromForm(elements, options = {}) {
         popups: []
     };
 
-    if (cardMode === 'register') {
+    if (cardMode === 'automation') {
         const uploadServerUrl = elements.registrationUploadServerUrl ? elements.registrationUploadServerUrl.value.trim() : '';
         const uploadCardKey = elements.registrationUploadCardKey ? elements.registrationUploadCardKey.value.trim() : '';
         const registrationAutoUpload = elements.registrationAutoUpload ? elements.registrationAutoUpload.checked === true : true;
@@ -447,8 +447,8 @@ module.exports = {
     setCardControlMode,
     getCardControlMode,
     isRemoteCardControlMode,
-    setRegistrationCardAccessMode,
-    canUseAnyRegistrationCard,
+    setAutomationCardAccessMode,
+    canUseAnyAutomationCard,
     getRemoteCardControlMessage,
     resolveCardMinCookieSizeBytes,
     resolveCardMinCookieSizeInputValue,

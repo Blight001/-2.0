@@ -399,7 +399,7 @@ class WebControlServer {
     }
 
     async _buildLoginPageHtml(request = null, runtimeContext = null) {
-        const title = '卡密验证 - AI账号注册器 2.0';
+        const title = '卡密验证 - AI 自动化工具 2.0';
         const runtime = runtimeContext || this._resolveRequestRuntimeContext(request);
         const bootstrapScript = this._buildRuntimeBootstrapScript(runtime);
         return `<!DOCTYPE html>

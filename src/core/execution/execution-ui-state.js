@@ -1,15 +1,15 @@
 const { getRegistrationTcpRuntimeInfo } = require('./tcp-control');
 
-const ALLOWED_REGISTER_CARD_NAMES = new Set([
-    '国际版即梦注册卡片'
+const ALLOWED_AUTOMATION_CARD_NAMES = new Set([
+    '国际版即梦自动化卡片'
 ]);
 
-function normalizeRegistrationCardMode(cardMode = 'register') {
-    return cardMode === 'test' || cardMode === 'haikaBind' ? cardMode : 'register';
+function normalizeAutomationCardMode(cardMode = 'automation') {
+    return cardMode === 'test' || cardMode === 'haikaBind' ? cardMode : 'automation';
 }
 
-function getCurrentCardNameForMode(app, cardMode = 'register') {
-    const mode = normalizeRegistrationCardMode(cardMode);
+function getCurrentCardNameForMode(app, cardMode = 'automation') {
+    const mode = normalizeAutomationCardMode(cardMode);
 
     if (mode === 'test') {
         return String(app?.currentTestCardName || app?.currentTestCard || '').trim();
@@ -22,41 +22,41 @@ function getCurrentCardNameForMode(app, cardMode = 'register') {
     return String(app?.currentCardName || app?.currentCard || '').trim();
 }
 
-function isAllowedRegistrationCardName(cardName) {
+function isAllowedAutomationCardName(cardName) {
     const normalized = String(cardName || '').trim();
     if (!normalized) {
         return false;
     }
 
-    return ALLOWED_REGISTER_CARD_NAMES.has(normalized);
+    return ALLOWED_AUTOMATION_CARD_NAMES.has(normalized);
 }
 
-function isUnlimitedRegistrationCardAccess(appOrOptions = {}) {
+function isUnlimitedAutomationCardAccess(appOrOptions = {}) {
     const source = appOrOptions && typeof appOrOptions === 'object' ? appOrOptions : {};
     return source?.licenseUsageSnapshot?.unlimited === true
         || source?.currentCardUsageSnapshot?.unlimited === true
         || source?.usageInfo?.unlimited === true
-        || source?.unlimitedRegistrationCardAccess === true
-        || source?.allowAllRegistrationCards === true;
+        || source?.unlimitedAutomationCardAccess === true
+        || source?.allowAllAutomationCards === true;
 }
 
-function filterRegistrationCards(cards = [], cardMode = 'register', appOrOptions = {}) {
-    const mode = normalizeRegistrationCardMode(cardMode);
+function filterAutomationCards(cards = [], cardMode = 'automation', appOrOptions = {}) {
+    const mode = normalizeAutomationCardMode(cardMode);
     const list = Array.isArray(cards) ? cards : [];
 
-    if (mode !== 'register') {
+    if (mode !== 'automation') {
         return list;
     }
 
-    if (isUnlimitedRegistrationCardAccess(appOrOptions)) {
+    if (isUnlimitedAutomationCardAccess(appOrOptions)) {
         return list;
     }
 
-    return list.filter((card) => isAllowedRegistrationCardName(card?.name));
+    return list.filter((card) => isAllowedAutomationCardName(card?.name));
 }
 
-async function loadRegistrationCardsForMode(app, cardMode = 'register', options = {}) {
-    const mode = normalizeRegistrationCardMode(cardMode);
+async function loadAutomationCardsForMode(app, cardMode = 'automation', options = {}) {
+    const mode = normalizeAutomationCardMode(cardMode);
     const loadOptions = options && typeof options === 'object' ? options : {};
 
     if (!app?.cardManager) {
@@ -72,15 +72,15 @@ async function loadRegistrationCardsForMode(app, cardMode = 'register', options 
     }
 
     const cards = await app.cardManager.loadCards(loadOptions);
-    return filterRegistrationCards(cards, mode, app);
+    return filterAutomationCards(cards, mode, app);
 }
 
-async function buildRegistrationUiState(app, options = {}) {
+async function buildAutomationUiState(app, options = {}) {
     const source = options && typeof options === 'object' ? options : {};
-    const cardMode = normalizeRegistrationCardMode(source.card_type || source.cardType || source.cardMode || 'register');
-    const cards = await loadRegistrationCardsForMode(app, cardMode, source);
-    const unlimitedCardAccess = isUnlimitedRegistrationCardAccess(app);
-    const currentCardName = cardMode === 'register' && !unlimitedCardAccess && !isAllowedRegistrationCardName(getCurrentCardNameForMode(app, cardMode))
+    const cardMode = normalizeAutomationCardMode(source.card_type || source.cardType || source.cardMode || 'automation');
+    const cards = await loadAutomationCardsForMode(app, cardMode, source);
+    const unlimitedCardAccess = isUnlimitedAutomationCardAccess(app);
+    const currentCardName = cardMode === 'automation' && !unlimitedCardAccess && !isAllowedAutomationCardName(getCurrentCardNameForMode(app, cardMode))
         ? String(cards[0]?.name || '').trim()
         : getCurrentCardNameForMode(app, cardMode);
     const tcpInfo = await getRegistrationTcpRuntimeInfo(app);
@@ -146,12 +146,12 @@ async function buildRegistrationUiState(app, options = {}) {
 }
 
 module.exports = {
-    ALLOWED_REGISTER_CARD_NAMES,
-    filterRegistrationCards,
-    normalizeRegistrationCardMode,
+    ALLOWED_AUTOMATION_CARD_NAMES,
+    filterAutomationCards,
+    normalizeAutomationCardMode,
     getCurrentCardNameForMode,
-    isAllowedRegistrationCardName,
-    isUnlimitedRegistrationCardAccess,
-    loadRegistrationCardsForMode,
-    buildRegistrationUiState
+    isAllowedAutomationCardName,
+    isUnlimitedAutomationCardAccess,
+    loadAutomationCardsForMode,
+    buildAutomationUiState
 };

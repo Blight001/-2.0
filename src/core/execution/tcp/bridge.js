@@ -49,7 +49,7 @@ async function _processRegistrationTcpIncomingPacket(app, socket, packet) {
     try {
         socket.write(responseBuffer);
     } catch (error) {
-        app?.logger?.warning?.(`注册器命令响应发送失败: ${error.message}`);
+        app?.logger?.warning?.(`自动化命令响应发送失败: ${error.message}`);
     }
 }
 

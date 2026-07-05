@@ -1,7 +1,7 @@
 {
-  "name": "ai-account-register-electron",
+  "name": "ai-automation-electron",
   "version": "2.9.0",
-  "description": "AI账号注册器 2.0 - Electron版本",
+  "description": "AI 自动化工具 2.0 - Electron版本",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
@@ -19,9 +19,9 @@
   "keywords": [
     "electron",
     "automation",
-    "account-registration"
+    "task-automation"
   ],
-  "author": "AI账号注册器团队",
+  "author": "AI 自动化工具团队",
   "license": "MIT",
   "devDependencies": {
     "electron": "^25.0.0",
@@ -44,8 +44,8 @@
     "universalify": "^2.0.1"
   },
   "build": {
-    "appId": "com.ai.account.register",
-    "productName": "AI账号注册器",
+    "appId": "com.ai.automation.tool",
+    "productName": "AI 自动化工具",
     "directories": {
       "output": "dist"
     },
@@ -115,7 +115,7 @@
       "installerHeaderIcon": "src/ui/assets/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "AI账号注册器 2.0",
+      "shortcutName": "AI 自动化工具 2.0",
       "language": "2052",
       "artifactName": "${productName} Setup ${version}.${ext}",
       "deleteAppDataOnUninstall": false,

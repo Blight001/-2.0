@@ -123,7 +123,7 @@ module.exports = function createRendererWiringIpc(deps) {
             : 0;
         const completedCount = Number.isFinite(Number(payload.completedCount)) ? Number(payload.completedCount) : 0;
         const totalCount = Number.isFinite(Number(payload.totalCount)) ? Number(payload.totalCount) : 0;
-        const taskLabel = payload.taskLabel || '定时注册批次';
+        const taskLabel = payload.taskLabel || '定时执行批次';
         const taskNumber = payload.taskNumber !== undefined
             ? String(payload.taskNumber)
             : (totalCount > 0 ? `${completedCount}/${totalCount}` : '');
@@ -221,7 +221,7 @@ module.exports = function createRendererWiringIpc(deps) {
                 cardManager.setCurrentCard(cardName);
                 state.currentCard = cardName;
                 loadCookies();
-            }, 'register');
+            }, 'automation');
         });
 
         ipcRenderer.on('task-progress', (_event, { taskId, progress, message, taskLabel, taskNumber, taskType, parentTaskId, parentTaskLabel, isGroupParent }) => {
@@ -360,7 +360,7 @@ module.exports = function createRendererWiringIpc(deps) {
         ipcRenderer.on('registration-success', (_event, payload = {}) => {
             const email = String(payload.email || '').trim();
             const points = payload.points;
-            logger.info(`注册成功: ${email || '未知邮箱'} / ${points ?? '未知积分'}`);
+            logger.info(`执行成功: ${email || '未知邮箱'} / ${points ?? '未知积分'}`);
         });
 
         ipcRenderer.on('license-usage-updated', (_event, payload = {}) => {
@@ -379,7 +379,7 @@ module.exports = function createRendererWiringIpc(deps) {
 
         ipcRenderer.on('registration-error', (_event, payload = {}) => {
             const error = String(payload.error || '').trim();
-            logger.error(`注册失败: ${error || '未知错误'}`);
+            logger.error(`执行失败: ${error || '未知错误'}`);
         });
 
         ipcRenderer.on('registration-cycle-status', (_event, payload) => {

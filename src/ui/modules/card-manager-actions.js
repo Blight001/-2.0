@@ -117,7 +117,7 @@ module.exports = function createCardManagerActions(deps = {}) {
         };
 
         const deferredLoadConfigs = [
-            { listElement: elements.cardList, cardMode: 'register', loadFn: loadCardsFn },
+            { listElement: elements.cardList, cardMode: 'automation', loadFn: loadCardsFn },
             { listElement: elements.testCardList, cardMode: 'test', loadFn: loadTestCardsFn },
             { listElement: elements.apiCardList, cardMode: 'api', loadFn: loadApiCardsFn },
             { listElement: elements.modelCardList, cardMode: 'model', loadFn: loadModelCardsFn },
@@ -136,7 +136,7 @@ module.exports = function createCardManagerActions(deps = {}) {
                 }
 
                 if (typeof isRemoteCardControlMode === 'function' && isRemoteCardControlMode()) {
-                    showMessage(getRemoteCardControlMessage(placeholder.dataset.cardLoadMode || 'register'), 'info');
+                    showMessage(getRemoteCardControlMessage(placeholder.dataset.cardLoadMode || 'automation'), 'info');
                     return;
                 }
 
@@ -147,11 +147,11 @@ module.exports = function createCardManagerActions(deps = {}) {
         if (elements.addCardBtn) {
             elements.addCardBtn.addEventListener('click', async () => {
                 if (typeof isRemoteCardControlMode === 'function' && isRemoteCardControlMode()) {
-                    showMessage(getRemoteCardControlMessage('register'), 'info');
+                    showMessage(getRemoteCardControlMessage('automation'), 'info');
                     return;
                 }
 
-                const result = await openCardEditorWindow(null, 'register');
+                const result = await openCardEditorWindow(null, 'automation');
                 if (result && result.success === false) {
                     showMessage(`打开编辑窗口失败: ${result.error || '未知错误'}`, 'error');
                 }
@@ -160,27 +160,27 @@ module.exports = function createCardManagerActions(deps = {}) {
         if (elements.refreshCardBtn) {
             elements.refreshCardBtn.addEventListener('click', async () => {
                 if (typeof isRemoteCardControlMode === 'function' && isRemoteCardControlMode()) {
-                    showMessage(getRemoteCardControlMessage('register'), 'info');
+                    showMessage(getRemoteCardControlMessage('automation'), 'info');
                     return;
                 }
 
                 try {
                     await loadCardsFn({ forceReload: true });
-                    showMessage('注册卡片列表已刷新', 'success');
+                    showMessage('自动化卡片列表已刷新', 'success');
                 } catch (error) {
-                    showMessage(`刷新注册卡片列表失败: ${error.message}`, 'error');
+                    showMessage(`刷新自动化卡片列表失败: ${error.message}`, 'error');
                 }
             });
         }
         if (elements.importCardBtn) {
-            elements.importCardBtn.addEventListener('click', () => importCard(showMessage, loadCardsFn, 'register', loadTestCardsFn, loadApiCardsFn, loadModelCardsFn, loadHaikaBindCardsFn));
+            elements.importCardBtn.addEventListener('click', () => importCard(showMessage, loadCardsFn, 'automation', loadTestCardsFn, loadApiCardsFn, loadModelCardsFn, loadHaikaBindCardsFn));
         }
         if (elements.editCardBtn) {
             elements.editCardBtn.addEventListener('click', async () => {
-                await ensureCardModeLoadedForAction('register', loadCardsFn, loadTestCardsFn, loadApiCardsFn, loadModelCardsFn, loadHaikaBindCardsFn);
-                const card = await editSelectedCard(showMessage, getCardNameByMode('register'), 'register');
+                await ensureCardModeLoadedForAction('automation', loadCardsFn, loadTestCardsFn, loadApiCardsFn, loadModelCardsFn, loadHaikaBindCardsFn);
+                const card = await editSelectedCard(showMessage, getCardNameByMode('automation'), 'automation');
                 if (card) {
-                    const result = await openCardEditorWindow(card, 'register');
+                    const result = await openCardEditorWindow(card, 'automation');
                     if (result && result.success === false) {
                         showMessage(`打开编辑窗口失败: ${result.error || '未知错误'}`, 'error');
                     }
@@ -189,8 +189,8 @@ module.exports = function createCardManagerActions(deps = {}) {
         }
         if (elements.deleteCardBtn) {
             elements.deleteCardBtn.addEventListener('click', async () => {
-                await ensureCardModeLoadedForAction('register', loadCardsFn, loadTestCardsFn, loadApiCardsFn, loadModelCardsFn, loadHaikaBindCardsFn);
-                deleteSelectedCard(elements, showMessage, loadCardsFn, getCardNameByMode('register'), (name) => { setCardNameByMode('register', name); }, 'register', loadTestCardsFn, loadApiCardsFn, loadModelCardsFn, loadHaikaBindCardsFn);
+                await ensureCardModeLoadedForAction('automation', loadCardsFn, loadTestCardsFn, loadApiCardsFn, loadModelCardsFn, loadHaikaBindCardsFn);
+                deleteSelectedCard(elements, showMessage, loadCardsFn, getCardNameByMode('automation'), (name) => { setCardNameByMode('automation', name); }, 'automation', loadTestCardsFn, loadApiCardsFn, loadModelCardsFn, loadHaikaBindCardsFn);
             });
         }
 
@@ -890,7 +890,7 @@ module.exports = function createCardManagerActions(deps = {}) {
             });
         }
         ipcRenderer.on(IPC_CHANNELS.cardEditorOpen, (_event, payload = {}) => {
-            showCardDialog(payload.cardData || null, elements, toggleCharsetField, payload.cardMode || 'register', payload.apiCardName || '');
+            showCardDialog(payload.cardData || null, elements, toggleCharsetField, payload.cardMode || 'automation', payload.apiCardName || '');
             if (elements.cardDialog) {
                 elements.cardDialog.style.display = 'flex';
             }

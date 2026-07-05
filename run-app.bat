@@ -10,7 +10,7 @@ set "REG_CONTROL_MQTT_ENABLED=1"
 set "ELECTRON_EXE=%~dp0node_modules\electron\dist\electron.exe"
 
 echo ========================================
-echo   AI Account Register 2.0 - Local App
+echo   AI Automation 2.0 - Local App
 echo ========================================
 echo.
 echo Mode: local desktop UI

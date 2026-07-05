@@ -1,7 +1,7 @@
 {
-  "name": "小云雀注册卡片",
+  "name": "小云雀自动化卡片",
   "website": "https://www.pippit.ai/zh-cn",
-  "description": "香蕉AI工具自动注册，使用标准步骤流程",
+  "description": "香蕉AI工具自动执行，使用标准步骤流程",
   "password": "",
   "points": 0,
   "steps": [
@@ -31,7 +31,7 @@
       "ui_fields_mode": "filled"
     },
     {
-      "name": "注册",
+      "name": "入口",
       "type": "click",
       "by": "css_selector",
       "selector": "span:has-text(Sign up')",

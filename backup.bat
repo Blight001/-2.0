@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 echo ===========================================
-echo    AI Account Register 2.0 - Code Backup Tool
+echo    AI Automation 2.0 - Code Backup Tool
 echo ===========================================
 echo.
 
@@ -59,8 +59,8 @@ xcopy "package.json" "%backup_dir%\" /Y /Q
 xcopy "package-lock.json" "%backup_dir%\" /Y /Q
 xcopy "README.md" "%backup_dir%\" /Y /Q
 
-REM 备份注册卡片配置
-echo [3/5] 备份注册卡片配置...
+REM 备份自动化卡片配置
+echo [3/5] 备份自动化卡片配置...
 mkdir "%backup_dir%\cards" 2>nul
 xcopy "cards\*.*" "%backup_dir%\cards\" /Y /Q /S
 
@@ -86,7 +86,7 @@ echo 备份内容包括：
 echo   ✓ 核心代码文件 (src/*)
 echo   ✓ UI界面文件 (src/ui/*)
 echo   ✓ 项目配置文件 (package.json等)
-echo   ✓ 注册卡片配置 (cards/*)
+echo   ✓ 自动化卡片配置 (cards/*)
 echo   ✓ Cookie数据 (cookies/*)
 echo   ✓ 构建脚本 (build.bat, start.bat, backup.bat)
 echo.

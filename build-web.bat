@@ -5,7 +5,7 @@ cd /d "%~dp0"
 chcp 65001 >nul
 
 echo ========================================
-echo   AI Account Register 2.0 - Web Build
+echo   AI Automation 2.0 - Web Build
 echo ========================================
 echo.
 echo Starting one-click traditional build...

@@ -1,7 +1,7 @@
 {
-  "name": "insmind注册卡片",
+  "name": "insmind自动化卡片",
   "website": "https://www.insmind.com/zh-cn/creation",
-  "description": "海螺可灵工具自动注册，使用标准步骤流程",
+  "description": "海螺可灵工具自动执行，使用标准步骤流程",
   "password": "",
   "points": 0,
   "steps": [
@@ -16,7 +16,7 @@
       "ui_fields_mode": "collapsed"
     },
     {
-      "name": "登录/注册",
+      "name": "点击登录入口",
       "type": "click",
       "by": "auto",
       "selector": "button:has-text(\"登录/注册\")",
@@ -56,7 +56,7 @@
       "ui_fields_mode": "all"
     },
     {
-      "name": "点击邮箱注册",
+      "name": "点击邮箱入口",
       "type": "click",
       "by": "css_selector",
       "timeout": 5000,

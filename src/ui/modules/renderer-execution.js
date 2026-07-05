@@ -1,11 +1,11 @@
 /**
- * 渲染层注册/运行控制模块。
+ * 渲染层执行/运行控制模块。
  *
- * 负责运行模式、注册控制、自动上传以及设备与上传配置读取。
+ * 负责运行模式、执行控制、自动上传以及设备与上传配置读取。
  */
 const { IPC_CHANNELS } = require('../../core/ipc/channels');
 
-module.exports = function createRendererRegistration(deps) {
+module.exports = function createRendererExecution(deps) {
     const state = deps;
     const {
         elements,
@@ -882,7 +882,7 @@ module.exports = function createRendererRegistration(deps) {
         async function getRegistrationUploadConfig(cardName = '') {
             const resolvedCardName = (cardName || cardManager.getCurrentCard() || '').trim();
             if (!resolvedCardName) {
-                logger.warning('自动上传已跳过：未选择注册卡片');
+                logger.warning('自动上传已跳过：未选择自动化卡片');
                 return null;
             }
 
@@ -1050,7 +1050,7 @@ module.exports = function createRendererRegistration(deps) {
                     today_used: 2,
                     today_score: null,
                     last_used_at: '',
-                    note: `注册器自动上传${taskId ? `(${taskId})` : ''}`,
+                    note: `自动化工具自动上传${taskId ? `(${taskId})` : ''}`,
                     card_name: cardName,
                     target_score_scope: targetScoreScope || 'all',
                     target_score_types: Array.isArray(targetScoreTypes) ? targetScoreTypes : [],
@@ -1087,7 +1087,7 @@ module.exports = function createRendererRegistration(deps) {
             }
 
             if (!selectedCardName) {
-                utils.showMessage('请先选择一个注册卡片', 'error', elements);
+                utils.showMessage('请先选择一个自动化卡片', 'error', elements);
                 return;
             }
 
@@ -1119,10 +1119,10 @@ module.exports = function createRendererRegistration(deps) {
                 elements.startBtn.disabled = true;
                 elements.stopBtn.disabled = false;
                 elements.statusLabel.textContent = config.runMode === 2
-                    ? `定时注册进行中... (单次数量: ${timedRegistrationCount}, 循环次数: ${timedRegistrationCycleCount}, 并发: ${config.concurrentCount}, 间隔: ${timedRegistrationDelaySeconds}s, 开始: ${timedStartModeText})`
+                    ? `定时执行进行中... (单次数量: ${timedRegistrationCount}, 循环次数: ${timedRegistrationCycleCount}, 并发: ${config.concurrentCount}, 间隔: ${timedRegistrationDelaySeconds}s, 开始: ${timedStartModeText})`
                     : config.runMode === 1
-                        ? `循环注册进行中... (并发: ${config.concurrentCount})`
-                        : `注册进行中... (并发: ${config.concurrentCount})`;
+                        ? `循环执行进行中... (并发: ${config.concurrentCount})`
+                        : `执行进行中... (并发: ${config.concurrentCount})`;
 
                 const result = await ipcRenderer.invoke('start-registration', config);
 
@@ -1131,12 +1131,12 @@ module.exports = function createRendererRegistration(deps) {
                 }
 
                 if (!result.success) {
-                    utils.showMessage(`开始注册失败: ${result.error}`, 'error', elements);
+                    utils.showMessage(`开始执行失败: ${result.error}`, 'error', elements);
                     elements.startBtn.disabled = false;
                     elements.stopBtn.disabled = true;
                 }
             } catch (error) {
-                utils.showMessage(`开始注册异常: ${error.message}`, 'error', elements);
+                utils.showMessage(`开始执行异常: ${error.message}`, 'error', elements);
                 elements.startBtn.disabled = false;
                 elements.stopBtn.disabled = true;
             }
@@ -1151,12 +1151,12 @@ module.exports = function createRendererRegistration(deps) {
             try {
                 const result = await ipcRenderer.invoke('stop-registration');
                 if (result.success) {
-                    utils.logToConsole('注册已停止', 'info');
+                    utils.logToConsole('执行已停止', 'info');
                 } else {
-                    utils.showMessage(`停止注册失败: ${result.error}`, 'error', elements);
+                    utils.showMessage(`停止执行失败: ${result.error}`, 'error', elements);
                 }
             } catch (error) {
-                utils.showMessage(`停止注册异常: ${error.message}`, 'error', elements);
+                utils.showMessage(`停止执行异常: ${error.message}`, 'error', elements);
             }
         }
 
@@ -1179,7 +1179,7 @@ module.exports = function createRendererRegistration(deps) {
                 if (!customTestAccountBrowserOpen) {
                     const selectedCardName = String(state.currentCard || cardManager.getCurrentCard() || '').trim();
                     if (!selectedCardName) {
-                        utils.showMessage('请先选择一个注册卡片', 'warning', elements);
+                        utils.showMessage('请先选择一个自动化卡片', 'warning', elements);
                         return;
                     }
                     const preset = getCustomTestAccountPreset();

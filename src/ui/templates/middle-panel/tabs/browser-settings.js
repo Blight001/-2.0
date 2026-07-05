@@ -6,7 +6,7 @@ module.exports = function renderBrowserSettingsTab() {
                                     <div class="panel-header browser-settings-header">
                                         <div>
                                             <h3>浏览器设置</h3>
-                                            <p class="panel-subtitle">统一管理注册、测试、海卡绑定和代理相关的浏览器参数。</p>
+                                            <p class="panel-subtitle">统一管理执行、测试、海卡绑定和代理相关的浏览器参数。</p>
                                         </div>
                                     </div>
                                     <div class="settings-content browser-settings-content">

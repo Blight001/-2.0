@@ -1,4 +1,4 @@
-const RegistrationThread = require('../registration-thread');
+const ExecutionThread = require('../execution-thread');
 const StepSynchronizer = require('../infra/step-synchronizer');
 const { IPC_CHANNELS } = require('../ipc/channels');
 const {
@@ -11,7 +11,7 @@ module.exports = {
     async startRegistration(config) {
         try {
             config = this._resolveRegistrationStartConfig(config);
-            this.logger.info?.(`注册器默认执行方案已参与启动: ${JSON.stringify(summarizeRegistrationDefaultExecutionPlan(this.registrationDefaultExecutionPlan || {}))}`);
+            this.logger.info?.(`自动化默认执行方案已参与启动: ${JSON.stringify(summarizeRegistrationDefaultExecutionPlan(this.automationDefaultExecutionPlan || {}))}`);
             this.logger.info?.(`注册启动最终配置: ${JSON.stringify({
                 runMode: config.runMode,
                 concurrentCount: config.concurrentCount,
@@ -32,7 +32,7 @@ module.exports = {
                 directCardConfig = cloneRegistrationCardConfig(await this.cardManager.getCard(runtimeDefaultCardName));
             }
             if (!directCardConfig && !this.currentCard) {
-                return { success: false, error: '请先选择一个注册卡片' };
+                return { success: false, error: '请先选择一个自动化卡片' };
             }
 
             this.activeRegistrationCardConfig = directCardConfig;
@@ -63,7 +63,7 @@ module.exports = {
                 cardData: this.activeRegistrationCardConfig ? cloneRegistrationCardConfig(this.activeRegistrationCardConfig) : undefined,
                 cardName: this.activeRegistrationCardName
             };
-            this.registrationStopRequested = false;
+            this.automationStopRequested = false;
             this.runMode = Number.isFinite(Number(config.runMode)) ? Number(config.runMode) : 0;
             this.concurrentCount = toPositiveInteger(config.concurrentCount, 1, 1, 99);
             this.syncEnabled = config.syncEnabled === true;
@@ -86,7 +86,7 @@ module.exports = {
             const timedSummary = this.isTimedRunning && this.timedRegistrationState
                 ? `, 单次数量: ${this.timedRegistrationState.totalCount}, 最大循环: ${this.timedRegistrationState.cycleLimit}, 间隔: ${this._formatTimedRegistrationDuration(this.timedRegistrationState.delayMs)}, 开始方式: ${this.timedRegistrationState.startMode === 'delayed' ? '延时开始' : '立即执行'}`
                 : '';
-            this.logger.info(`开始注册 - 模式: ${modeLabel}, 并发数: ${this.concurrentCount}, 同步: ${this.syncEnabled}, 自动恢复上限: ${this.maxProxyRecoveryAttempts}${timedSummary}`);
+            this.logger.info(`开始执行 - 模式: ${modeLabel}, 并发数: ${this.concurrentCount}, 同步: ${this.syncEnabled}, 自动恢复上限: ${this.maxProxyRecoveryAttempts}${timedSummary}`);
 
             if (this.syncEnabled && this.concurrentCount > 1) {
                 this.stepSynchronizer = new StepSynchronizer(this.concurrentCount, this.logger);
@@ -114,13 +114,13 @@ module.exports = {
                 this.logger.info(`启动初始注册任务: ${initialLaunchCount} 个`);
 
                 for (let i = 0; i < initialLaunchCount; i++) {
-                    if (this.registrationStopRequested) {
+                    if (this.automationStopRequested) {
                         break;
                     }
 
                     const startResult = await this.startSingleRegistrationTask({
                         trigger: 'manual-start',
-                        taskType: 'registration'
+                        taskType: 'automation'
                     });
 
                     if (!startResult || startResult.success === false) {
@@ -139,14 +139,14 @@ module.exports = {
                 this.timedRegistrationSessionId = null;
                 this.isTimedRunning = false;
             }
-            this.logger.error(`开始注册失败: ${error.message}`);
+            this.logger.error(`开始执行失败: ${error.message}`);
             return { success: false, error: error.message };
         }
     },
 
     async startSingleRegistrationTask(overrides = {}) {
-        const taskType = overrides.taskType || 'registration';
-        if (taskType === 'registration' && (this.registrationStopRequested || (this.timedRegistrationState && this.timedRegistrationState.stopRequested))) {
+        const taskType = overrides.taskType || 'automation';
+        if (taskType === 'automation' && (this.automationStopRequested || (this.timedRegistrationState && this.timedRegistrationState.stopRequested))) {
             return { success: false, error: '注册已停止' };
         }
 
@@ -169,13 +169,13 @@ module.exports = {
             cardConfig.name = effectiveCardName;
         }
 
-        if (taskType === 'registration' && (this.registrationStopRequested || (this.timedRegistrationState && this.timedRegistrationState.stopRequested))) {
+        if (taskType === 'automation' && (this.automationStopRequested || (this.timedRegistrationState && this.timedRegistrationState.stopRequested))) {
             return { success: false, error: '注册已停止' };
         }
 
         let browserType = overrides.browserType || this.currentBrowserType;
         const browserSettings = overrides.browserSettings || this.browserSettings;
-        if (taskType === 'registration' && String(browserType || '').trim().toLowerCase() === 'electron') {
+        if (taskType === 'automation' && String(browserType || '').trim().toLowerCase() === 'electron') {
             browserType = 'edge';
             if (browserSettings && typeof browserSettings === 'object') {
                 browserSettings.browser_type = browserType;
@@ -185,10 +185,10 @@ module.exports = {
             }
             this.logger.info?.('注册任务检测到 Electron 浏览器，已切换到系统 Edge 以提高验证码兼容性');
         }
-        if (taskType === 'registration' && browserSettings && typeof browserSettings === 'object' && browserSettings.headless === undefined) {
+        if (taskType === 'automation' && browserSettings && typeof browserSettings === 'object' && browserSettings.headless === undefined) {
             browserSettings.headless = String(browserType || '').trim().toLowerCase() === 'electron' ? false : true;
         }
-        if (taskType === 'registration' && browserSettings && typeof browserSettings === 'object') {
+        if (taskType === 'automation' && browserSettings && typeof browserSettings === 'object') {
             browserSettings.headless = false;
             browserSettings.headlessMode = false;
             browserSettings.block_images_videos = false;
@@ -198,7 +198,7 @@ module.exports = {
             browserSettings.captcha_compatibility_mode = true;
             browserSettings.captchaCompatibilityMode = true;
         }
-        const hasLimitedLicenseUsage = taskType === 'registration' && this.licenseUsageLocked === true;
+        const hasLimitedLicenseUsage = taskType === 'automation' && this.licenseUsageLocked === true;
         if (hasLimitedLicenseUsage) {
             const normalizedBrowserType = String(browserType || '').trim().toLowerCase();
             if (!normalizedBrowserType || normalizedBrowserType === 'electron') {
@@ -215,7 +215,7 @@ module.exports = {
                 browserSettings.captchaCompatibilityMode = true;
             }
         }
-        if (taskType === 'registration' && typeof this.isLicenseUsageExhausted === 'function') {
+        if (taskType === 'automation' && typeof this.isLicenseUsageExhausted === 'function') {
             const usageCheck = await this.isLicenseUsageExhausted(overrides.cardKey || this.currentCardKey || this.currentCardValidationSnapshot?.key || '');
             if (usageCheck?.exhausted === true) {
                 return { success: false, error: '卡密次数已用完，请重新验证或更换卡密' };
@@ -603,18 +603,18 @@ module.exports = {
             this.runningTasks.delete(taskId);
         }
 
-        if (this.registrationStopRequested) {
+        if (this.automationStopRequested) {
             await this.updateStats();
             return;
         }
 
         if (result.success) {
-            const successToastMessage = `注册成功!\n邮箱: ${result.email}\n积分: ${result.points}`;
+            const successToastMessage = `执行成功!\n邮箱: ${result.email}\n积分: ${result.points}`;
             if (this.mainWindow) {
                 this.mainWindow.webContents.send('task-finished', {
                     taskId,
                     taskLabel: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || '注册任务',
-                    taskType: 'registration'
+                    taskType: 'automation'
                 });
                 this.mainWindow.webContents.send('app-toast', {
                     message: successToastMessage,
@@ -632,51 +632,51 @@ module.exports = {
                         cookiesSaved: result.cookiesSaved === true
                     });
                     if (tcpResult && tcpResult.ok === false) {
-                        this.logger.warning(`注册成功通知未发送: ${tcpResult.message || '未知原因'}`);
+                        this.logger.warning(`执行成功通知未发送: ${tcpResult.message || '未知原因'}`);
                     }
                 } catch (error) {
-                    this.logger.warning(`注册成功通知发送失败: ${error.message}`);
+                    this.logger.warning(`执行成功通知发送失败: ${error.message}`);
                 }
             }
             if (this.mainWindow) {
-                this.mainWindow.webContents.send('registration-result', {
+                this.mainWindow.webContents.send('automation-result', {
                     taskId,
                     result
                 });
             }
-            const registrationCardKey = String(
+            const automationCardKey = String(
                 this.currentCardKey
                 || this.currentCardValidationSnapshot?.key
                 || (typeof this.readSavedCardKey === 'function' ? await this.readSavedCardKey() : '')
                 || ''
             ).trim();
-            if (registrationCardKey && typeof this.consumeSavedCardUsage === 'function') {
+            if (automationCardKey && typeof this.consumeSavedCardUsage === 'function') {
                 try {
-                    const usageResult = await this.consumeSavedCardUsage(registrationCardKey, 1, {
-                        source: 'registration-success',
+                    const usageResult = await this.consumeSavedCardUsage(automationCardKey, 1, {
+                        source: 'automation-success',
                         cardName: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || ''
                     });
                     if (usageResult?.cache?.usageInfo) {
                         this.currentCardUsageSnapshot = usageResult.cache.usageInfo;
                         this.licenseUsageLocked = usageResult.cache.usageInfo.locked === true;
-                        if (this.currentCardValidationSnapshot?.key === registrationCardKey) {
+                        if (this.currentCardValidationSnapshot?.key === automationCardKey) {
                             this.currentCardValidationSnapshot = {
                                 ...this.currentCardValidationSnapshot,
                                 usageInfo: usageResult.cache.usageInfo
                             };
                         }
                         this.logger.info(
-                            `注册成功后刷新剩余次数: ${usageResult.cache.usageInfo.remainingText || '0'} / ${usageResult.cache.usageInfo.totalText || '未知'}`
+                            `执行成功后刷新剩余次数: ${usageResult.cache.usageInfo.remainingText || '0'} / ${usageResult.cache.usageInfo.totalText || '未知'}`
                         );
                         if (this.mainWindow) {
                             this.mainWindow.webContents.send('license-usage-updated', {
-                                cardKey: registrationCardKey,
+                                cardKey: automationCardKey,
                                 usageInfo: usageResult.cache.usageInfo
                             });
                         }
                     }
                 } catch (usageError) {
-                    this.logger.warning(`注册成功后扣减卡密次数失败: ${usageError.message}`);
+                    this.logger.warning(`执行成功后扣减卡密次数失败: ${usageError.message}`);
                 }
             }
 
@@ -690,7 +690,7 @@ module.exports = {
                     taskId,
                     error: result.error || result.message || '注册任务失败',
                     taskLabel: result.cardName || this.activeRegistrationCardName || this.currentCardName || this.currentCard || '注册任务',
-                    taskType: 'registration',
+                    taskType: 'automation',
                     statusKey: 'error'
                 });
             }
@@ -706,8 +706,8 @@ module.exports = {
                 if (!proxyRecovered) {
                     this.isLoopRunning = false;
                     if (this.mainWindow && !this.isLoopRunning) {
-                        const failureToastMessage = `注册失败: ${this.getErrorText(result.error || '注册任务失败')}`;
-                        this.mainWindow.webContents.send('registration-error', { error: result.error });
+                        const failureToastMessage = `执行失败: ${this.getErrorText(result.error || '注册任务失败')}`;
+                        this.mainWindow.webContents.send('automation-error', { error: result.error });
                         this.mainWindow.webContents.send('app-toast', {
                             message: failureToastMessage,
                             type: 'error'
@@ -722,8 +722,8 @@ module.exports = {
                 }
 
                 if (!proxyRecovered && this.mainWindow && !this.isLoopRunning) {
-                    const failureToastMessage = `注册失败: ${this.getErrorText(result.error || '注册任务失败')}`;
-                    this.mainWindow.webContents.send('registration-error', { error: result.error });
+                    const failureToastMessage = `执行失败: ${this.getErrorText(result.error || '注册任务失败')}`;
+                    this.mainWindow.webContents.send('automation-error', { error: result.error });
                     this.mainWindow.webContents.send('app-toast', {
                         message: failureToastMessage,
                         type: 'error'
@@ -737,8 +737,8 @@ module.exports = {
                         return;
                     }
                 } else if (this.mainWindow && !this.isLoopRunning) {
-                    const failureToastMessage = `注册失败: ${this.getErrorText(result.error || '注册任务失败')}`;
-                    this.mainWindow.webContents.send('registration-error', { error: result.error });
+                    const failureToastMessage = `执行失败: ${this.getErrorText(result.error || '注册任务失败')}`;
+                    this.mainWindow.webContents.send('automation-error', { error: result.error });
                     this.mainWindow.webContents.send('app-toast', {
                         message: failureToastMessage,
                         type: 'error'
@@ -797,7 +797,7 @@ module.exports = {
             this.mainWindow.webContents.send('task-error', { taskId, error: errorText });
         }
 
-        if (this.registrationStopRequested) {
+        if (this.automationStopRequested) {
             this.updateStats().catch(updateError => {
                 this.logger.error(`更新统计失败: ${updateError.message}`);
             });
@@ -813,8 +813,8 @@ module.exports = {
             if (!this._isTimedRegistrationSessionActive()) {
                 this.isLoopRunning = false;
                 if (this.mainWindow) {
-                    const failureToastMessage = `注册失败: ${errorText}`;
-                    this.mainWindow.webContents.send('registration-error', { error: errorText });
+                    const failureToastMessage = `执行失败: ${errorText}`;
+                    this.mainWindow.webContents.send('automation-error', { error: errorText });
                     this.mainWindow.webContents.send('app-toast', {
                         message: failureToastMessage,
                         type: 'error'
@@ -832,8 +832,8 @@ module.exports = {
 
         this.recoverFromProxyError(taskId, error).then(async (recovered) => {
             if (!recovered && this.mainWindow && !this.isLoopRunning) {
-                const failureToastMessage = `注册失败: ${errorText}`;
-                this.mainWindow.webContents.send('registration-error', { error });
+                const failureToastMessage = `执行失败: ${errorText}`;
+                this.mainWindow.webContents.send('automation-error', { error });
                 this.mainWindow.webContents.send('app-toast', {
                     message: failureToastMessage,
                     type: 'error'
@@ -851,8 +851,8 @@ module.exports = {
         }).catch(async (recoverError) => {
             this.logger.error(`处理任务 ${taskId} 失败时发生异常: ${recoverError.message}`);
             if (this.mainWindow && !this.isLoopRunning) {
-                const failureToastMessage = `注册失败: ${errorText}`;
-                this.mainWindow.webContents.send('registration-error', { error });
+                const failureToastMessage = `执行失败: ${errorText}`;
+                this.mainWindow.webContents.send('automation-error', { error });
                 this.mainWindow.webContents.send('app-toast', {
                     message: failureToastMessage,
                     type: 'error'
@@ -875,7 +875,7 @@ module.exports = {
             closeBrowsers = true
         } = options;
 
-        this.registrationStopRequested = true;
+        this.automationStopRequested = true;
         this.isLoopRunning = false;
         this.isTimedRunning = false;
         this.proxyRecoveryState.active = false;
@@ -897,7 +897,7 @@ module.exports = {
 
         for (const [taskId, task] of this.runningTasks) {
             task.stop('注册任务已停止');
-            this.logger.info(`停止注册任务: ${taskId}`);
+            this.logger.info(`停止执行任务: ${taskId}`);
         }
 
         this.runningTasks.clear();
@@ -915,7 +915,7 @@ module.exports = {
 
         const browserCount = this.browserManager.getBrowserCount();
         if (browserCount > 0) {
-            this.logger.warning(`停止注册后仍有 ${browserCount} 个浏览器实例未关闭`);
+            this.logger.warning(`停止执行后仍有 ${browserCount} 个浏览器实例未关闭`);
             await this.browserManager.closeAll();
             await new Promise(resolve => setTimeout(resolve, 2000));
             const finalCount = this.browserManager.getBrowserCount();

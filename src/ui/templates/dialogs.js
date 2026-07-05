@@ -3,7 +3,7 @@ module.exports = function renderDialogs() {
         <div id="card-dialog" class="dialog-overlay" style="display: none;">
             <div class="dialog">
                 <div class="dialog-header">
-                    <h3 id="dialog-title">添加注册卡片</h3>
+                    <h3 id="dialog-title">添加自动化卡片</h3>
                     <button id="close-dialog-btn" class="close-btn">&times;</button>
                 </div>
                 <div class="dialog-body">
@@ -32,7 +32,7 @@ module.exports = function renderDialogs() {
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="card-description">描述:</label>
-                                                        <textarea id="card-description" rows="3" placeholder="即梦 AI工具自动注册，使用标准步骤流程"></textarea>
+                                                        <textarea id="card-description" rows="3" placeholder="即梦 AI工具自动执行，使用标准步骤流程"></textarea>
                                                     </div>
                                                     <div class="form-group" style="display: none;">
                                                         <label for="card-password">密码:</label>
@@ -103,11 +103,11 @@ module.exports = function renderDialogs() {
                                                     </div>
                                                     <div class="card-step-progress-panel">
                                                         <div class="card-step-progress-panel__header">
-                                                            <div class="card-step-progress-panel__title">注册步骤进度</div>
+                                                            <div class="card-step-progress-panel__title">自动化步骤进度</div>
                                                             <div id="card-step-progress-summary" class="card-step-progress-panel__summary">等待调试开始</div>
                                                         </div>
                                                         <div id="card-step-progress-list" class="card-step-progress-list" aria-live="polite">
-                                                            <!-- 注册步骤进度将在这里动态生成 -->
+                                                            <!-- 自动化步骤进度将在这里动态生成 -->
                                                         </div>
                                                     </div>
                                                 </div>
@@ -151,17 +151,17 @@ module.exports = function renderDialogs() {
                             </form>
                         </div>
 
-                        <!-- 右侧：注册步骤 / 弹窗规则 -->
+                        <!-- 右侧：自动化步骤 / 弹窗规则 -->
                         <div class="card-right-panel">
                             <div class="card-right-panel-tabs" role="tablist" aria-label="右侧栏目切换">
-                                <button id="card-right-panel-steps-tab-btn" class="card-right-panel-tab-header active" type="button" data-tab="card-right-panel-steps-tab" role="tab" aria-selected="true">注册步骤</button>
+                                <button id="card-right-panel-steps-tab-btn" class="card-right-panel-tab-header active" type="button" data-tab="card-right-panel-steps-tab" role="tab" aria-selected="true">自动化步骤</button>
                                 <button id="card-right-panel-popups-tab-btn" class="card-right-panel-tab-header" type="button" data-tab="card-right-panel-popups-tab" role="tab" aria-selected="false">弹窗规则</button>
                             </div>
                             <div class="card-right-panel-tab-contents">
                                 <div id="card-right-panel-steps-tab" class="card-right-panel-tab-content active" role="tabpanel">
                                     <div class="card-form-section card-form-section--steps">
                                         <div class="card-form-section__header">
-                                            <div class="card-form-section__title">注册步骤</div>
+                                            <div class="card-form-section__title">自动化步骤</div>
                                         </div>
                                         <div class="card-form-section__body">
                                             <div class="step-editor-toolbar">

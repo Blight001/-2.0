@@ -133,9 +133,9 @@ module.exports = {
         if (!message) {
             const messageParts = [];
             if (options.completed || (sessionCompletedCount >= totalPlannedCount && currentCycleIndex >= cycleLimit && cycleCompletedCount >= batchSize)) {
-                messageParts.push(`定时注册完成，共完成 ${sessionCompletedCount}/${totalPlannedCount}`);
+                messageParts.push(`定时执行完成，共完成 ${sessionCompletedCount}/${totalPlannedCount}`);
             } else if (nextLaunchInMs !== null && cycleCompletedCount === 0 && cycleStartedCount === 0 && completedCount === 0 && completedCyclesBeforeCurrent === 0) {
-                messageParts.push(`准备开始定时注册，首轮将在 ${this._formatTimedRegistrationDuration(nextLaunchInMs)} 后开始`);
+                messageParts.push(`准备开始定时执行，首轮将在 ${this._formatTimedRegistrationDuration(nextLaunchInMs)} 后开始`);
                 messageParts.push(`共 ${cycleLimit} 轮，每轮 ${batchSize} 个`);
             } else if (nextLaunchInMs !== null && remainingCount <= 0) {
                 messageParts.push(`${this._getTimedRegistrationCycleLabel(state, currentCycleIndex)}已完成`);
@@ -279,8 +279,8 @@ module.exports = {
                 nextLaunchAt: currentNextLaunchAt,
                 statusText: '等待下一次执行',
                 message: isInitialWaiting
-                    ? `定时注册倒计时：${countdownLabel}还有 ${this._formatTimedRegistrationDuration(currentNextLaunchAt - Date.now())}，本轮已完成 ${Math.max(0, currentState.cycleCompletedCount || 0)}/${batchSize}，累计已完成 ${Math.max(0, currentState.completedCount || 0)}/${totalPlannedCount}`
-                    : `定时注册倒计时：${countdownLabel}还有 ${this._formatTimedRegistrationDuration(currentNextLaunchAt - Date.now())}，${cycleLabel}已完成，本轮已完成 ${Math.max(0, currentState.cycleCompletedCount || 0)}/${batchSize}，累计已完成 ${Math.max(0, currentState.completedCount || 0)}/${totalPlannedCount}`,
+                    ? `定时执行倒计时：${countdownLabel}还有 ${this._formatTimedRegistrationDuration(currentNextLaunchAt - Date.now())}，本轮已完成 ${Math.max(0, currentState.cycleCompletedCount || 0)}/${batchSize}，累计已完成 ${Math.max(0, currentState.completedCount || 0)}/${totalPlannedCount}`
+                    : `定时执行倒计时：${countdownLabel}还有 ${this._formatTimedRegistrationDuration(currentNextLaunchAt - Date.now())}，${cycleLabel}已完成，本轮已完成 ${Math.max(0, currentState.cycleCompletedCount || 0)}/${batchSize}，累计已完成 ${Math.max(0, currentState.completedCount || 0)}/${totalPlannedCount}`,
                 stage: 'waiting'
             });
 
@@ -354,7 +354,7 @@ module.exports = {
         return state;
     },
 
-    _finalizeTimedRegistrationSession(reason = '定时注册已完成') {
+    _finalizeTimedRegistrationSession(reason = '定时执行已完成') {
         const state = this.timedRegistrationState;
         if (!state) {
             return false;
@@ -510,7 +510,7 @@ module.exports = {
         const nextLaunchAt = Date.now() + normalizedDelayMs;
         const timerId = setTimeout(() => {
             launchCycle(timerId).catch(error => {
-                this.logger.error(`启动定时注册轮次失败: ${error.message}`);
+                this.logger.error(`启动定时执行轮次失败: ${error.message}`);
             });
         }, normalizedDelayMs);
 
@@ -526,7 +526,7 @@ module.exports = {
             : '首轮';
         const message = options.message || (
             isInitialStart
-                ? `准备开始定时注册批次，共 ${cycleLimit} 轮，每轮 ${batchSize} 个，首轮将在 ${this._formatTimedRegistrationDuration(normalizedDelayMs)} 后开始`
+                ? `准备开始定时执行批次，共 ${cycleLimit} 轮，每轮 ${batchSize} 个，首轮将在 ${this._formatTimedRegistrationDuration(normalizedDelayMs)} 后开始`
                 : `${cycleLabel}已完成，下一轮将在 ${this._formatTimedRegistrationDuration(normalizedDelayMs)} 后开始，累计计划 ${totalPlannedCount} 个`
         );
 
@@ -572,7 +572,7 @@ module.exports = {
                 if (startResult && startResult.taskId && this.runningTasks.has(startResult.taskId)) {
                     const launchedTask = this.runningTasks.get(startResult.taskId);
                     if (launchedTask && typeof launchedTask.stop === 'function') {
-                        launchedTask.stop('定时注册已停止');
+                        launchedTask.stop('定时执行已停止');
                     }
                 }
                 return false;
@@ -580,7 +580,7 @@ module.exports = {
 
             if (!startResult || startResult.success !== true) {
                 const errorText = startResult && startResult.error ? startResult.error : '未知错误';
-                this.logger.error(`定时注册启动下一次任务失败: ${errorText}`);
+                this.logger.error(`定时执行启动下一次任务失败: ${errorText}`);
                 return false;
             }
 
@@ -607,7 +607,7 @@ module.exports = {
             this.logger.info(statusText);
             return true;
         } catch (error) {
-            this.logger.error(`定时注册启动下一次任务异常: ${error.message}`);
+            this.logger.error(`定时执行启动下一次任务异常: ${error.message}`);
             return false;
         } finally {
             state.startingCount = Math.max(0, state.startingCount - 1);
@@ -633,7 +633,7 @@ module.exports = {
 
         if (currentCycleIndex >= cycleLimit) {
             if (this.runningTasks.size === 0 && state.startingCount === 0) {
-                this._finalizeTimedRegistrationSession('定时注册已完成');
+                this._finalizeTimedRegistrationSession('定时执行已完成');
             }
             return false;
         }
@@ -692,7 +692,7 @@ module.exports = {
         if (state.cycleCompletedCount >= batchSize) {
             if (waitingCount <= 0) {
                 if (currentCycleIndex >= cycleLimit) {
-                    this._finalizeTimedRegistrationSession('定时注册已完成');
+                    this._finalizeTimedRegistrationSession('定时执行已完成');
                     return true;
                 }
 

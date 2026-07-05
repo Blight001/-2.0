@@ -6,9 +6,9 @@
 const { ipcRenderer } = require('electron');
 const { logger } = require('../console.js');
 const {
-    filterRegistrationCards,
-    isAllowedRegistrationCardName
-} = require('../../core/registration/registration-ui-state');
+    filterAutomationCards,
+    isAllowedAutomationCardName
+} = require('../../core/execution/execution-ui-state');
 const { IPC_CHANNELS } = require('../../core/ipc/channels');
 const cardManagerShared = require('./card-manager-shared');
 const createCardManagerStepEditor = require('./card-manager-step-editor');
@@ -78,7 +78,7 @@ const {
     hideCardDialog
 } = cardManagerEditorUi;
 
-function normalizeCardMode(cardMode = 'register') {
+function normalizeCardMode(cardMode = 'automation') {
     return cardManagerShared.normalizeCardMode(cardMode);
 }
 
@@ -110,16 +110,16 @@ function isRemoteCardControlMode() {
     return cardControlMode === 'remote';
 }
 
-function setRegistrationCardAccessMode(mode = 'restricted') {
+function setAutomationCardAccessMode(mode = 'restricted') {
     const normalized = String(mode || '').trim().toLowerCase();
     registrationCardAccessMode = normalized === 'all' || normalized === 'unrestricted' ? 'all' : 'restricted';
 }
 
-function canUseAnyRegistrationCard() {
+function canUseAnyAutomationCard() {
     return registrationCardAccessMode === 'all';
 }
 
-function getRemoteCardControlMessage(cardMode = 'register') {
+function getRemoteCardControlMessage(cardMode = 'automation') {
     const modeConfig = getCardModeConfig(cardMode);
     return `服务器控制状态下${modeConfig.label}卡片由服务器接管`;
 }
@@ -275,12 +275,12 @@ function setUploadTargetScoreControlsVisibility(elements) {
     }
 }
 
-function getCardModeConfig(cardMode = 'register') {
+function getCardModeConfig(cardMode = 'automation') {
     const mode = normalizeCardMode(cardMode);
     const modeConfig = {
-        register: {
-            mode: 'register',
-            label: '注册',
+        automation: {
+            mode: 'automation',
+            label: '自动化',
             listSelector: '#card-list .card-item',
             itemSelector: name => `#card-list [data-card-name="${name}"]`,
             listElementKey: 'cardList',
@@ -353,7 +353,7 @@ function getCardModeConfig(cardMode = 'register') {
     return modeConfig[mode];
 }
 
-function getCurrentCardByMode(cardMode = 'register') {
+function getCurrentCardByMode(cardMode = 'automation') {
     if (cardMode === 'test') return currentTestCard;
     if (cardMode === 'api') return currentApiCard;
     if (cardMode === 'model') return currentModelCard;
@@ -361,11 +361,11 @@ function getCurrentCardByMode(cardMode = 'register') {
     return currentCard;
 }
 
-function isCardModeLoaded(cardMode = 'register') {
+function isCardModeLoaded(cardMode = 'automation') {
     return loadedCardModes.has(normalizeCardMode(cardMode));
 }
 
-function markCardModeLoaded(cardMode = 'register', loaded = true) {
+function markCardModeLoaded(cardMode = 'automation', loaded = true) {
     const mode = normalizeCardMode(cardMode);
     if (loaded) {
         loadedCardModes.add(mode);
@@ -375,7 +375,7 @@ function markCardModeLoaded(cardMode = 'register', loaded = true) {
     loadedCardModes.delete(mode);
 }
 
-function renderDeferredLoadPlaceholder(elements, cardMode = 'register', message = '') {
+function renderDeferredLoadPlaceholder(elements, cardMode = 'automation', message = '') {
     const modeConfig = getCardModeConfig(cardMode);
     const listElement = elements && elements[modeConfig.listElementKey];
     if (!listElement) {
@@ -394,7 +394,7 @@ function renderDeferredLoadPlaceholder(elements, cardMode = 'register', message 
     `;
 }
 
-async function ensureCardsLoaded(cardMode = 'register', options = {}) {
+async function ensureCardsLoaded(cardMode = 'automation', options = {}) {
     const mode = normalizeCardMode(cardMode);
     const forceReload = Boolean(options && options.forceReload);
     const allowLocalLoadInRemoteMode = Boolean(options && options.allowLocalLoadInRemoteMode);
@@ -431,7 +431,7 @@ async function ensureCardsLoaded(cardMode = 'register', options = {}) {
     return loadingPromise;
 }
 
-function setCurrentCardByMode(cardName, cardMode = 'register') {
+function setCurrentCardByMode(cardName, cardMode = 'automation') {
     if (cardMode === 'test') {
         currentTestCard = cardName;
         return;
@@ -458,27 +458,27 @@ async function loadCards(options = {}) {
     try {
         const allowLocalLoadInRemoteMode = Boolean(options && options.allowLocalLoadInRemoteMode);
         if (isRemoteCardControlMode() && !allowLocalLoadInRemoteMode) {
-            markCardModeLoaded('register', false);
+            markCardModeLoaded('automation', false);
             return [];
         }
 
         const result = await ipcRenderer.invoke('load-cards', options);
         if (result.success) {
-            markCardModeLoaded('register', true);
-            setRegistrationCardAccessMode(result.allowAllRegistrationCards === true ? 'all' : 'restricted');
-            result.cards = canUseAnyRegistrationCard()
+            markCardModeLoaded('automation', true);
+            setAutomationCardAccessMode(result.allowAllAutomationCards === true ? 'all' : 'restricted');
+            result.cards = canUseAnyAutomationCard()
                 ? (Array.isArray(result.cards) ? result.cards : [])
-                : filterRegistrationCards(result.cards, 'register');
+                : filterAutomationCards(result.cards, 'automation');
             // 通过全局事件通知渲染进程更新卡片列表
             // elements 和 onCardChange 由 renderer.js 中的事件监听器处理
             window.dispatchEvent(new CustomEvent('cards-loaded', { detail: result.cards }));
             return result.cards;
         } else {
-            markCardModeLoaded('register', false);
+            markCardModeLoaded('automation', false);
             logger.error(`加载卡片失败: ${result.error}`);
         }
     } catch (error) {
-        markCardModeLoaded('register', false);
+        markCardModeLoaded('automation', false);
         logger.error(`加载卡片异常: ${error.message}`);
     }
 
@@ -602,16 +602,16 @@ async function loadHaikaBindCards(options = {}) {
  * @param {Array} cards - 卡片数据数组
  * @param {Object} elements - DOM元素对象
  * @param {Function} onCardChange - 卡片变化回调（用于刷新Cookie列表等）
- * @param {string} cardMode - 卡片类型: register | test | api | haikaBind
+ * @param {string} cardMode - 卡片类型: automation | test | api | haikaBind
  */
-function renderCardList(cards, elements, onCardChange, cardMode = 'register') {
+function renderCardList(cards, elements, onCardChange, cardMode = 'automation') {
     const modeConfig = getCardModeConfig(cardMode);
     const listElement = elements[modeConfig.listElementKey];
     if (!elements || !listElement) return;
 
     const selectedApiCardName = String(currentApiCard || '').trim();
-    const displayCards = cardMode === 'register'
-        ? (canUseAnyRegistrationCard() ? (Array.isArray(cards) ? cards : []) : filterRegistrationCards(cards, cardMode))
+    const displayCards = cardMode === 'automation'
+        ? (canUseAnyAutomationCard() ? (Array.isArray(cards) ? cards : []) : filterAutomationCards(cards, cardMode))
         : cardMode === 'model'
             ? (selectedApiCardName
                 ? (Array.isArray(cards) ? cards : []).filter(card => cardManagerShared.resolveModelCardApiName(card) === selectedApiCardName)
@@ -662,12 +662,12 @@ function renderCardList(cards, elements, onCardChange, cardMode = 'register') {
             .find(item => item && item.dataset && item.dataset.cardName === selectedCardName);
         if (selectedElement) {
             selectedElement.classList.add('selected');
-        } else if (cardMode === 'register' && displayCards.length === 1 && (canUseAnyRegistrationCard() || isAllowedRegistrationCardName(displayCards[0]?.name))) {
+        } else if (cardMode === 'automation' && displayCards.length === 1 && (canUseAnyAutomationCard() || isAllowedAutomationCardName(displayCards[0]?.name))) {
             selectCard(displayCards[0].name, elements, (name) => {
                 setCurrentCardByMode(name, cardMode);
             }, onCardChange, cardMode);
         }
-    } else if (cardMode === 'register' && displayCards.length === 1 && (canUseAnyRegistrationCard() || isAllowedRegistrationCardName(displayCards[0]?.name))) {
+    } else if (cardMode === 'automation' && displayCards.length === 1 && (canUseAnyAutomationCard() || isAllowedAutomationCardName(displayCards[0]?.name))) {
         selectCard(displayCards[0].name, elements, (name) => {
             setCurrentCardByMode(name, cardMode);
         }, onCardChange, cardMode);
@@ -680,17 +680,17 @@ function renderCardList(cards, elements, onCardChange, cardMode = 'register') {
  * @param {Object} elements - DOM元素对象
  * @param {Function} onSelect - 选择回调函数
  * @param {Function} onCardChange - 卡片变化回调（用于刷新Cookie列表等）
- * @param {string} cardMode - 卡片类型: register | test | api | haikaBind
+ * @param {string} cardMode - 卡片类型: automation | test | api | haikaBind
  */
-function selectCard(cardName, elements, onSelect, onCardChange, cardMode = 'register') {
+function selectCard(cardName, elements, onSelect, onCardChange, cardMode = 'automation') {
     const modeConfig = getCardModeConfig(cardMode);
     if (isRemoteCardControlMode()) {
         logger.info(getRemoteCardControlMessage(cardMode));
         return;
     }
 
-    if (cardMode === 'register' && !canUseAnyRegistrationCard() && !isAllowedRegistrationCardName(cardName)) {
-        logger.info('注册卡片页面仅允许使用国际版即梦注册卡片');
+    if (cardMode === 'automation' && !canUseAnyAutomationCard() && !isAllowedAutomationCardName(cardName)) {
+        logger.info('自动化卡片页面仅允许使用国际版即梦自动化卡片');
         return;
     }
 
@@ -716,7 +716,7 @@ function selectCard(cardName, elements, onSelect, onCardChange, cardMode = 'regi
             });
         }
 
-        if (cardMode === 'register' && elements.startBtn) {
+        if (cardMode === 'automation' && elements.startBtn) {
             elements.startBtn.disabled = false;
             elements.statusLabel.textContent = `已选择卡片: ${cardName}`;
         }
@@ -780,7 +780,7 @@ function setCurrentHaikaBindCard(cardName) {
  */
 async function saveCard(elements, showMessage, loadCardsFn, loadTestCardsFn = loadCardsFn, loadApiCardsFn = loadCardsFn, loadModelCardsFn = loadCardsFn, loadHaikaBindCardsFn = loadCardsFn, options = {}) {
     try {
-        const cardMode = elements.cardDialog.dataset.cardMode || 'register';
+        const cardMode = elements.cardDialog.dataset.cardMode || 'automation';
         const closeDialog = options.closeDialog !== false;
         if (isRemoteCardControlMode()) {
             showMessage(getRemoteCardControlMessage(cardMode), 'info');
@@ -815,7 +815,7 @@ async function saveCard(elements, showMessage, loadCardsFn, loadTestCardsFn = lo
             } else {
                 await loadCardsFn({ forceReload: true });
                 await ipcRenderer.invoke('refresh-registration-tab').catch(error => {
-                    logger.warning(`刷新注册卡片列表失败: ${error.message}`);
+                    logger.warning(`刷新自动化卡片列表失败: ${error.message}`);
                 });
             }
             showMessage(`${modeConfig.label}卡片保存成功`, 'success');
@@ -829,7 +829,7 @@ async function saveCard(elements, showMessage, loadCardsFn, loadTestCardsFn = lo
 
 async function debugCard(elements, showMessage, getBrowserSettingsPatchFn = null) {
     try {
-        const cardMode = elements.cardDialog.dataset.cardMode || 'register';
+        const cardMode = elements.cardDialog.dataset.cardMode || 'automation';
         const built = cardManagerShared.buildCardDataFromForm(elements, {
             collectSteps: syncCardStepsTextareaFromEditor
         });
@@ -897,7 +897,7 @@ async function debugCard(elements, showMessage, getBrowserSettingsPatchFn = null
 /**
  * 导入卡片
  */
-async function importCard(showMessage, loadCardsFn, cardMode = 'register', loadTestCardsFn = loadCardsFn, loadApiCardsFn = loadCardsFn, loadModelCardsFn = loadCardsFn, loadHaikaBindCardsFn = loadCardsFn) {
+async function importCard(showMessage, loadCardsFn, cardMode = 'automation', loadTestCardsFn = loadCardsFn, loadApiCardsFn = loadCardsFn, loadModelCardsFn = loadCardsFn, loadHaikaBindCardsFn = loadCardsFn) {
     try {
         if (isRemoteCardControlMode()) {
             showMessage(getRemoteCardControlMessage(cardMode), 'info');
@@ -920,7 +920,7 @@ async function importCard(showMessage, loadCardsFn, cardMode = 'register', loadT
             } else {
                 await loadCardsFn({ forceReload: true });
                 await ipcRenderer.invoke('refresh-registration-tab').catch(error => {
-                    logger.warning(`刷新注册卡片列表失败: ${error.message}`);
+                    logger.warning(`刷新自动化卡片列表失败: ${error.message}`);
                 });
             }
             showMessage(`${modeConfig.label}卡片导入成功`, 'success');
@@ -937,7 +937,7 @@ async function importCard(showMessage, loadCardsFn, cardMode = 'register', loadT
 /**
  * 编辑选中的卡片
  */
-async function editSelectedCard(showMessage, selectedCardName, cardMode = 'register') {
+async function editSelectedCard(showMessage, selectedCardName, cardMode = 'automation') {
     if (isRemoteCardControlMode()) {
         showMessage(getRemoteCardControlMessage(cardMode), 'info');
         return null;
@@ -967,7 +967,7 @@ async function editSelectedCard(showMessage, selectedCardName, cardMode = 'regis
 /**
  * 删除选中的卡片
  */
-async function deleteSelectedCard(elements, showMessage, loadCardsFn, selectedCardName, setCurrentCardFn, cardMode = 'register', loadTestCardsFn = loadCardsFn, loadApiCardsFn = loadCardsFn, loadModelCardsFn = loadCardsFn, loadHaikaBindCardsFn = loadCardsFn) {
+async function deleteSelectedCard(elements, showMessage, loadCardsFn, selectedCardName, setCurrentCardFn, cardMode = 'automation', loadTestCardsFn = loadCardsFn, loadApiCardsFn = loadCardsFn, loadModelCardsFn = loadCardsFn, loadHaikaBindCardsFn = loadCardsFn) {
     if (isRemoteCardControlMode()) {
         showMessage(getRemoteCardControlMessage(cardMode), 'info');
         return;
@@ -986,7 +986,7 @@ async function deleteSelectedCard(elements, showMessage, loadCardsFn, selectedCa
         if (result.success) {
             setCurrentCardFn(null);
             
-            if (cardMode === 'register' && elements.startBtn) {
+            if (cardMode === 'automation' && elements.startBtn) {
                 elements.startBtn.disabled = true;
                 elements.statusLabel.textContent = '未选择卡片';
             }
@@ -1048,7 +1048,7 @@ async function ensureCardModeLoadedForAction(cardMode, loadCardsFn, loadTestCard
     }
 
     await loadCardsFn();
-    return isCardModeLoaded('register');
+    return isCardModeLoaded('automation');
 }
 
 
@@ -1114,7 +1114,7 @@ module.exports = {
     setCardControlMode,
     getCardControlMode,
     isRemoteCardControlMode,
-    setRegistrationCardAccessMode,
+    setAutomationCardAccessMode,
     buildCardDataFromForm: cardManagerShared.buildCardDataFromForm,
     renderDeferredLoadPlaceholder,
     renderCardList,

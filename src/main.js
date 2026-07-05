@@ -34,15 +34,15 @@ const {
 } = require('./core/infra/config-utils');
 const { resolveWebControlConfig } = require('./core/web/web-control-config');
 const {
-    getRegistrationTcpRuntimeInfo,
+    getAutomationTcpRuntimeInfo,
     refreshRegistrationTcpConnection,
     startRegistrationTcpConnectionMonitor,
     stopRegistrationTcpConnectionMonitor,
     notifyRegistrationTcpSuccess,
     applyRegistrationTcpUserConfig,
     normalizeRegistrationTcpEndpoint: normalizeRegistrationTcpEndpointValue
-} = require('./core/registration/tcp-control');
-const { buildRegistrationUiState } = require('./core/registration/registration-ui-state');
+} = require('./core/execution/tcp-control');
+const { buildAutomationUiState } = require('./core/execution/execution-ui-state');
 const mainRuntime = require('./core/runtime/main-runtime');
 const appBootstrap = require('./core/app/bootstrap');
 const {
@@ -50,13 +50,13 @@ const {
     buildHardwareInfoFallback,
     buildTcpConfigSnapshot,
     extractEmailRandomConfig,
-    hasRegistrationTcpConfig,
+    hasAutomationTcpConfig,
     normalizeBrowserSource,
-    normalizeRegistrationMode,
+    normalizeAutomationMode,
     resolveStartupMode
 } = require('./main/main-utils');
 
-class AutoRegisterApp {
+class AutomationApp {
     constructor() {
         this.app = app;
         this.projectRoot = path.resolve(__dirname, '..');
@@ -129,9 +129,9 @@ class AutoRegisterApp {
         this.currentCardValidationSnapshot = null;
         this.licenseUsageLocked = false;
         this.licenseExpiryTimer = null;
-        this.registrationTcpEndpoint = null;
-        this.registrationTcpConfigured = false;
-        this.registrationTcpConfigSource = null;
+        this.automationTcpEndpoint = null;
+        this.automationTcpConfigured = false;
+        this.automationTcpConfigSource = null;
         this.registrationTcpReconnectEnabled = true;
         this.registrationTcpConnectionStatus = null;
         this.registrationTcpConnectionMonitorTimer = null;
@@ -163,12 +163,12 @@ class AutoRegisterApp {
         this.registrationDefaultExecutionPlan = null;
         this.registrationDefaultExecutionPlanUpdatedAt = '';
         this.cookieMigrationDone = false; // 防止重复迁移的标志
-        this.lastRegistrationConfig = null;
-        this.activeRegistrationCardConfig = null;
-        this.activeRegistrationCardName = '';
-        this.registrationStopRequested = false;
-        this.timedRegistrationState = null;
-        this.timedRegistrationSessionId = null;
+        this.lastAutomationConfig = null;
+        this.activeAutomationCardConfig = null;
+        this.activeAutomationCardName = '';
+        this.automationStopRequested = false;
+        this.timedAutomationState = null;
+        this.timedAutomationSessionId = null;
         this.proxyRecoveryState = {
             active: false,
             attempts: 0
@@ -398,15 +398,15 @@ class AutoRegisterApp {
     isTcpManagedMode() {
         return false;
     }
-    isRegistrationControlLocked() {
+    isAutomationControlLocked() {
         return this.registrationTcpControlState && this.registrationTcpControlState.control_locked === true;
     }
     shouldAutoLoadLocalCards() {
         return true;
     }
     async getAppRuntimeInfo() {
-        const runtimeConfig = typeof this.readRegistrationRuntimeConfigFromDisk === 'function'
-            ? await this.readRegistrationRuntimeConfigFromDisk()
+        const runtimeConfig = typeof this.readAutomationRuntimeConfigFromDisk === 'function'
+            ? await this.readAutomationRuntimeConfigFromDisk()
             : {};
         const runtimeBrowserSettings = runtimeConfig && typeof runtimeConfig === 'object'
             ? (runtimeConfig.browserSettings && typeof runtimeConfig.browserSettings === 'object'
@@ -415,8 +415,8 @@ class AutoRegisterApp {
                     ? runtimeConfig.browser_settings
                     : {})
             : {};
-        this.registrationRuntimeConfig = runtimeConfig && typeof runtimeConfig === 'object' ? { ...runtimeConfig } : {};
-        this.registrationRuntimeBrowserSettings = runtimeBrowserSettings && typeof runtimeBrowserSettings === 'object'
+        this.automationRuntimeConfig = runtimeConfig && typeof runtimeConfig === 'object' ? { ...runtimeConfig } : {};
+        this.automationRuntimeBrowserSettings = runtimeBrowserSettings && typeof runtimeBrowserSettings === 'object'
             ? { ...runtimeBrowserSettings }
             : {};
 
@@ -430,10 +430,10 @@ class AutoRegisterApp {
                 || this.browserSettings?.browserSource
                 || this.browserSettings?.browser_type
                 || this.browserSettings?.browserType
-                || this.registrationRuntimeBrowserSettings?.browser_source
-                || this.registrationRuntimeBrowserSettings?.browserSource
-                || this.registrationRuntimeBrowserSettings?.browser_type
-                || this.registrationRuntimeBrowserSettings?.browserType,
+                || this.automationRuntimeBrowserSettings?.browser_source
+                || this.automationRuntimeBrowserSettings?.browserSource
+                || this.automationRuntimeBrowserSettings?.browser_type
+                || this.automationRuntimeBrowserSettings?.browserType,
                 'local-browser'
             ),
             tcpManagedMode: false,
@@ -454,15 +454,15 @@ class AutoRegisterApp {
         };
     }
     getRegistrationTcpEndpoint() {
-        const sourceConfig = this.registrationTcpConfigSource && typeof this.registrationTcpConfigSource === 'object'
-            ? this.registrationTcpConfigSource
+        const sourceConfig = this.automationTcpConfigSource && typeof this.automationTcpConfigSource === 'object'
+            ? this.automationTcpConfigSource
             : null;
 
-        if (this.registrationTcpConfigured !== true && !sourceConfig) {
+        if (this.automationTcpConfigured !== true && !sourceConfig) {
             return null;
         }
 
-        return this.registrationTcpEndpoint
+        return this.automationTcpEndpoint
             || normalizeRegistrationTcpEndpointValue(sourceConfig || {});
     }
     hasRegistrationTcpConfig(config = {}) {
@@ -566,8 +566,8 @@ class AutoRegisterApp {
         const runtimeBrowserSettings = config.browserSettings && typeof config.browserSettings === 'object'
             ? { ...config.browserSettings }
             : {};
-        this.registrationRuntimeConfig = { ...config };
-        this.registrationRuntimeBrowserSettings = runtimeBrowserSettings;
+        this.automationRuntimeConfig = { ...config };
+        this.automationRuntimeBrowserSettings = runtimeBrowserSettings;
         await this.applyUserConfig(config, {
             source: 'startup-config',
             restartTcpBridge: false
@@ -727,7 +727,7 @@ class AutoRegisterApp {
             }
 
             const normalized = hasRegistrationTcpConfig(config) ? buildTcpConfigSnapshot(config) : {};
-            this.registrationTcpConfigSource = Object.keys(normalized).length > 0 ? { ...normalized } : null;
+            this.automationTcpConfigSource = Object.keys(normalized).length > 0 ? { ...normalized } : null;
             return normalized;
         } catch (error) {
             this.logger?.warning?.(`读取TCP配置文件失败: ${error.message}`);
@@ -749,7 +749,7 @@ class AutoRegisterApp {
 
             await fs.ensureDir(path.dirname(targetPath));
             await fs.writeJson(targetPath, snapshot, { spaces: 4 });
-            this.registrationTcpConfigSource = { ...snapshot };
+            this.automationTcpConfigSource = { ...snapshot };
             return {
                 success: true,
                 config: snapshot,
@@ -760,7 +760,7 @@ class AutoRegisterApp {
             return { success: false, error: error.message };
         }
     }
-    async readRegistrationRuntimeConfigFromDisk() { return appBootstrap.readRegistrationRuntimeConfigFromDisk.call(this); }
+    async readAutomationRuntimeConfigFromDisk() { return appBootstrap.readAutomationRuntimeConfigFromDisk.call(this); }
     async saveRegistrationRuntimeConfigToDisk(config) { return appBootstrap.saveRegistrationRuntimeConfigToDisk.call(this, config); }
     getCardKeyPrefix() {
         if (typeof this.currentCardKeyPrefix === 'string' && this.currentCardKeyPrefix) {
@@ -884,16 +884,16 @@ class AutoRegisterApp {
         return await notifyRegistrationTcpSuccess(this, payload);
     }
 
-    async registrationControlSnapshot() {
+    async automationControlSnapshot() {
         return null;
     }
 
-    async registrationControlPatch(patch = {}) {
-        return { ok: false, error: '注册控制桥接已移除' };
+    async automationControlPatch(patch = {}) {
+        return { ok: false, error: '控制桥接已移除' };
     }
 
     async getRegistrationUiState(options = {}) {
-        return await buildRegistrationUiState(this, options);
+        return await buildAutomationUiState(this, options);
     }
 
     getDialogParentWindow() {
@@ -966,4 +966,4 @@ class AutoRegisterApp {
 }
 
 // 创建应用程序实例
-const appInstance = new AutoRegisterApp();
+const appInstance = new AutomationApp();

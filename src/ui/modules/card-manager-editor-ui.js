@@ -63,7 +63,7 @@ module.exports = function createCardManagerEditorUi(deps = {}) {
 
         const parsed = JSON.parse(rawValue);
         if (!Array.isArray(parsed)) {
-            throw new Error('注册步骤必须是数组格式');
+            throw new Error('自动化步骤必须是数组格式');
         }
 
         return parsed;
@@ -298,7 +298,7 @@ module.exports = function createCardManagerEditorUi(deps = {}) {
         renderCardStepProgressList(elements, null);
     }
 
-    async function openCardEditorWindow(cardData, cardMode = 'register', extraPayload = {}) {
+    async function openCardEditorWindow(cardData, cardMode = 'automation', extraPayload = {}) {
         try {
             const result = await ipcRenderer.invoke(IPC_CHANNELS.openCardEditorWindow, {
                 cardData,
@@ -895,7 +895,7 @@ module.exports = function createCardManagerEditorUi(deps = {}) {
         if (normalizedSteps.length === 0) {
             elements.cardStepEditorList.innerHTML = `
                 <div class="step-editor-empty">
-                    还没有注册步骤。选择一个模板后点击“新增步骤”，或先手动添加第一段步骤。
+                    还没有自动化步骤。选择一个模板后点击“新增步骤”，或先手动添加第一段步骤。
                 </div>
             `;
             return;
@@ -1133,7 +1133,7 @@ module.exports = function createCardManagerEditorUi(deps = {}) {
         return { success: true, steps };
     }
 
-    function showCardDialog(cardData, elements, toggleCharsetField, cardMode = 'register', relatedApiCardName = '') {
+    function showCardDialog(cardData, elements, toggleCharsetField, cardMode = 'automation', relatedApiCardName = '') {
         elements.cardForm.reset();
         if (elements.cardDebugStepPause) {
             elements.cardDebugStepPause.checked = true;
@@ -1248,12 +1248,12 @@ module.exports = function createCardManagerEditorUi(deps = {}) {
         activateCardEditorTab(elements, 'card-right-panel-steps-tab');
 
         if (elements.cardMinCookieSizeGroup) {
-            const isRegisterMode = cardMode === 'register';
-            elements.cardMinCookieSizeGroup.style.display = isRegisterMode ? '' : 'none';
+            const isAutomationMode = cardMode === 'automation';
+            elements.cardMinCookieSizeGroup.style.display = isAutomationMode ? '' : 'none';
         }
         if (elements.cardPasswordRandomGroup) {
-            const isRegisterMode = cardMode === 'register';
-            elements.cardPasswordRandomGroup.style.display = isRegisterMode ? '' : 'none';
+            const isAutomationMode = cardMode === 'automation';
+            elements.cardPasswordRandomGroup.style.display = isAutomationMode ? '' : 'none';
         }
         if (elements.cardDialogApiServiceTabBtn || elements.cardDialogApiServiceTab) {
             const isModelMode = cardMode === 'model';
@@ -1265,8 +1265,8 @@ module.exports = function createCardManagerEditorUi(deps = {}) {
             }
         }
         if (elements.cardUploadTargetScoreScope || elements.cardUploadTargetScoreTypesGroup) {
-            const isRegisterMode = cardMode === 'register';
-            if (isRegisterMode) {
+            const isAutomationMode = cardMode === 'automation';
+            if (isAutomationMode) {
                 const uploadTargetScoreConfig = resolveUploadTargetScoreConfig(cardData || {});
                 if (elements.cardUploadTargetScoreScope) {
                     elements.cardUploadTargetScoreScope.value = uploadTargetScoreConfig.scope;

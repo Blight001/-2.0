@@ -207,7 +207,7 @@ module.exports = {
                     await this.startSingleRegistrationTask();
                 }
             } else if (this.isTimedRunning && this.timedRegistrationState) {
-                this.logger.info('代理恢复完成，定时注册将按原有延时策略继续');
+                this.logger.info('代理恢复完成，定时执行将按原有延时策略继续');
             }
 
             return true;

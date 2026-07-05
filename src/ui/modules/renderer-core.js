@@ -1,9 +1,9 @@
 /**
- * AI账号注册器 2.0 - 渲染进程核心
+ * AI 自动化工具 2.0 - 渲染进程核心
  *
  * `renderer.js` 现在只是一个轻入口。
  * 这个文件保留状态、DOM 和模块组装；
- * 浏览器、后端配置、注册控制、进度、Cookie、海卡和 wiring 已拆到 `src/ui/modules`。
+ * 浏览器、后端配置、执行控制、进度、Cookie、海卡和 wiring 已拆到 `src/ui/modules`。
  */
 
 const { ipcRenderer } = require('electron');
@@ -482,7 +482,7 @@ const elements = {
 // ==================== 模块组装 ====================
 const createRendererWiring = require('./renderer-wiring');
 const createRendererConfig = require('./renderer-config');
-const createRendererRegistration = require('./renderer-registration');
+const createRendererExecution = require('./renderer-execution');
 const createRendererProgress = require('./task-progress');
 const createRendererCookie = require('./renderer-cookie');
 const createRendererHaika = require('./renderer-haika');
@@ -544,8 +544,8 @@ Object.assign(rendererWiringDeps, rendererBrowserApi);
 const rendererConfigApi = createRendererConfig(rendererWiringDeps);
 Object.assign(rendererWiringDeps, rendererConfigApi);
 
-const rendererRegistrationApi = createRendererRegistration(rendererWiringDeps);
-Object.assign(rendererWiringDeps, rendererRegistrationApi);
+const rendererExecutionApi = createRendererExecution(rendererWiringDeps);
+Object.assign(rendererWiringDeps, rendererExecutionApi);
 
 const rendererProgressApi = createRendererProgress(rendererWiringDeps);
 Object.assign(rendererWiringDeps, rendererProgressApi);

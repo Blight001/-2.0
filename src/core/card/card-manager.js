@@ -4,7 +4,7 @@ const path = require('path');
 class CardManager {
     constructor() {
         this.resourceRoot = this.resolveResourceRoot();
-        this.cardsDir = path.join(this.resourceRoot, 'register_cards');
+        this.cardsDir = path.join(this.resourceRoot, 'automation_cards');
         this.testCardsDir = path.join(this.resourceRoot, 'test_cards');
         this.apiCardsDir = path.join(this.resourceRoot, 'api_cards');
         this.modelCardsDir = path.join(this.resourceRoot, 'model_cards');
@@ -55,7 +55,7 @@ class CardManager {
 
     async migrateLegacyCardDirs() {
         const migrations = [
-            { legacyDir: this.legacyCardsDir, targetDir: this.cardsDir, label: '注册卡片' },
+            { legacyDir: this.legacyCardsDir, targetDir: this.cardsDir, label: '自动化卡片' },
             { legacyDir: this.legacyTestCardsDir, targetDir: this.testCardsDir, label: '测试卡片' },
             { legacyDir: this.legacyApiCardsDir, targetDir: this.apiCardsDir, label: 'API卡片' },
             { legacyDir: this.legacyModelCardsDir, targetDir: this.modelCardsDir, label: '模型卡片' }
@@ -86,7 +86,7 @@ class CardManager {
         }
     }
     
-    // ==================== 注册卡片方法 ====================
+    // ==================== 自动化卡片方法 ====================
 
     getCardDirectory() {
         return this.cardsDir;

@@ -5,18 +5,18 @@ const {
     REGISTRATION_APP_NAME
 } = require('./protocol');
 
-function _normalizeCardType(cardType = 'register') {
-    const normalizedType = String(cardType || 'register').trim().toLowerCase();
+function _normalizeCardType(cardType = 'automation') {
+    const normalizedType = String(cardType || 'automation').trim().toLowerCase();
     if (normalizedType === 'test' || normalizedType === 'test_card') {
         return 'test';
     }
     if (normalizedType === 'haika_bind' || normalizedType === 'haika' || normalizedType === 'haika-bind') {
         return 'haikaBind';
     }
-    return 'register';
+    return 'automation';
 }
 
-function _resolveRegistrationCardSaver(app, cardType = 'register') {
+function _resolveRegistrationCardSaver(app, cardType = 'automation') {
     const normalizedType = _normalizeCardType(cardType);
     if (normalizedType === 'test') {
         return {
@@ -35,13 +35,13 @@ function _resolveRegistrationCardSaver(app, cardType = 'register') {
     }
 
     return {
-        type: 'register',
+        type: 'automation',
         save: app?.cardManager?.saveCard?.bind(app.cardManager),
         get: app?.cardManager?.getCard?.bind(app.cardManager)
     };
 }
 
-function _applyRegistrationCurrentCard(app, cardType = 'register', cardName = '') {
+function _applyRegistrationCurrentCard(app, cardType = 'automation', cardName = '') {
     const normalizedType = _normalizeCardType(cardType);
     const normalizedName = String(cardName || '').trim();
     if (!app) {
@@ -155,7 +155,7 @@ function _applyRegistrationRuntimePatch(app, patch = {}) {
     }
 
     if (Object.prototype.hasOwnProperty.call(input, 'card_type') || Object.prototype.hasOwnProperty.call(input, 'cardType')) {
-        const cardType = String(input.card_type || input.cardType || 'register').trim();
+        const cardType = String(input.card_type || input.cardType || 'automation').trim();
         const cardName = String(input.card_name || input.cardName || '').trim();
         if (cardName) {
             _applyRegistrationCurrentCard(app, cardType, cardName);
@@ -167,7 +167,7 @@ function _applyRegistrationRuntimePatch(app, patch = {}) {
     if (Object.prototype.hasOwnProperty.call(input, 'currentCardName') || Object.prototype.hasOwnProperty.call(input, 'currentCard')) {
         const cardName = String(input.currentCardName || input.currentCard || '').trim();
         if (cardName) {
-            _applyRegistrationCurrentCard(app, 'register', cardName);
+            _applyRegistrationCurrentCard(app, 'automation', cardName);
             appliedFields.push('currentCard');
             appliedFields.push('currentCardName');
         }
@@ -422,7 +422,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
                 : null;
             const uiState = typeof app?.getRegistrationUiState === 'function'
                 ? await app.getRegistrationUiState({
-                    cardMode: commandArgs.card_mode || commandArgs.cardMode || commandArgs.card_type || commandArgs.cardType || 'register',
+                    cardMode: commandArgs.card_mode || commandArgs.cardMode || commandArgs.card_type || commandArgs.cardType || 'automation',
                     log_limit: commandArgs.log_limit || commandArgs.logLimit
                 })
                 : null;
@@ -494,7 +494,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
         }
 
         if (command === 'save_card') {
-            const cardType = String(commandArgs.card_type || commandArgs.cardType || 'register').trim();
+            const cardType = String(commandArgs.card_type || commandArgs.cardType || 'automation').trim();
             const cardData = commandArgs.card && typeof commandArgs.card === 'object'
                 ? clonePlainObject(commandArgs.card)
                 : null;
@@ -529,7 +529,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
         }
 
         if (command === 'set_current_card') {
-            const cardType = String(commandArgs.card_type || commandArgs.cardType || 'register').trim();
+            const cardType = String(commandArgs.card_type || commandArgs.cardType || 'automation').trim();
             const cardName = String(commandArgs.card_name || commandArgs.cardName || '').trim();
             if (!cardName) {
                 return {
@@ -585,7 +585,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
                 return {
                     ok: result && result.success !== false,
                     command,
-                    message: result && result.success !== false ? '单任务注册已启动' : (result?.error || '启动单任务注册失败'),
+                    message: result && result.success !== false ? '单任务执行已启动' : (result?.error || '启动单任务执行失败'),
                     entrypoint: 'startSingleRegistrationTask',
                     task_type: commandArgs.task_type || commandArgs.taskType || 'registration',
                     task_id: result?.taskId || null,
@@ -625,7 +625,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
             return {
                 ok: result && result.success !== false,
                 command,
-                message: result && result.success !== false ? '注册已启动' : (result?.error || '启动注册失败'),
+                message: result && result.success !== false ? '执行已启动' : (result?.error || '启动执行失败'),
                 entrypoint: 'startRegistration',
                 task_type: commandArgs.task_type || commandArgs.taskType || 'registration',
                 task_id: result?.taskId || null,
@@ -688,7 +688,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
             return {
                 ok: result && result.success !== false,
                 command,
-                message: result && result.success !== false ? '注册已停止' : (result?.error || '停止注册失败'),
+                message: result && result.success !== false ? '执行已停止' : (result?.error || '停止执行失败'),
                 entrypoint: 'stopRegistration',
                 result,
                 snapshot
@@ -768,7 +768,7 @@ async function executeRegistrationTcpCommand(app, commandPayload = {}) {
         return {
             ok: false,
             command,
-            message: `未支持的注册器命令: ${command}`,
+            message: `未支持的自动化命令: ${command}`,
             snapshot
         };
     } catch (error) {

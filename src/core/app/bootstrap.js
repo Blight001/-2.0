@@ -121,7 +121,7 @@ module.exports = {
                 contextIsolation: false
             },
             icon: path.join(this.projectRoot, 'src/ui/assets/icon.ico'),
-            title: '卡密验证 - AI账号注册器 2.0'
+            title: '卡密验证 - AI 自动化工具 2.0'
         });
 
         this.setupLoginIpcHandlers();
@@ -835,7 +835,7 @@ module.exports = {
             try {
                 await this.stopRegistration?.({ closeBrowsers: true, reason: 'license_expired' });
             } catch (stopError) {
-                this.logger?.warning?.(`到期后停止注册流程失败: ${stopError.message}`);
+                this.logger?.warning?.(`到期后停止执行流程失败: ${stopError.message}`);
             }
 
             if (this.desktopWindow && !this.desktopWindow.isDestroyed()) {
@@ -1007,7 +1007,7 @@ module.exports = {
                 enableRemoteModule: true
             },
             icon: path.join(this.projectRoot, 'src/ui/assets/icon.ico'),
-            title: 'AI账号注册器 2.0'
+            title: 'AI 自动化工具 2.0'
         });
 
         this.mainWindow = this.desktopWindow;
@@ -1101,7 +1101,7 @@ module.exports = {
     async createCardEditorWindow(options = {}) {
         const requestedCardData = options.cardData && typeof options.cardData === 'object' ? options.cardData : null;
         let resolvedCardData = requestedCardData;
-        const cardMode = String(options.cardMode || 'register').trim() || 'register';
+        const cardMode = String(options.cardMode || 'automation').trim() || 'automation';
         const requestedApiCardName = String(
             options.apiCardName
             || options.relatedApiCardName
@@ -1117,7 +1117,7 @@ module.exports = {
                 ? 'API卡片编辑器'
                 : cardMode === 'haikaBind'
                     ? '海卡绑定卡片编辑器'
-                    : '注册卡片编辑器';
+                    : '自动化卡片编辑器';
 
         try {
             const cardName = String(requestedCardData?.name || '').trim();
@@ -1290,7 +1290,7 @@ module.exports = {
                     {
                         label: '关于',
                         click: () => {
-                            const aboutMessage = 'AI账号注册器 2.0\n自动注册AI账号的工具软件\n版本: 2.0.0\n基于 Electron 构建';
+                            const aboutMessage = 'AI 自动化工具 2.0\nAI平台自动化执行工具\n版本: 2.0.0\n基于 Electron 构建';
                             if (this.mainWindow && !this.mainWindow.isDestroyed()) {
                                 this.mainWindow.webContents.send('app-toast', {
                                     message: aboutMessage,

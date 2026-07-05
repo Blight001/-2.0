@@ -532,7 +532,7 @@ module.exports = function createRendererWiringEvents(deps) {
                 ? '测试'
                 : cardMode === 'haikaBind'
                     ? '海卡绑定'
-                    : '注册';
+                    : '自动化';
             const action = String(payload?.action || 'update');
             const cardName = String(payload?.card_name || '').trim();
             logger.info(`收到${label}卡片更新通知: ${action}${cardName ? ` -> ${cardName}` : ''}`);

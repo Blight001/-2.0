@@ -26,7 +26,7 @@ module.exports = function renderEmailTab() {
                                     <div class="setting-item">
                                         <label for="email-suffix">邮箱后缀名</label>
                                         <input type="text" id="email-suffix" placeholder="heysure.top" autocomplete="off" spellcheck="false">
-                                        <div class="setting-help">注册步骤中填写 <code>{account}</code> 时会自动补成 <code>账号@后缀名</code>。</div>
+                                        <div class="setting-help">自动化步骤中填写 <code>{account}</code> 时会自动补成 <code>账号@后缀名</code>。</div>
                                     </div>
                                     <div class="setting-item">
                                         <label>随机字符串配置</label>

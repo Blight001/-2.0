@@ -1,10 +1,10 @@
 const { detectAllBrowsers } = require('../browser/browser_detector');
 const { IPC_CHANNELS } = require('./channels');
 const {
-    filterRegistrationCards,
-    isAllowedRegistrationCardName,
-    isUnlimitedRegistrationCardAccess
-} = require('../registration/registration-ui-state');
+    filterAutomationCards,
+    isAllowedAutomationCardName,
+    isUnlimitedAutomationCardAccess
+} = require('../execution/execution-ui-state');
 
 module.exports = function registerCardHandlers({ app, ipcMain, dialog, fs, path }) {
     const isControlLocked = () => typeof app.isRegistrationControlLocked === 'function' && app.isRegistrationControlLocked();
@@ -103,11 +103,11 @@ module.exports = function registerCardHandlers({ app, ipcMain, dialog, fs, path 
     ipcMain.handle('load-cards', async (_event, options = {}) => {
         try {
             const cards = await app.cardManager.loadCards(options);
-            const allowAllRegistrationCards = isUnlimitedRegistrationCardAccess(app);
+            const allowAllAutomationCards = isUnlimitedAutomationCardAccess(app);
             return {
                 success: true,
-                cards: allowAllRegistrationCards ? cards : filterRegistrationCards(cards, 'register'),
-                allowAllRegistrationCards
+                cards: allowAllAutomationCards ? cards : filterAutomationCards(cards, 'automation'),
+                allowAllAutomationCards
             };
         } catch (error) {
             app.logger.error(`加载卡片失败: ${error.message}`);
@@ -157,11 +157,11 @@ module.exports = function registerCardHandlers({ app, ipcMain, dialog, fs, path 
 
     ipcMain.handle('import-card', async () => {
         if (isControlLocked()) {
-            return blockLockedAction('导入注册卡片');
+            return blockLockedAction('导入自动化卡片');
         }
         try {
             const { canceled, filePaths } = await dialog.showOpenDialog(getDialogParentWindow(), {
-                title: '导入注册卡片',
+                title: '导入自动化卡片',
                 filters: [{ name: 'JSON Files', extensions: ['json'] }],
                 properties: ['openFile']
             });
@@ -367,7 +367,7 @@ module.exports = function registerCardHandlers({ app, ipcMain, dialog, fs, path 
 
     ipcMain.handle('save-card', async (_event, cardData) => {
         if (isControlLocked()) {
-            return blockLockedAction('保存注册卡片');
+            return blockLockedAction('保存自动化卡片');
         }
         try {
             const success = await app.cardManager.saveCard(cardData);
@@ -556,7 +556,7 @@ module.exports = function registerCardHandlers({ app, ipcMain, dialog, fs, path 
 
     ipcMain.handle('delete-card', async (_event, cardName) => {
         if (isControlLocked()) {
-            return blockLockedAction('删除注册卡片');
+            return blockLockedAction('删除自动化卡片');
         }
         try {
             const success = await app.cardManager.deleteCard(cardName);
@@ -782,14 +782,14 @@ module.exports = function registerCardHandlers({ app, ipcMain, dialog, fs, path 
     ipcMain.handle('set-current-card', async (_event, cardName) => {
         try {
             if (isControlLocked()) {
-                return blockLockedAction('手动切换注册卡片');
+                return blockLockedAction('手动切换自动化卡片');
             }
 
-            const allowAllRegistrationCards = isUnlimitedRegistrationCardAccess(app);
-            if (!allowAllRegistrationCards && !isAllowedRegistrationCardName(cardName)) {
+            const allowAllAutomationCards = isUnlimitedAutomationCardAccess(app);
+            if (!allowAllAutomationCards && !isAllowedAutomationCardName(cardName)) {
                 return {
                     success: false,
-                    error: '注册卡片页面仅允许使用国际版即梦注册卡片'
+                    error: '自动化卡片页面仅允许使用国际版即梦自动化卡片'
                 };
             }
 

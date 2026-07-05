@@ -1,7 +1,7 @@
 {
-  "name": "国际版即梦注册卡片",
+  "name": "国际版即梦自动化卡片",
   "website": "https://dreamina.capcut.com/ai-tool/home?type=video",
-  "description": "即梦 AI工具自动注册，使用标准步骤流程",
+  "description": "即梦 AI工具自动执行，使用标准步骤流程",
   "email": "",
   "password": "",
   "points": 0,
@@ -131,7 +131,7 @@
     },
     {
       "by": "css_selector",
-      "name": "点击Next完成注册",
+      "name": "点击Next完成",
       "selector": "span:has-text('Next')",
       "timeout": 10000,
       "type": "click"

@@ -1,4 +1,4 @@
-# AI账号注册器 2.0 (AI Account Register 2.0)
+# AI 自动化工具 2.0 (AI Automation 2.0)
 
 [English](README.md) | [中文](README_zh-CN.md)
 
@@ -7,14 +7,14 @@
 ## 🇨🇳 中文
 
 ### 简介
-**AI账号注册器 2.0** 是一款基于 Electron 的强大桌面应用程序，专为自动化注册各种 AI 平台账号而设计。它采用灵活的“卡片”系统来定义注册流程，使其易于扩展以支持新的服务。
+**AI 自动化工具 2.0** 是一款基于 Electron 的强大桌面应用程序，专为 AI 平台自动化执行任务而设计。它采用灵活的“卡片”系统来定义自动化流程，使其易于扩展以支持新的服务。
 
 ### 主要功能
-- **自动化注册**：全自动的注册流程，包括表单填写、点击和页面跳转。
+- **自动化执行**：全自动的任务流程，包括页面操作、表单填写、点击和流程控制。
 - **邮箱验证**：内置邮箱验证码处理支持。
-- **灵活的“卡片”系统**：注册逻辑定义在 JSON 格式的“卡片”中（位于 `resource/register_cards/` 目录），无需修改核心代码即可轻松更新或添加新服务。
+- **灵活的“卡片”系统**：自动化逻辑定义在 JSON 格式的“卡片”中（位于 `resource/automation_cards/` 目录），无需修改核心代码即可轻松更新或添加新服务。
 - **代理支持**：集成 Clash 代理管理，确保网络稳定性和 IP 轮换。
-- **Cookie 管理**：注册成功后自动保存和管理会话 Cookie。
+- **Cookie 管理**：自动化执行后自动保存和管理会话 Cookie。
 - **浏览器自动化**：使用 Playwright 进行强大的浏览器自动化操作，并具备反检测能力。
 - **用户界面**：简洁直观的 Electron 界面，用于监控进度和管理任务。
 
@@ -52,8 +52,8 @@
 }
 ```
 
-#### 2. 注册卡片
-注册流程定义在 `resource/register_cards/` 目录中。每个 `.json` 文件代表一个注册目标（例如 `resource/register_cards/即梦注册卡片.json`）。您可以修改现有卡片或创建新卡片以支持其他网站。
+#### 2. 自动化卡片
+自动化流程定义在 `resource/automation_cards/` 目录中。每个 `.json` 文件代表一个自动化目标（例如 `resource/automation_cards/即梦自动化卡片.json`）。您可以修改现有卡片或创建新卡片以支持其他网站。
 
 ### 使用方法
 
@@ -92,13 +92,13 @@ npm run dist
 - `src/core/haika/`: 海卡状态与存储
 - `src/core/infra/`: 通用基础设施工具
 - `src/core/ipc/`: Electron IPC 处理器
-- `src/core/registration/`: TCP / MQTT 注册桥接
-- `src/core/registration-thread/`: 注册流程执行引擎
+- `src/core/execution/`: TCP / MQTT 控制桥接
+- `src/core/execution-thread/`: 自动化流程执行引擎
 - `src/core/runtime/`: 运行时编排
 - `src/core/web/`: 网页控制台服务与打包器
 - `src/ui/`: 前端源代码（HTML, CSS, JS）
-- `resource/register_cards/`: 注册流程的 JSON 配置文件
-- `cookies/`: 存储注册成功后的会话 Cookie
+- `resource/automation_cards/`: 自动化流程的 JSON 配置文件
+- `cookies/`: 存储执行后的会话 Cookie
 - `backup/`: 备份数据
 - `dist/`: 构建产物
 

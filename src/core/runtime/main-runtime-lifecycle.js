@@ -36,7 +36,7 @@ module.exports = {
             if (typeof this.stopRegistrationTcpConnectionMonitor === 'function') {
                 this.stopRegistrationTcpConnectionMonitor();
             }
-            await withTimeout(this.stopRegistration({ closeBrowsers: false }), 10000, '停止注册流程超时');
+            await withTimeout(this.stopRegistration({ closeBrowsers: false }), 10000, '停止执行流程超时');
 
             this.logger.info('开始关闭所有浏览器实例');
             await withTimeout(this.browserManager.closeAll(), 10000, '关闭浏览器实例超时');

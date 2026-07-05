@@ -1,5 +1,5 @@
 const registerCardHandlers = require('./card-ipc');
-const registerRegistrationHandlers = require('./registration-ipc');
+const registerExecutionHandlers = require('./execution-ipc');
 const registerCookieHandlers = require('./cookie-ipc');
 const registerRuntimeConfigHandlers = require('./runtime-config-ipc');
 const registerEmailHandlers = require('./email-ipc');
@@ -14,7 +14,7 @@ const registerApiServerHandlers = require('./api-server-ipc');
 
 module.exports = function registerAllIpcHandlers(context) {
     registerCardHandlers(context);
-    registerRegistrationHandlers(context);
+    registerExecutionHandlers(context);
     registerCookieHandlers(context);
     registerRuntimeConfigHandlers(context);
     registerEmailHandlers(context);

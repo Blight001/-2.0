@@ -1,7 +1,7 @@
 {
-  "name": "Framia注册卡片（可灵香蕉MJ）",
+  "name": "Framia自动化卡片（可灵香蕉MJ）",
   "website": "https://framia.pro/invite/9FLBDLQF",
-  "description": "香蕉和MJ的账号自动注册，使用标准步骤流程",
+  "description": "香蕉和MJ的账号自动执行，使用标准步骤流程",
   "password": "",
   "points": 0,
   "steps": [
@@ -13,7 +13,7 @@
       "ui_fields_mode": "filled"
     },
     {
-      "name": "选择注册",
+      "name": "选择入口",
       "type": "click",
       "by": "css_selector",
       "selector": "div:has-text('Start Free')",
@@ -21,7 +21,7 @@
       "ui_fields_mode": "collapsed"
     },
     {
-      "name": "选择注册",
+      "name": "选择入口",
       "type": "click",
       "by": "css_selector",
       "selector": "div:has-text('Sign up')",

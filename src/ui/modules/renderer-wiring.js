@@ -412,7 +412,7 @@ module.exports = function createRendererWiring(deps) {
             return;
         }
 
-        const fallbackText = '开始注册';
+        const fallbackText = '开始执行';
         const normalizedUsageText = String(usageText || '').trim();
         if (!normalizedUsageText || normalizedUsageText === '未获取' || normalizedUsageText === '无限次') {
             elements.startBtn.textContent = fallbackText;
@@ -554,8 +554,8 @@ module.exports = function createRendererWiring(deps) {
         }
     }
 
-    async function syncRegistrationCardStateFromServer(cardMode = 'register') {
-        const mode = cardMode === 'test' || cardMode === 'haikaBind' ? cardMode : 'register';
+    async function syncRegistrationCardStateFromServer(cardMode = 'automation') {
+        const mode = cardMode === 'test' || cardMode === 'haikaBind' ? cardMode : 'automation';
 
         if (!state.registrationTcpEnabled) {
             return false;
@@ -568,7 +568,7 @@ module.exports = function createRendererWiring(deps) {
             });
 
             if (!result || result.success !== true) {
-                throw new Error(result?.error || '获取注册卡片状态失败');
+                throw new Error(result?.error || '获取自动化卡片状态失败');
             }
 
             const snapshot = result || {};
@@ -600,7 +600,7 @@ module.exports = function createRendererWiring(deps) {
                 window.dispatchEvent(new CustomEvent(loadEvent, { detail: cards }));
             }
 
-            if (mode === 'register') {
+            if (mode === 'automation') {
                 if (elements.startBtn) {
                     elements.startBtn.disabled = !currentCardName;
                 }
@@ -611,11 +611,11 @@ module.exports = function createRendererWiring(deps) {
             }
 
             logger.info(
-                `已同步${mode === 'register' ? '注册' : mode === 'test' ? '测试' : '海卡绑定'}状态${Array.isArray(cards) ? `: ${cards.length} 个卡片` : ''}${currentCardName ? `，当前卡片: ${currentCardName}` : ''}`
+                `已同步${mode === 'automation' ? '自动化' : mode === 'test' ? '测试' : '海卡绑定'}状态${Array.isArray(cards) ? `: ${cards.length} 个卡片` : ''}${currentCardName ? `，当前卡片: ${currentCardName}` : ''}`
             );
             return true;
         } catch (error) {
-            logger.warning(`同步${mode === 'register' ? '注册' : mode === 'test' ? '测试' : '海卡绑定'}卡片失败: ${error.message}`);
+            logger.warning(`同步${mode === 'automation' ? '自动化' : mode === 'test' ? '测试' : '海卡绑定'}卡片失败: ${error.message}`);
             return false;
         }
     }
@@ -972,7 +972,7 @@ window.selectClashNodeGlobal = function(nodeName) {
                 cardManager.setCurrentCard(cardName);
                 state.currentCard = cardName;
                 loadCookies();
-            }, 'register');
+            }, 'automation');
         }
 
         loadCookies();
@@ -980,7 +980,7 @@ window.selectClashNodeGlobal = function(nodeName) {
         ensureTcpManagedUiObserver();
 
         if (state.registrationTcpEnabled) {
-            void syncRegistrationCardStateFromServer('register');
+            void syncRegistrationCardStateFromServer('automation');
         }
         
         if (elements.emailHost) {
@@ -1072,9 +1072,9 @@ window.selectClashNodeGlobal = function(nodeName) {
                 { name: 'TCP配置', run: () => loadTcpServerConfig() },
                 { name: 'API服务配置', run: () => loadApiServerConfig() },
                 { name: 'AI助手配置', run: () => loadAiAssistantConfig() },
-                { name: '注册控制', run: () => loadRegistrationControls() },
+                { name: '执行控制', run: () => loadRegistrationControls() },
                 {
-                    name: '注册上传配置',
+                    name: '执行上传配置',
                     run: () => loadRegistrationUploadControls()
                 },
                 { name: '海卡绑定账号', run: () => loadHaikaBindAccountControls() },

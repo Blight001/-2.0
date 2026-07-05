@@ -831,8 +831,8 @@ module.exports = {
             || step?.cardName
             || this.cardConfig?.name
             || this.activeRegistrationCardName
-            || '注册步骤Cookie'
-        ).trim() || '注册步骤Cookie';
+            || '自动化步骤Cookie'
+        ).trim() || '自动化步骤Cookie';
 
         this.logger.info(`开始获取Cookie并保存为文件: ${normalizedFileName}.json`);
 

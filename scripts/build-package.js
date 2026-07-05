@@ -27,32 +27,32 @@ function buildVariantConfig(variant) {
     const variantMap = {
         app: {
             label: '软件版',
-            productName: 'AI账号注册器 2.0',
-            appId: 'com.ai.account.register',
+            productName: 'AI 自动化工具 2.0',
+            appId: 'com.ai.automation.tool',
             output: 'dist/app',
             launchMode: 'desktop',
             startupMode: 'local'
         },
         web: {
             label: '网页版',
-            productName: 'AI账号注册器 2.0 网页版',
-            appId: 'com.ai.account.register.web',
+            productName: 'AI 自动化工具 2.0 网页版',
+            appId: 'com.ai.automation.tool.web',
             output: 'dist/web',
             launchMode: 'web',
             startupMode: 'local'
         },
         'tcp-app': {
             label: 'TCP软件版',
-            productName: 'AI账号注册器 2.0 TCP软件版',
-            appId: 'com.ai.account.register.tcp',
+            productName: 'AI 自动化工具 2.0 TCP软件版',
+            appId: 'com.ai.automation.tool.tcp',
             output: 'dist/tcp-app',
             launchMode: 'desktop',
             startupMode: 'tcp'
         },
         'tcp-web': {
             label: 'TCP网页版',
-            productName: 'AI账号注册器 2.0 TCP网页版',
-            appId: 'com.ai.account.register.tcp.web',
+            productName: 'AI 自动化工具 2.0 TCP网页版',
+            appId: 'com.ai.automation.tool.tcp.web',
             output: 'dist/tcp-web',
             launchMode: 'web',
             startupMode: 'tcp'

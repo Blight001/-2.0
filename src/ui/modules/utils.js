@@ -784,7 +784,7 @@ function addEmailCodeToTable(email, code) {
  */
 function showTutorial(type, elements) {
     const tutorialUrl = 'https://www.yuque.com/heysure/mn6q55/nm4sohp04gp82f2v?singleDoc#%20%E3%80%8A%E6%B3%A8%E5%86%8C%E5%99%A8%E6%B3%A8%E5%86%8C%E5%8D%A1%E7%89%87%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B%E3%80%8B';
-    const title = '注册器注册卡片使用教程';
+    const title = '自动化工具卡片使用教程';
 
     elements.tutorialTitle.textContent = title;
     elements.tutorialContent.innerHTML = `

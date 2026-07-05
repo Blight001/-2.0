@@ -1,7 +1,7 @@
 {
-  "name": "openart注册卡片（seedance2.0）",
+  "name": "openart自动化卡片（seedance2.0）",
   "website": "https://openart.ai/signup",
-  "description": "skywork标准注册步骤",
+  "description": "skywork标准自动化步骤",
   "password": "",
   "points": 0,
   "steps": [

@@ -90,7 +90,7 @@ module.exports = function createTaskProgressHandlers(deps) {
 
         state.currentTimedRegistrationTaskId = null;
         if (typeof logger?.info === 'function') {
-            logger.info(payload.message || payload.text || '定时注册完成');
+            logger.info(payload.message || payload.text || '定时执行完成');
         }
     }
 

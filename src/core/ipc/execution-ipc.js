@@ -1,4 +1,4 @@
-module.exports = function registerRegistrationHandlers({ app, ipcMain }) {
+module.exports = function registerExecutionHandlers({ app, ipcMain }) {
     const isControlLocked = () => typeof app.isRegistrationControlLocked === 'function' && app.isRegistrationControlLocked();
     const blockLockedAction = (actionLabel) => ({
         success: false,
@@ -7,7 +7,7 @@ module.exports = function registerRegistrationHandlers({ app, ipcMain }) {
 
     ipcMain.handle('start-registration', async (_event, config) => {
         if (isControlLocked()) {
-            return blockLockedAction('本地手动开始注册');
+            return blockLockedAction('本地手动开始执行');
         }
 
         let latestRuntimeConfig = {};
@@ -51,7 +51,7 @@ module.exports = function registerRegistrationHandlers({ app, ipcMain }) {
 
     ipcMain.handle('stop-registration', async () => {
         if (isControlLocked()) {
-            return blockLockedAction('本地手动停止注册');
+            return blockLockedAction('本地手动停止执行');
         }
         return await app.stopRegistration();
     });
